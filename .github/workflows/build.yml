@@ -210,3 +210,40 @@ jobs:
         with:
           name: macos-release
           path: KikoFlu-macos.dmg
+
+  linux:
+    name: Linux Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Linux Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang cmake ninja-build pkg-config \
+            libgtk-3-dev \
+            libmpv-dev \
+            libsqlite3-dev
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Build Linux Release
+        run: flutter build linux --release
+
+      - name: Create Archive
+        run: |
+          cd build/linux/x64/release/bundle
+          tar -czf "$GITHUB_WORKSPACE/KikoFlu-linux-x64.tar.gz" .
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: linux-release
+          path: KikoFlu-linux-x64.tar.gz

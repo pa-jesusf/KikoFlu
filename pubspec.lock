@@ -717,6 +717,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
+  media_kit_libs_linux:
+    dependency: "direct main"
+    description:
+      name: media_kit_libs_linux
+      sha256: "2b473399a49ec94452c4d4ae51cfc0f6585074398d74216092bf3d54aac37ecf"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.1"
   media_kit_libs_windows_audio:
     dependency: "direct main"
     description:
