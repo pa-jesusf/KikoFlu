@@ -1456,4 +1456,482 @@ class SEn extends S {
 
   @override
   String get hasNewVersion => 'New version';
+
+  @override
+  String get themeMode => 'Theme Mode';
+
+  @override
+  String get colorTheme => 'Color Theme';
+
+  @override
+  String get themePreview => 'Theme Preview';
+
+  @override
+  String get themeModeSystemDesc =>
+      'Automatically adapt to system dark/light mode';
+
+  @override
+  String get themeModeLightDesc => 'Always use light theme';
+
+  @override
+  String get themeModeDarkDesc => 'Always use dark theme';
+
+  @override
+  String get colorSchemeOceanBlueDesc => 'Blue, blue, blue!';
+
+  @override
+  String get colorSchemeSakuraPinkDesc => '( ゜- ゜)つロ Cheers~';
+
+  @override
+  String get colorSchemeSunsetOrangeDesc => 'Themes are a must ✍🏻✍🏻✍🏻';
+
+  @override
+  String get colorSchemeLavenderPurpleDesc => 'Bro, bro...';
+
+  @override
+  String get colorSchemeForestGreenDesc => 'Green, green, green';
+
+  @override
+  String get colorSchemeDynamicDesc =>
+      'Use wallpaper colors from system (Android 12+)';
+
+  @override
+  String get primaryContainer => 'Primary Container';
+
+  @override
+  String get secondaryContainer => 'Secondary Container';
+
+  @override
+  String get tertiaryContainer => 'Tertiary Container';
+
+  @override
+  String get surfaceColor => 'Surface';
+
+  @override
+  String get playerButtonSettingsSubtitle =>
+      'Customize player control button order';
+
+  @override
+  String get playerLyricStyleSubtitle =>
+      'Customize subtitle style for mini and fullscreen player';
+
+  @override
+  String get workDetailDisplaySubtitle =>
+      'Control info items on work detail page';
+
+  @override
+  String get workCardDisplaySubtitle => 'Control info items on work cards';
+
+  @override
+  String get myTabsDisplaySubtitle => 'Control tab display in My page';
+
+  @override
+  String get pageSizeSettings => 'Items Per Page';
+
+  @override
+  String pageSizeCurrent(int size) {
+    return 'Current: $size items/page';
+  }
+
+  @override
+  String currentSettingLabel(String value) {
+    return 'Current: $value';
+  }
+
+  @override
+  String setToValue(String value) {
+    return 'Set to: $value';
+  }
+
+  @override
+  String get llmConfigRequiredMessage =>
+      'LLM translation requires an API Key. Please configure it in settings first.';
+
+  @override
+  String get autoSwitchedToLlm => 'Auto-switched to: LLM Translation';
+
+  @override
+  String get translationDescGoogle =>
+      'Requires network access to Google services';
+
+  @override
+  String get translationDescYoudao => 'Works with default network';
+
+  @override
+  String get translationDescMicrosoft => 'Works with default network';
+
+  @override
+  String get translationDescLlm =>
+      'OpenAI-compatible API, requires manual API Key configuration';
+
+  @override
+  String get audioPassthroughDescAndroid =>
+      'Allow raw bitstream output (AC3/DTS) to external decoder. May take exclusive audio control.';
+
+  @override
+  String get permissionExplanation => 'Permission Explanation';
+
+  @override
+  String get backgroundRunningPermission => 'Background Running Permission';
+
+  @override
+  String get notificationPermissionDesc =>
+      'Used for showing media playback notification, allowing control from lock screen and notification bar.';
+
+  @override
+  String get backgroundRunningPermissionDesc =>
+      'Exempts app from battery optimization to ensure audio continues playing in background.';
+
+  @override
+  String get notificationGrantedStatus =>
+      'Granted - Can show playback notification and controls';
+
+  @override
+  String get notificationDeniedStatus =>
+      'Not granted - Tap to request permission';
+
+  @override
+  String get backgroundGrantedStatus =>
+      'Granted - App can run continuously in background';
+
+  @override
+  String get backgroundDeniedStatus =>
+      'Not granted - Tap to request permission';
+
+  @override
+  String get notificationPermissionGranted => 'Notification permission granted';
+
+  @override
+  String get notificationPermissionDenied => 'Notification permission denied';
+
+  @override
+  String requestNotificationFailed(String error) {
+    return 'Failed to request notification permission: $error';
+  }
+
+  @override
+  String get backgroundPermissionGranted =>
+      'Background running permission granted';
+
+  @override
+  String get backgroundPermissionDenied =>
+      'Background running permission denied';
+
+  @override
+  String requestBackgroundFailed(String error) {
+    return 'Failed to request background permission: $error';
+  }
+
+  @override
+  String permissionRequired(String permission) {
+    return '$permission Required';
+  }
+
+  @override
+  String permissionPermanentlyDenied(String permission) {
+    return '$permission has been permanently denied. Please enable it manually in system settings.';
+  }
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
+  String get permissionsAndroidOnly =>
+      'Permission management is only available on Android';
+
+  @override
+  String get permissionsNotNeeded =>
+      'Other platforms do not require manual permission management';
+
+  @override
+  String get refreshPermissionStatus => 'Refresh permission status';
+
+  @override
+  String deleteFileConfirm(String fileName) {
+    return 'Are you sure you want to delete \"$fileName\"?';
+  }
+
+  @override
+  String deleteSelectedFilesConfirm(int count) {
+    return 'Are you sure you want to delete $count selected files?';
+  }
+
+  @override
+  String get deleted => 'Deleted';
+
+  @override
+  String cannotOpenFolder(String path) {
+    return 'Cannot open folder: $path';
+  }
+
+  @override
+  String openFolderFailed(String error) {
+    return 'Failed to open folder: $error';
+  }
+
+  @override
+  String get reloadingFromDisk => 'Reloading from disk...';
+
+  @override
+  String get refreshComplete => 'Refresh complete';
+
+  @override
+  String refreshFailed(String error) {
+    return 'Refresh failed: $error';
+  }
+
+  @override
+  String deleteSelectedWorksConfirm(int count) {
+    return 'Are you sure you want to delete $count selected works?';
+  }
+
+  @override
+  String partialDeleteFailed(String error) {
+    return 'Partial deletion failed: $error';
+  }
+
+  @override
+  String deletedNOfTotal(int success, int total) {
+    return 'Deleted $success/$total tasks';
+  }
+
+  @override
+  String deleteFailedWithError(String error) {
+    return 'Deletion failed: $error';
+  }
+
+  @override
+  String get noWorkMetadataForOffline =>
+      'This download has no saved work details and cannot be viewed offline';
+
+  @override
+  String openWorkDetailFailed(String error) {
+    return 'Failed to open work detail: $error';
+  }
+
+  @override
+  String get noLocalDownloads => 'No local downloads';
+
+  @override
+  String get exitSelection => 'Exit selection';
+
+  @override
+  String get reload => 'Reload';
+
+  @override
+  String get openFolder => 'Open Folder';
+
+  @override
+  String get playlistLink => 'Playlist Link';
+
+  @override
+  String get playlistLinkHint =>
+      'Paste playlist link, e.g.:\nhttps://www.asmr.one/playlist?id=...';
+
+  @override
+  String get unrecognizedPlaylistLink => 'Unrecognized playlist link or ID';
+
+  @override
+  String get addingPlaylist => 'Adding playlist...';
+
+  @override
+  String get playlistAddedSuccess => 'Playlist added successfully';
+
+  @override
+  String get addFailed => 'Add failed';
+
+  @override
+  String get playlistNotFound => 'Playlist does not exist or has been deleted';
+
+  @override
+  String get noPermissionToAccessPlaylist =>
+      'No permission to access this playlist';
+
+  @override
+  String get networkConnectionFailed =>
+      'Network connection failed, please check network';
+
+  @override
+  String addFailedWithError(String error) {
+    return 'Add failed: $error';
+  }
+
+  @override
+  String get creatingPlaylist => 'Creating playlist...';
+
+  @override
+  String playlistCreatedSuccess(String name) {
+    return 'Playlist \"$name\" created successfully';
+  }
+
+  @override
+  String createFailedWithError(String error) {
+    return 'Creation failed: $error';
+  }
+
+  @override
+  String get noPlaylists => 'No playlists';
+
+  @override
+  String get noPlaylistsDescription =>
+      'You haven\'t created or favorited any playlists yet';
+
+  @override
+  String get myPlaylists => 'My Playlists';
+
+  @override
+  String totalNItems(int count) {
+    return '$count total';
+  }
+
+  @override
+  String get systemPlaylistCannotDelete => 'System playlists cannot be deleted';
+
+  @override
+  String get deletePlaylist => 'Delete Playlist';
+
+  @override
+  String get unfavoritePlaylist => 'Unfavorite Playlist';
+
+  @override
+  String get deletePlaylistConfirm =>
+      'Deletion is irreversible. Users who favorited this playlist will lose access. Are you sure?';
+
+  @override
+  String unfavoritePlaylistConfirm(String name) {
+    return 'Are you sure you want to unfavorite \"$name\"?';
+  }
+
+  @override
+  String get unfavorite => 'Unfavorite';
+
+  @override
+  String get deleting => 'Deleting...';
+
+  @override
+  String get deleteSuccess => 'Deleted successfully';
+
+  @override
+  String get onlyOwnerCanEdit => 'Only the playlist owner can edit';
+
+  @override
+  String get editPlaylist => 'Edit Playlist';
+
+  @override
+  String get playlistNameRequired => 'Playlist name cannot be empty';
+
+  @override
+  String get privacyDescPrivate => 'Only you can view';
+
+  @override
+  String get privacyDescUnlisted => 'Only people with the link can view';
+
+  @override
+  String get privacyDescPublic => 'Anyone can view';
+
+  @override
+  String get addWorks => 'Add Works';
+
+  @override
+  String get addWorksInputHint =>
+      'Enter text containing work IDs, RJ numbers will be auto-detected';
+
+  @override
+  String get workId => 'Work ID';
+
+  @override
+  String get workIdHint => 'e.g.: RJ123456\nrj233333';
+
+  @override
+  String detectedNWorkIds(int count) {
+    return 'Detected $count work IDs';
+  }
+
+  @override
+  String addNWorks(int count) {
+    return 'Add $count';
+  }
+
+  @override
+  String get noValidWorkIds => 'No valid work IDs found (starting with RJ)';
+
+  @override
+  String addingNWorks(int count) {
+    return 'Adding $count works...';
+  }
+
+  @override
+  String addedNWorksSuccess(int count) {
+    return 'Successfully added $count works';
+  }
+
+  @override
+  String get removeWork => 'Remove Work';
+
+  @override
+  String removeWorkConfirm(String title) {
+    return 'Are you sure you want to remove \"$title\" from the playlist?';
+  }
+
+  @override
+  String get removeSuccess => 'Removed successfully';
+
+  @override
+  String removeFailedWithError(String error) {
+    return 'Remove failed: $error';
+  }
+
+  @override
+  String get saving => 'Saving...';
+
+  @override
+  String get saveSuccess => 'Saved successfully';
+
+  @override
+  String saveFailedWithError(String error) {
+    return 'Save failed: $error';
+  }
+
+  @override
+  String get noWorks => 'No works';
+
+  @override
+  String get playlistNoWorksDescription =>
+      'No works have been added to this playlist yet';
+
+  @override
+  String get lastUpdated => 'Last updated';
+
+  @override
+  String get createdTime => 'Created';
+
+  @override
+  String nWorksCount(int count) {
+    return '$count works';
+  }
+
+  @override
+  String nPlaysCount(int count) {
+    return '$count plays';
+  }
+
+  @override
+  String get removeFromPlaylist => 'Remove from playlist';
+
+  @override
+  String get checkNetworkOrRetry =>
+      'Please check your network connection or try again later';
+
+  @override
+  String get reachedEnd => 'You\'ve reached the end~';
+
+  @override
+  String excludedNWorks(int count) {
+    return 'Excluded $count works';
+  }
+
+  @override
+  String pageExcludedNWorks(int count) {
+    return 'This page excluded $count works';
+  }
 }

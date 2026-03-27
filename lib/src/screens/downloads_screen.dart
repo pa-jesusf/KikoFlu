@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../models/download_task.dart';
 import '../services/download_service.dart';
 import '../utils/string_utils.dart';
@@ -86,8 +87,8 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
       appBar: AppBar(
         scrolledUnderElevation: 0,
         title: _isSelectionMode
-            ? Text('已选择 ${_selectedTaskIds.length} 项')
-            : const Text('下载任务', style: TextStyle(fontSize: 18)),
+            ? Text(S.of(context).selectedCount(_selectedTaskIds.length))
+            : Text(S.of(context).downloadTasks, style: const TextStyle(fontSize: 18)),
         leading: _isSelectionMode
             ? IconButton(
                 icon: const Icon(Icons.close),
@@ -107,26 +108,26 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
                         t.status == DownloadStatus.failed);
                     _selectAll(currentTasks.toList());
                   },
-                  tooltip: '全选',
+                  tooltip: S.of(context).selectAll,
                 ),
                 IconButton(
                   icon: const Icon(Icons.deselect),
                   onPressed: _deselectAll,
-                  tooltip: '取消全选',
+                  tooltip: S.of(context).deselectAll,
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: _selectedTaskIds.isEmpty
                       ? null
                       : () => _confirmBatchDelete(),
-                  tooltip: '删除',
+                  tooltip: S.of(context).delete,
                 ),
               ]
             : [
                 IconButton(
                   icon: const Icon(Icons.checklist),
                   onPressed: _toggleSelectionMode,
-                  tooltip: '选择',
+                  tooltip: S.of(context).select,
                 ),
               ],
       ),
@@ -152,13 +153,13 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
 
   Widget _buildDownloadingList(List<DownloadTask> tasks) {
     if (tasks.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.download_outlined, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text('暂无下载任务', style: TextStyle(color: Colors.grey)),
+            const Icon(Icons.download_outlined, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(S.of(context).noDownloadTasks, style: const TextStyle(color: Colors.grey)),
           ],
         ),
       );
@@ -194,7 +195,7 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
               overflow: TextOverflow.ellipsis,
             ),
             subtitle: Text(
-              '${workTasks.length} 个文件',
+              S.of(context).nFiles(workTasks.length),
               style: const TextStyle(fontSize: 12),
             ),
             trailing: _isSelectionMode ? null : const Icon(Icons.expand_more),
@@ -239,7 +240,7 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
           if (task.error != null) ...[
             const SizedBox(height: 4),
             Text(
-              '错误: ${task.error}',
+              S.of(context).errorWithMessage(task.error!),
               style: const TextStyle(fontSize: 11, color: Colors.red),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -276,7 +277,7 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
         return IconButton(
           icon: const Icon(Icons.pause),
           onPressed: () => DownloadService.instance.pauseTask(task.id),
-          tooltip: '暂停',
+          tooltip: S.of(context).pause,
         );
       case DownloadStatus.paused:
       case DownloadStatus.failed:
@@ -286,12 +287,12 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
             IconButton(
               icon: const Icon(Icons.play_arrow),
               onPressed: () => DownloadService.instance.resumeTask(task.id),
-              tooltip: '继续',
+              tooltip: S.of(context).resume,
             ),
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () => _confirmDelete(task),
-              tooltip: '删除',
+              tooltip: S.of(context).delete,
             ),
           ],
         );
@@ -299,7 +300,7 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
         return IconButton(
           icon: const Icon(Icons.delete),
           onPressed: () => _confirmDelete(task),
-          tooltip: '删除',
+          tooltip: S.of(context).delete,
         );
     }
   }
@@ -308,19 +309,19 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除 "${task.fileName}" 吗?'),
+        title: Text(S.of(context).deletionConfirmTitle),
+        content: Text(S.of(context).deleteFileConfirm(task.fileName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-            child: const Text('删除'),
+            child: Text(S.of(context).delete),
           ),
         ],
       ),
@@ -330,7 +331,7 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
       await DownloadService.instance.deleteTask(task.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('已删除')),
+          SnackBar(content: Text(S.of(context).deleted)),
         );
       }
     }
@@ -340,19 +341,19 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除选中的 ${_selectedTaskIds.length} 个文件吗?'),
+        title: Text(S.of(context).deletionConfirmTitle),
+        content: Text(S.of(context).deleteSelectedFilesConfirm(_selectedTaskIds.length)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-            child: const Text('删除'),
+            child: Text(S.of(context).delete),
           ),
         ],
       ),
@@ -372,7 +373,7 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('已删除 ${taskIds.length} 个文件')),
+          SnackBar(content: Text(S.of(context).deletedNFiles(taskIds.length))),
         );
       }
     }

@@ -1434,4 +1434,461 @@ class SJa extends S {
 
   @override
   String get hasNewVersion => '新しいバージョン';
+
+  @override
+  String get themeMode => 'テーマモード';
+
+  @override
+  String get colorTheme => 'カラーテーマ';
+
+  @override
+  String get themePreview => 'テーマプレビュー';
+
+  @override
+  String get themeModeSystemDesc => 'システムのダーク/ライトモードに自動対応';
+
+  @override
+  String get themeModeLightDesc => '常にライトテーマを使用';
+
+  @override
+  String get themeModeDarkDesc => '常にダークテーマを使用';
+
+  @override
+  String get colorSchemeOceanBlueDesc => 'ブルー、ブルー、ブルー！';
+
+  @override
+  String get colorSchemeSakuraPinkDesc => '( ゜- ゜)つロ 乾杯~';
+
+  @override
+  String get colorSchemeSunsetOrangeDesc => 'テーマ変更は必須✍🏻✍🏻✍🏻';
+
+  @override
+  String get colorSchemeLavenderPurpleDesc => 'ブラザー、ブラザー...';
+
+  @override
+  String get colorSchemeForestGreenDesc => 'グリーン、グリーン、グリーン';
+
+  @override
+  String get colorSchemeDynamicDesc => 'システム壁紙の色を使用 (Android 12+)';
+
+  @override
+  String get primaryContainer => 'プライマリコンテナ';
+
+  @override
+  String get secondaryContainer => 'セカンダリコンテナ';
+
+  @override
+  String get tertiaryContainer => 'ターシャリコンテナ';
+
+  @override
+  String get surfaceColor => 'サーフェス';
+
+  @override
+  String get playerButtonSettingsSubtitle => 'プレーヤーコントロールボタンの順序をカスタマイズ';
+
+  @override
+  String get playerLyricStyleSubtitle => 'ミニプレーヤーとフルスクリーンプレーヤーの字幕スタイルをカスタマイズ';
+
+  @override
+  String get workDetailDisplaySubtitle => '作品詳細ページの表示項目を制御';
+
+  @override
+  String get workCardDisplaySubtitle => '作品カードの表示項目を制御';
+
+  @override
+  String get myTabsDisplaySubtitle => 'マイページのタブ表示を制御';
+
+  @override
+  String get pageSizeSettings => 'ページあたりの表示数';
+
+  @override
+  String pageSizeCurrent(int size) {
+    return '現在の設定: $size 件/ページ';
+  }
+
+  @override
+  String currentSettingLabel(String value) {
+    return '現在: $value';
+  }
+
+  @override
+  String setToValue(String value) {
+    return '設定: $value';
+  }
+
+  @override
+  String get llmConfigRequiredMessage =>
+      'LLM翻訳にはAPI Keyの設定が必要です。先に設定画面で設定してください。';
+
+  @override
+  String get autoSwitchedToLlm => '自動切替: LLM翻訳';
+
+  @override
+  String get translationDescGoogle => 'Googleサービスへのネットワークアクセスが必要';
+
+  @override
+  String get translationDescYoudao => 'デフォルトネットワークで動作';
+
+  @override
+  String get translationDescMicrosoft => 'デフォルトネットワークで動作';
+
+  @override
+  String get translationDescLlm => 'OpenAI互換API、手動でAPI Keyの設定が必要';
+
+  @override
+  String get audioPassthroughDescAndroid =>
+      '外部デコーダーへの生ビットストリーム出力 (AC3/DTS) を許可。オーディオデバイスを占有する場合があります。';
+
+  @override
+  String get permissionExplanation => '権限の説明';
+
+  @override
+  String get backgroundRunningPermission => 'バックグラウンド実行権限';
+
+  @override
+  String get notificationPermissionDesc =>
+      'メディア再生通知バーの表示に使用し、ロック画面や通知バーから再生を制御できます。';
+
+  @override
+  String get backgroundRunningPermissionDesc =>
+      'バッテリー最適化の制限を解除し、バックグラウンドでのオーディオ再生を維持します。';
+
+  @override
+  String get notificationGrantedStatus => '許可済み - 再生通知とコントローラーを表示可能';
+
+  @override
+  String get notificationDeniedStatus => '未許可 - タップして権限を申請';
+
+  @override
+  String get backgroundGrantedStatus => '許可済み - バックグラウンドで継続実行可能';
+
+  @override
+  String get backgroundDeniedStatus => '未許可 - タップして権限を申請';
+
+  @override
+  String get notificationPermissionGranted => '通知権限が許可されました';
+
+  @override
+  String get notificationPermissionDenied => '通知権限が拒否されました';
+
+  @override
+  String requestNotificationFailed(String error) {
+    return '通知権限の申請に失敗: $error';
+  }
+
+  @override
+  String get backgroundPermissionGranted => 'バックグラウンド実行権限が許可されました';
+
+  @override
+  String get backgroundPermissionDenied => 'バックグラウンド実行権限が拒否されました';
+
+  @override
+  String requestBackgroundFailed(String error) {
+    return 'バックグラウンド権限の申請に失敗: $error';
+  }
+
+  @override
+  String permissionRequired(String permission) {
+    return '$permissionが必要です';
+  }
+
+  @override
+  String permissionPermanentlyDenied(String permission) {
+    return '$permissionが永久に拒否されています。システム設定で手動で有効にしてください。';
+  }
+
+  @override
+  String get openSettings => '設定を開く';
+
+  @override
+  String get permissionsAndroidOnly => '権限管理はAndroidでのみ利用可能です';
+
+  @override
+  String get permissionsNotNeeded => '他のプラットフォームでは手動での権限管理は不要です';
+
+  @override
+  String get refreshPermissionStatus => '権限状態を更新';
+
+  @override
+  String deleteFileConfirm(String fileName) {
+    return '「$fileName」を削除しますか？';
+  }
+
+  @override
+  String deleteSelectedFilesConfirm(int count) {
+    return '選択した $count 個のファイルを削除しますか？';
+  }
+
+  @override
+  String get deleted => '削除済み';
+
+  @override
+  String cannotOpenFolder(String path) {
+    return 'フォルダを開けません: $path';
+  }
+
+  @override
+  String openFolderFailed(String error) {
+    return 'フォルダを開けませんでした: $error';
+  }
+
+  @override
+  String get reloadingFromDisk => 'ディスクから再読み込み中...';
+
+  @override
+  String get refreshComplete => '更新完了';
+
+  @override
+  String refreshFailed(String error) {
+    return '更新失敗: $error';
+  }
+
+  @override
+  String deleteSelectedWorksConfirm(int count) {
+    return '選択した $count 個の作品を削除しますか？';
+  }
+
+  @override
+  String partialDeleteFailed(String error) {
+    return '一部の削除に失敗: $error';
+  }
+
+  @override
+  String deletedNOfTotal(int success, int total) {
+    return '$success/$total 個のタスクを削除';
+  }
+
+  @override
+  String deleteFailedWithError(String error) {
+    return '削除失敗: $error';
+  }
+
+  @override
+  String get noWorkMetadataForOffline =>
+      'このダウンロードには作品詳細が保存されていないため、オフラインで表示できません';
+
+  @override
+  String openWorkDetailFailed(String error) {
+    return '作品詳細を開けませんでした: $error';
+  }
+
+  @override
+  String get noLocalDownloads => 'ローカルダウンロードなし';
+
+  @override
+  String get exitSelection => '選択を終了';
+
+  @override
+  String get reload => '再読み込み';
+
+  @override
+  String get openFolder => 'フォルダを開く';
+
+  @override
+  String get playlistLink => 'プレイリストリンク';
+
+  @override
+  String get playlistLinkHint =>
+      'プレイリストリンクを貼り付け、例:\nhttps://www.asmr.one/playlist?id=...';
+
+  @override
+  String get unrecognizedPlaylistLink => '認識できないプレイリストリンクまたはID';
+
+  @override
+  String get addingPlaylist => 'プレイリストを追加中...';
+
+  @override
+  String get playlistAddedSuccess => 'プレイリストの追加に成功';
+
+  @override
+  String get addFailed => '追加失敗';
+
+  @override
+  String get playlistNotFound => 'プレイリストが存在しないか、削除されています';
+
+  @override
+  String get noPermissionToAccessPlaylist => 'このプレイリストへのアクセス権限がありません';
+
+  @override
+  String get networkConnectionFailed => 'ネットワーク接続に失敗しました。接続を確認してください';
+
+  @override
+  String addFailedWithError(String error) {
+    return '追加失敗: $error';
+  }
+
+  @override
+  String get creatingPlaylist => 'プレイリストを作成中...';
+
+  @override
+  String playlistCreatedSuccess(String name) {
+    return 'プレイリスト「$name」を作成しました';
+  }
+
+  @override
+  String createFailedWithError(String error) {
+    return '作成失敗: $error';
+  }
+
+  @override
+  String get noPlaylists => 'プレイリストなし';
+
+  @override
+  String get noPlaylistsDescription => 'プレイリストはまだ作成・お気に入り登録されていません';
+
+  @override
+  String get myPlaylists => 'マイプレイリスト';
+
+  @override
+  String totalNItems(int count) {
+    return '全 $count 件';
+  }
+
+  @override
+  String get systemPlaylistCannotDelete => 'システムプレイリストは削除できません';
+
+  @override
+  String get deletePlaylist => 'プレイリストを削除';
+
+  @override
+  String get unfavoritePlaylist => 'お気に入りを解除';
+
+  @override
+  String get deletePlaylistConfirm =>
+      '削除すると元に戻せません。このプレイリストをお気に入りに登録しているユーザーもアクセスできなくなります。削除しますか？';
+
+  @override
+  String unfavoritePlaylistConfirm(String name) {
+    return '「$name」のお気に入りを解除しますか？';
+  }
+
+  @override
+  String get unfavorite => 'お気に入り解除';
+
+  @override
+  String get deleting => '削除中...';
+
+  @override
+  String get deleteSuccess => '削除成功';
+
+  @override
+  String get onlyOwnerCanEdit => 'プレイリストの作成者のみ編集できます';
+
+  @override
+  String get editPlaylist => 'プレイリストを編集';
+
+  @override
+  String get playlistNameRequired => 'プレイリスト名は必須です';
+
+  @override
+  String get privacyDescPrivate => '自分のみ閲覧可能';
+
+  @override
+  String get privacyDescUnlisted => 'リンクを知っている人のみ閲覧可能';
+
+  @override
+  String get privacyDescPublic => '誰でも閲覧可能';
+
+  @override
+  String get addWorks => '作品を追加';
+
+  @override
+  String get addWorksInputHint => '作品番号を含むテキストを入力、RJ番号を自動検出';
+
+  @override
+  String get workId => '作品番号';
+
+  @override
+  String get workIdHint => '例: RJ123456\nrj233333';
+
+  @override
+  String detectedNWorkIds(int count) {
+    return '$count 個の作品番号を検出';
+  }
+
+  @override
+  String addNWorks(int count) {
+    return '$count 個追加';
+  }
+
+  @override
+  String get noValidWorkIds => '有効な作品番号が見つかりません（RJで始まるもの）';
+
+  @override
+  String addingNWorks(int count) {
+    return '$count 個の作品を追加中...';
+  }
+
+  @override
+  String addedNWorksSuccess(int count) {
+    return '$count 個の作品を追加しました';
+  }
+
+  @override
+  String get removeWork => '作品を削除';
+
+  @override
+  String removeWorkConfirm(String title) {
+    return 'プレイリストから「$title」を削除しますか？';
+  }
+
+  @override
+  String get removeSuccess => '削除成功';
+
+  @override
+  String removeFailedWithError(String error) {
+    return '削除失敗: $error';
+  }
+
+  @override
+  String get saving => '保存中...';
+
+  @override
+  String get saveSuccess => '保存成功';
+
+  @override
+  String saveFailedWithError(String error) {
+    return '保存失敗: $error';
+  }
+
+  @override
+  String get noWorks => '作品なし';
+
+  @override
+  String get playlistNoWorksDescription => 'このプレイリストにはまだ作品が追加されていません';
+
+  @override
+  String get lastUpdated => '最終更新';
+
+  @override
+  String get createdTime => '作成日';
+
+  @override
+  String nWorksCount(int count) {
+    return '$count 作品';
+  }
+
+  @override
+  String nPlaysCount(int count) {
+    return '$count 再生';
+  }
+
+  @override
+  String get removeFromPlaylist => 'プレイリストから削除';
+
+  @override
+  String get checkNetworkOrRetry => 'ネットワーク接続を確認するか、後で再試行してください';
+
+  @override
+  String get reachedEnd => '最後まで来ました〜';
+
+  @override
+  String excludedNWorks(int count) {
+    return '$count 作品を除外';
+  }
+
+  @override
+  String pageExcludedNWorks(int count) {
+    return 'このページで $count 作品を除外';
+  }
 }

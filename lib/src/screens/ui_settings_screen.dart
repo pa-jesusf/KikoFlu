@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
 import 'player_buttons_settings_screen.dart';
 import 'player_lyric_style_screen.dart';
 import 'work_detail_display_settings_screen.dart';
@@ -16,10 +17,10 @@ class UiSettingsScreen extends ConsumerWidget {
     final pageSize = ref.watch(pageSizeProvider);
 
     return Scaffold(
-      appBar: const ScrollableAppBar(
+      appBar: ScrollableAppBar(
         title: Text(
-          '界面设置',
-          style: TextStyle(fontSize: 18),
+          S.of(context).uiSettings,
+          style: const TextStyle(fontSize: 18),
         ),
       ),
       body: ListView(
@@ -31,8 +32,8 @@ class UiSettingsScreen extends ConsumerWidget {
                 ListTile(
                   leading: Icon(Icons.tune,
                       color: Theme.of(context).colorScheme.primary),
-                  title: const Text('播放器按钮'),
-                  subtitle: const Text('自定义播放器控制按钮顺序'),
+                  title: Text(S.of(context).playerButtonSettings),
+                  subtitle: Text(S.of(context).playerButtonSettingsSubtitle),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     Navigator.of(context).push(
@@ -47,8 +48,8 @@ class UiSettingsScreen extends ConsumerWidget {
                 ListTile(
                   leading: Icon(Icons.lyrics,
                       color: Theme.of(context).colorScheme.primary),
-                  title: const Text('播放器字幕样式'),
-                  subtitle: const Text('自定义迷你播放器和全屏播放器的字幕样式'),
+                  title: Text(S.of(context).playerLyricStyle),
+                  subtitle: Text(S.of(context).playerLyricStyleSubtitle),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     Navigator.of(context).push(
@@ -62,8 +63,8 @@ class UiSettingsScreen extends ConsumerWidget {
                 ListTile(
                   leading: Icon(Icons.visibility,
                       color: Theme.of(context).colorScheme.primary),
-                  title: const Text('作品详情显示'),
-                  subtitle: const Text('控制作品详情页显示的信息项'),
+                  title: Text(S.of(context).workDetailDisplaySettings),
+                  subtitle: Text(S.of(context).workDetailDisplaySubtitle),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     Navigator.of(context).push(
@@ -78,8 +79,8 @@ class UiSettingsScreen extends ConsumerWidget {
                 ListTile(
                   leading: Icon(Icons.grid_view,
                       color: Theme.of(context).colorScheme.primary),
-                  title: const Text('作品卡片显示'),
-                  subtitle: const Text('控制作品卡片显示的信息项'),
+                  title: Text(S.of(context).workCardDisplaySettings),
+                  subtitle: Text(S.of(context).workCardDisplaySubtitle),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     Navigator.of(context).push(
@@ -94,8 +95,8 @@ class UiSettingsScreen extends ConsumerWidget {
                 ListTile(
                   leading: Icon(Icons.tab,
                       color: Theme.of(context).colorScheme.primary),
-                  title: const Text('"我的"界面显示'),
-                  subtitle: const Text('控制"我的"界面中标签页的显示'),
+                  title: Text(S.of(context).myTabsDisplaySettings),
+                  subtitle: Text(S.of(context).myTabsDisplaySubtitle),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     Navigator.of(context).push(
@@ -110,8 +111,8 @@ class UiSettingsScreen extends ConsumerWidget {
                 ListTile(
                   leading: Icon(Icons.format_list_numbered,
                       color: Theme.of(context).colorScheme.primary),
-                  title: const Text('每页显示数量'),
-                  subtitle: Text('当前设置: $pageSize 条/页'),
+                  title: Text(S.of(context).pageSizeSettings),
+                  subtitle: Text(S.of(context).pageSizeCurrent(pageSize)),
                   trailing: DropdownButton<int>(
                     value: pageSize,
                     underline: const SizedBox(),

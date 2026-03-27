@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 
+import '../../l10n/app_localizations.dart';
 import '../models/download_task.dart';
 import '../models/work.dart';
 import '../services/download_service.dart';
@@ -172,7 +173,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
           if (mounted) {
             _showSnackBarSafe(
               SnackBar(
-                content: Text('无法打开文件夹: $path'),
+                content: Text(S.of(context).cannotOpenFolder(path)),
                 duration: const Duration(seconds: 3),
               ),
             );
@@ -183,7 +184,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
       if (mounted) {
         _showSnackBarSafe(
           SnackBar(
-            content: Text('打开文件夹失败: $e'),
+            content: Text(S.of(context).openFolderFailed(e.toString())),
             duration: const Duration(seconds: 3),
           ),
         );
@@ -203,10 +204,10 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
         try {
           messenger = ScaffoldMessenger.maybeOf(context);
           messenger?.showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Row(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
@@ -214,11 +215,11 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   ),
-                  SizedBox(width: 12),
-                  Text('正在从硬盘重新加载...'),
+                  const SizedBox(width: 12),
+                  Text(S.of(context).reloadingFromDisk),
                 ],
               ),
-              duration: Duration(seconds: 30), // 设置较长时间，手动清除
+              duration: const Duration(seconds: 30), // 设置较长时间，手动清除
             ),
           );
         } catch (e) {
@@ -238,15 +239,15 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
             ScaffoldMessenger.maybeOf(context)?.clearSnackBars();
             // 显示完成消息
             _showSnackBarSafe(
-              const SnackBar(
+              SnackBar(
                 content: Row(
                   children: [
-                    Icon(Icons.check_circle, color: Colors.white),
-                    SizedBox(width: 12),
-                    Text('刷新完成'),
+                    const Icon(Icons.check_circle, color: Colors.white),
+                    const SizedBox(width: 12),
+                    Text(S.of(context).refreshComplete),
                   ],
                 ),
-                duration: Duration(seconds: 2),
+                duration: const Duration(seconds: 2),
               ),
             );
           } catch (e) {
@@ -265,7 +266,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
             // 显示错误消息
             _showSnackBarSafe(
               SnackBar(
-                content: Text('刷新失败: $e'),
+                content: Text(S.of(context).refreshFailed(e.toString())),
                 duration: const Duration(seconds: 3),
               ),
             );
@@ -285,19 +286,19 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除选中的 ${_selectedWorkIds.length} 个作品吗？'),
+        title: Text(S.of(context).deletionConfirmTitle),
+        content: Text(S.of(context).deleteSelectedWorksConfirm(_selectedWorkIds.length)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('删除'),
+            child: Text(S.of(context).delete),
           ),
         ],
       ),
@@ -321,7 +322,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
             await DownloadService.instance.deleteTask(task.id);
             successCount++;
           } catch (e) {
-            errorMessage ??= '部分删除失败: $e';
+            errorMessage ??= S.of(context).partialDeleteFailed(e.toString());
             print('[LocalDownloads] 删除任务 ${task.id} 失败: $e');
           }
         }
@@ -341,7 +342,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
           if (mounted) {
             if (errorMessage != null && successCount > 0) {
               _showSnackBarSafe(
-                SnackBar(content: Text('已删除 $successCount/$totalCount 个任务')),
+                SnackBar(content: Text(S.of(context).deletedNOfTotal(successCount, totalCount))),
               );
             } else if (errorMessage != null) {
               _showSnackBarSafe(
@@ -349,7 +350,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
               );
             } else {
               _showSnackBarSafe(
-                const SnackBar(content: Text('删除成功')),
+                SnackBar(content: Text(S.of(context).deleted)),
               );
             }
           }
@@ -360,7 +361,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
         Future.microtask(() {
           if (mounted) {
             _showSnackBarSafe(
-              SnackBar(content: Text('删除失败: $e')),
+              SnackBar(content: Text(S.of(context).deleteFailedWithError(e.toString()))),
             );
           }
         });
@@ -375,9 +376,9 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
     if (task.workMetadata == null) {
       print('[LocalDownloads] 错误：任务没有元数据');
       _showSnackBarSafe(
-        const SnackBar(
-          content: Text('该下载任务没有保存作品详情，无法离线查看'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(S.of(context).noWorkMetadataForOffline),
+          duration: const Duration(seconds: 2),
         ),
       );
       return;
@@ -409,7 +410,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
       if (mounted) {
         _showSnackBarSafe(
           SnackBar(
-            content: Text('打开作品详情失败: $e'),
+            content: Text(S.of(context).openWorkDetailFailed(e.toString())),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -509,7 +510,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            '暂无本地下载',
+                            S.of(context).noLocalDownloads,
                             style: TextStyle(
                               fontSize: 16,
                               color: Theme.of(context)
@@ -617,12 +618,12 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                     constraints:
                         const BoxConstraints(minWidth: 40, minHeight: 40),
                     onPressed: _toggleSelectionMode,
-                    tooltip: '退出选择',
+                    tooltip: S.of(context).exitSelection,
                   ),
                 ),
                 // 选中数量显示
                 Text(
-                  '已选择 ${_selectedWorkIds.length} 项',
+                  S.of(context).selectedCount(_selectedWorkIds.length),
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const Spacer(),
@@ -641,8 +642,8 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                       ? _deselectAll
                       : () => _selectAll(groupedTasks),
                   tooltip: _selectedWorkIds.length == groupedTasks.length
-                      ? '取消全选'
-                      : '全选',
+                      ? S.of(context).deselectAll
+                      : S.of(context).selectAll,
                 ),
                 // 删除按钮
                 if (_selectedWorkIds.isNotEmpty)
@@ -653,7 +654,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                     constraints:
                         const BoxConstraints(minWidth: 40, minHeight: 40),
                     onPressed: () => _deleteSelectedWorks(groupedTasks),
-                    tooltip: '删除 (${_selectedWorkIds.length})',
+                    tooltip: '${S.of(context).delete} (${_selectedWorkIds.length})',
                     color: Theme.of(context).colorScheme.error,
                   ),
                 SizedBox(width: horizontalPadding - 8),
@@ -671,7 +672,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                       padding: const EdgeInsets.only(left: 20, right: 8),
                       child: TextButton.icon(
                         icon: const Icon(Icons.checklist, size: 20),
-                        label: const Text('选择'),
+                        label: Text(S.of(context).select),
                         style: TextButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 10),
@@ -688,7 +689,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                       padding: const EdgeInsets.only(right: 8),
                       child: TextButton.icon(
                         icon: const Icon(Icons.refresh, size: 20),
-                        label: const Text('重载'),
+                        label: Text(S.of(context).reload),
                         style: TextButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 10),
@@ -706,7 +707,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                         padding: const EdgeInsets.only(right: 8),
                         child: TextButton.icon(
                           icon: const Icon(Icons.folder_open, size: 20),
-                          label: const Text('打开文件夹'),
+                          label: Text(S.of(context).openFolder),
                           style: TextButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 10),

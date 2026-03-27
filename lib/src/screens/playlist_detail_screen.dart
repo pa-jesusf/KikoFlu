@@ -11,6 +11,7 @@ import '../screens/work_detail_screen.dart';
 import '../widgets/overscroll_next_page_detector.dart';
 import '../utils/string_utils.dart';
 import '../widgets/privacy_blur_cover.dart';
+import '../../l10n/app_localizations.dart';
 
 class PlaylistDetailScreen extends ConsumerStatefulWidget {
   final String playlistId;
@@ -78,30 +79,30 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
 
     // 系统播放列表不能删除
     if (playlist.isSystemPlaylist && isOwner) {
-      SnackBarUtil.showError(context, '系统播放列表不能删除');
+      SnackBarUtil.showError(context, S.of(context).systemPlaylistCannotDelete);
       return;
     }
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(isOwner ? '删除播放列表' : '取消收藏播放列表'),
+        title: Text(isOwner ? S.of(context).deletePlaylist : S.of(context).unfavoritePlaylist),
         content: Text(
           isOwner
-              ? '删除后不可恢复，收藏本列表的人将无法再访问。确定要删除吗？'
-              : '确定要取消收藏"${playlist.displayName}"吗？',
+              ? S.of(context).deletePlaylistConfirm
+              : S.of(context).unfavoritePlaylistConfirm(playlist.displayName),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: Text(isOwner ? '删除' : '取消收藏'),
+            child: Text(isOwner ? S.of(context).delete : S.of(context).unfavorite),
           ),
         ],
       ),
@@ -120,7 +121,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     try {
       // 显示加载提示
       if (!mounted) return;
-      SnackBarUtil.showLoading(context, '正在删除...');
+      SnackBarUtil.showLoading(context, S.of(context).deleting);
 
       await ref
           .read(playlistDetailProvider(widget.playlistId).notifier)
@@ -132,7 +133,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
       SnackBarUtil.hide(context);
 
       // 显示成功提示并返回上一页
-      SnackBarUtil.showSuccess(context, '删除成功');
+      SnackBarUtil.showSuccess(context, S.of(context).deleteSuccess);
 
       // 延迟一点返回，让用户看到成功提示
       await Future.delayed(const Duration(milliseconds: 300));
@@ -145,7 +146,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
       SnackBarUtil.hide(context);
 
       // 显示错误提示
-      SnackBarUtil.showError(context, '删除失败: ${e.toString()}');
+      SnackBarUtil.showError(context, S.of(context).deleteFailedWithError(e.toString()));
     }
   }
 
@@ -157,7 +158,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     final isOwner = metadata.userName == currentUserName;
 
     if (!isOwner) {
-      SnackBarUtil.showError(context, '只有播放列表作者才能编辑');
+      SnackBarUtil.showError(context, S.of(context).onlyOwnerCanEdit);
       return;
     }
 
@@ -191,7 +192,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                       child: Row(
                         children: [
                           Text(
-                            '编辑播放列表',
+                            S.of(context).editPlaylist,
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                         ],
@@ -208,11 +209,11 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                           // 名称输入
                           TextField(
                             controller: nameController,
-                            decoration: const InputDecoration(
-                              labelText: '播放列表名称',
-                              hintText: '请输入名称',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.title),
+                            decoration: InputDecoration(
+                              labelText: S.of(context).playlistName,
+                              hintText: S.of(context).enterPlaylistName,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.title),
                             ),
                             autofocus: true,
                             maxLength: 50,
@@ -223,25 +224,25 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                           DropdownButtonFormField<int>(
                             value: selectedPrivacy,
                             decoration: InputDecoration(
-                              labelText: '隐私设置',
+                              labelText: S.of(context).privacySetting,
                               border: const OutlineInputBorder(),
                               prefixIcon: const Icon(Icons.lock_outline),
                               helperText:
                                   _getPrivacyDescription(selectedPrivacy),
                               helperMaxLines: 2,
                             ),
-                            items: const [
+                            items: [
                               DropdownMenuItem(
                                 value: 0,
-                                child: Text('私享'),
+                                child: Text(S.of(context).playlistPrivacyPrivate),
                               ),
                               DropdownMenuItem(
                                 value: 1,
-                                child: Text('不公开'),
+                                child: Text(S.of(context).playlistPrivacyUnlisted),
                               ),
                               DropdownMenuItem(
                                 value: 2,
-                                child: Text('公开'),
+                                child: Text(S.of(context).playlistPrivacyPublic),
                               ),
                             ],
                             onChanged: (value) {
@@ -257,11 +258,11 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                           // 描述输入
                           TextField(
                             controller: descriptionController,
-                            decoration: const InputDecoration(
-                              labelText: '描述（可选）',
-                              hintText: '添加一些描述信息',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.description),
+                            decoration: InputDecoration(
+                              labelText: S.of(context).playlistDescription,
+                              hintText: S.of(context).addDescription,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.description),
                             ),
                             maxLines: 1,
                             maxLength: 200,
@@ -279,14 +280,14 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                         children: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('取消'),
+                            child: Text(S.of(context).cancel),
                           ),
                           const SizedBox(width: 8),
                           FilledButton(
                             onPressed: () {
                               final name = nameController.text.trim();
                               if (name.isEmpty) {
-                                SnackBarUtil.showWarning(context, '播放列表名称不能为空');
+                                SnackBarUtil.showWarning(context, S.of(context).playlistNameRequired);
                                 return;
                               }
                               Navigator.of(context).pop();
@@ -296,7 +297,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                                 description: descriptionController.text.trim(),
                               );
                             },
-                            child: const Text('保存'),
+                            child: Text(S.of(context).save),
                           ),
                         ],
                       ),
@@ -315,11 +316,11 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
   String _getPrivacyDescription(int privacy) {
     switch (privacy) {
       case 0:
-        return '只有您可以观看';
+        return S.of(context).privacyDescPrivate;
       case 1:
-        return '知道链接的人才能观看';
+        return S.of(context).privacyDescUnlisted;
       case 2:
-        return '任何人都可以观看';
+        return S.of(context).privacyDescPublic;
       default:
         return '';
     }
@@ -356,7 +357,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                         child: Row(
                           children: [
                             Text(
-                              '添加作品',
+                              S.of(context).addWorks,
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                           ],
@@ -372,7 +373,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                           children: [
                             // 提示文本
                             Text(
-                              '输入包含作品号的文本，自动识别RJ号',
+                              S.of(context).addWorksInputHint,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -387,11 +388,11 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                             // 输入框
                             TextField(
                               controller: textController,
-                              decoration: const InputDecoration(
-                                labelText: '作品号',
-                                hintText: '例如：RJ123456\nrj233333',
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.music_note),
+                              decoration: InputDecoration(
+                                labelText: S.of(context).workId,
+                                hintText: S.of(context).workIdHint,
+                                border: const OutlineInputBorder(),
+                                prefixIcon: const Icon(Icons.music_note),
                               ),
                               maxLines: 5,
                               autofocus: true,
@@ -437,7 +438,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          '识别到 ${parsedWorkIds.length} 个作品号',
+                                          S.of(context).detectedNWorkIds(parsedWorkIds.length),
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodySmall
@@ -485,7 +486,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                           children: [
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('取消'),
+                              child: Text(S.of(context).cancel),
                             ),
                             const SizedBox(width: 8),
                             FilledButton(
@@ -496,8 +497,8 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                                       _addWorks(parsedWorkIds);
                                     },
                               child: Text(parsedWorkIds.isEmpty
-                                  ? '添加'
-                                  : '添加 ${parsedWorkIds.length} 个'),
+                                  ? S.of(context).add
+                                  : S.of(context).addNWorks(parsedWorkIds.length)),
                             ),
                           ],
                         ),
@@ -528,14 +529,14 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
   /// 添加作品到播放列表
   Future<void> _addWorks(List<String> workIds) async {
     if (workIds.isEmpty) {
-      SnackBarUtil.showWarning(context, '未找到有效的作品号（RJ开头）');
+      SnackBarUtil.showWarning(context, S.of(context).noValidWorkIds);
       return;
     }
 
     try {
       // 显示加载提示
       if (!mounted) return;
-      SnackBarUtil.showLoading(context, '正在添加 ${workIds.length} 个作品...');
+      SnackBarUtil.showLoading(context, S.of(context).addingNWorks(workIds.length));
 
       await ref
           .read(playlistDetailProvider(widget.playlistId).notifier)
@@ -547,7 +548,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
       SnackBarUtil.hide(context);
 
       // 显示成功提示
-      SnackBarUtil.showSuccess(context, '成功添加 ${workIds.length} 个作品');
+      SnackBarUtil.showSuccess(context, S.of(context).addedNWorksSuccess(workIds.length));
     } catch (e) {
       if (!mounted) return;
 
@@ -555,7 +556,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
       SnackBarUtil.hide(context);
 
       // 显示错误提示
-      SnackBarUtil.showError(context, '添加失败: ${e.toString()}');
+      SnackBarUtil.showError(context, S.of(context).addFailedWithError(e.toString()));
     }
   }
 
@@ -564,19 +565,19 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('移除作品'),
-        content: Text('确定要从播放列表中移除「${work.title}」吗？'),
+        title: Text(S.of(context).removeWork),
+        content: Text(S.of(context).removeWorkConfirm(work.title)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('移除'),
+            child: Text(S.of(context).remove),
           ),
         ],
       ),
@@ -603,7 +604,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
       SnackBarUtil.clearAll(context);
 
       // 显示成功提示，缩短显示时间
-      SnackBarUtil.showSuccess(context, '移除成功',
+      SnackBarUtil.showSuccess(context, S.of(context).removeSuccess,
           duration: const Duration(seconds: 1));
     } catch (e) {
       if (!mounted) return;
@@ -612,7 +613,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
       SnackBarUtil.hide(context);
 
       // 显示错误提示
-      SnackBarUtil.showError(context, '移除失败: ${e.toString()}');
+      SnackBarUtil.showError(context, S.of(context).removeFailedWithError(e.toString()));
     }
   }
 
@@ -625,7 +626,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     try {
       // 显示加载提示
       if (!mounted) return;
-      SnackBarUtil.showLoading(context, '正在保存...');
+      SnackBarUtil.showLoading(context, S.of(context).saving);
 
       await ref
           .read(playlistDetailProvider(widget.playlistId).notifier)
@@ -641,7 +642,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
       SnackBarUtil.hide(context);
 
       // 显示成功提示
-      SnackBarUtil.showSuccess(context, '保存成功');
+      SnackBarUtil.showSuccess(context, S.of(context).saveSuccess);
     } catch (e) {
       if (!mounted) return;
 
@@ -649,7 +650,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
       SnackBarUtil.hide(context);
 
       // 显示错误提示
-      SnackBarUtil.showError(context, '保存失败: ${e.toString()}');
+      SnackBarUtil.showError(context, S.of(context).saveFailedWithError(e.toString()));
     }
   }
 
@@ -667,13 +668,13 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                   .read(playlistDetailProvider(widget.playlistId).notifier)
                   .refresh();
             },
-            tooltip: '刷新',
+            tooltip: S.of(context).refresh,
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddWorksDialog,
-        tooltip: '添加作品',
+        tooltip: S.of(context).addWorks,
         child: const Icon(Icons.add),
       ),
       body: ScrollNotificationObserver(
@@ -696,7 +697,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              '加载失败',
+              S.of(context).loadFailed,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
@@ -713,7 +714,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                   .read(playlistDetailProvider(widget.playlistId).notifier)
                   .refresh(),
               icon: const Icon(Icons.refresh),
-              label: const Text('重试'),
+              label: Text(S.of(context).retry),
             ),
           ],
         ),
@@ -748,12 +749,12 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      '暂无作品',
+                      S.of(context).noWorks,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '此播放列表还没有添加任何作品',
+                      S.of(context).playlistNoWorksDescription,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
@@ -867,8 +868,8 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
 
     final dateLabel = metadata.updatedAt.isNotEmpty &&
             metadata.updatedAt != metadata.createdAt
-        ? '最近更新'
-        : '创建时间';
+        ? S.of(context).lastUpdated
+        : S.of(context).createdTime;
 
     return SliverToBoxAdapter(
       child: Container(
@@ -926,13 +927,13 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                           IconButton(
                             onPressed: () => _showEditDialog(metadata),
                             icon: const Icon(Icons.edit_outlined),
-                            tooltip: '编辑',
+                            tooltip: S.of(context).edit,
                             visualDensity: VisualDensity.compact,
                           ),
                           IconButton(
                             onPressed: _showDeleteConfirmDialog,
                             icon: const Icon(Icons.delete_outline),
-                            tooltip: '删除',
+                            tooltip: S.of(context).delete,
                             visualDensity: VisualDensity.compact,
                             color: Theme.of(context).colorScheme.error,
                           ),
@@ -942,7 +943,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                       return IconButton(
                         onPressed: _showDeleteConfirmDialog,
                         icon: const Icon(Icons.delete_outline),
-                        tooltip: '取消收藏',
+                        tooltip: S.of(context).unfavorite,
                         visualDensity: VisualDensity.compact,
                         color: Theme.of(context).colorScheme.error,
                       );
@@ -975,7 +976,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '${metadata.worksCount} 作品',
+                  S.of(context).nWorksCount(metadata.worksCount),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -990,7 +991,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${metadata.playbackCount} 播放',
+                    S.of(context).nPlaysCount(metadata.playbackCount),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -1173,7 +1174,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                 color: colorScheme.error,
                 visualDensity: VisualDensity.compact,
                 onPressed: () => _showRemoveWorkConfirmDialog(work),
-                tooltip: '从播放列表移除',
+                tooltip: S.of(context).removeFromPlaylist,
               ),
             ],
           ],

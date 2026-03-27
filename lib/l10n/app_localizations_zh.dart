@@ -1432,6 +1432,459 @@ class SZh extends S {
 
   @override
   String get hasNewVersion => '有新版本';
+
+  @override
+  String get themeMode => '主题模式';
+
+  @override
+  String get colorTheme => '颜色主题';
+
+  @override
+  String get themePreview => '主题预览';
+
+  @override
+  String get themeModeSystemDesc => '自动适应系统的深色/浅色模式';
+
+  @override
+  String get themeModeLightDesc => '始终使用浅色主题';
+
+  @override
+  String get themeModeDarkDesc => '始终使用深色主题';
+
+  @override
+  String get colorSchemeOceanBlueDesc => '蓝蓝路，蓝蓝路！';
+
+  @override
+  String get colorSchemeSakuraPinkDesc => '( ゜- ゜)つロ 乾杯~';
+
+  @override
+  String get colorSchemeSunsetOrangeDesc => '软件一定要能换主题✍🏻✍🏻✍🏻';
+
+  @override
+  String get colorSchemeLavenderPurpleDesc => '兄弟，兄弟...';
+
+  @override
+  String get colorSchemeForestGreenDesc => '艹艹艹';
+
+  @override
+  String get colorSchemeDynamicDesc => '使用系统壁纸的颜色 (Android 12+)';
+
+  @override
+  String get primaryContainer => '主色容器';
+
+  @override
+  String get secondaryContainer => '辅色容器';
+
+  @override
+  String get tertiaryContainer => '第三色容器';
+
+  @override
+  String get surfaceColor => '表面色';
+
+  @override
+  String get playerButtonSettingsSubtitle => '自定义播放器控制按钮顺序';
+
+  @override
+  String get playerLyricStyleSubtitle => '自定义迷你播放器和全屏播放器的字幕样式';
+
+  @override
+  String get workDetailDisplaySubtitle => '控制作品详情页显示的信息项';
+
+  @override
+  String get workCardDisplaySubtitle => '控制作品卡片显示的信息项';
+
+  @override
+  String get myTabsDisplaySubtitle => '控制\"我的\"界面中标签页的显示';
+
+  @override
+  String get pageSizeSettings => '每页显示数量';
+
+  @override
+  String pageSizeCurrent(int size) {
+    return '当前设置: $size 条/页';
+  }
+
+  @override
+  String currentSettingLabel(String value) {
+    return '当前: $value';
+  }
+
+  @override
+  String setToValue(String value) {
+    return '已设置为: $value';
+  }
+
+  @override
+  String get llmConfigRequiredMessage => '使用LLM翻译需要配置 API Key。请先前往设置进行配置。';
+
+  @override
+  String get autoSwitchedToLlm => '已自动切换至: 大模型翻译';
+
+  @override
+  String get translationDescGoogle => '需要网络环境支持';
+
+  @override
+  String get translationDescYoudao => '支持默认网络环境';
+
+  @override
+  String get translationDescMicrosoft => '支持默认网络环境';
+
+  @override
+  String get translationDescLlm => 'OpenAI 兼容接口, 需要手动配置API Key';
+
+  @override
+  String get audioPassthroughDescAndroid =>
+      '允许输出原始比特流 (AC3/DTS) 到外部解码器。可能会独占音频设备。';
+
+  @override
+  String get permissionExplanation => '权限说明';
+
+  @override
+  String get backgroundRunningPermission => '后台运行权限';
+
+  @override
+  String get notificationPermissionDesc => '用于显示媒体播放通知栏，让您可以在锁屏和通知栏中控制播放。';
+
+  @override
+  String get backgroundRunningPermissionDesc =>
+      '让应用免受电池优化限制，确保音频在后台持续播放不被系统杀死。';
+
+  @override
+  String get notificationGrantedStatus => '已授权 - 可以显示播放通知和控制器';
+
+  @override
+  String get notificationDeniedStatus => '未授权 - 点击申请权限';
+
+  @override
+  String get backgroundGrantedStatus => '已授权 - 应用可以在后台持续运行';
+
+  @override
+  String get backgroundDeniedStatus => '未授权 - 点击申请权限';
+
+  @override
+  String get notificationPermissionGranted => '通知权限已授予';
+
+  @override
+  String get notificationPermissionDenied => '通知权限被拒绝';
+
+  @override
+  String requestNotificationFailed(String error) {
+    return '请求通知权限失败: $error';
+  }
+
+  @override
+  String get backgroundPermissionGranted => '后台运行权限已授予';
+
+  @override
+  String get backgroundPermissionDenied => '后台运行权限被拒绝';
+
+  @override
+  String requestBackgroundFailed(String error) {
+    return '请求后台运行权限失败: $error';
+  }
+
+  @override
+  String permissionRequired(String permission) {
+    return '需要$permission';
+  }
+
+  @override
+  String permissionPermanentlyDenied(String permission) {
+    return '$permission已被永久拒绝，请在系统设置中手动开启。';
+  }
+
+  @override
+  String get openSettings => '打开设置';
+
+  @override
+  String get permissionsAndroidOnly => '权限管理仅在安卓平台可用';
+
+  @override
+  String get permissionsNotNeeded => '其他平台不需要手动管理这些权限';
+
+  @override
+  String get refreshPermissionStatus => '刷新权限状态';
+
+  @override
+  String deleteFileConfirm(String fileName) {
+    return '确定要删除 \"$fileName\" 吗？';
+  }
+
+  @override
+  String deleteSelectedFilesConfirm(int count) {
+    return '确定要删除选中的 $count 个文件吗？';
+  }
+
+  @override
+  String get deleted => '已删除';
+
+  @override
+  String cannotOpenFolder(String path) {
+    return '无法打开文件夹: $path';
+  }
+
+  @override
+  String openFolderFailed(String error) {
+    return '打开文件夹失败: $error';
+  }
+
+  @override
+  String get reloadingFromDisk => '正在从硬盘重新加载...';
+
+  @override
+  String get refreshComplete => '刷新完成';
+
+  @override
+  String refreshFailed(String error) {
+    return '刷新失败: $error';
+  }
+
+  @override
+  String deleteSelectedWorksConfirm(int count) {
+    return '确定要删除选中的 $count 个作品吗？';
+  }
+
+  @override
+  String partialDeleteFailed(String error) {
+    return '部分删除失败: $error';
+  }
+
+  @override
+  String deletedNOfTotal(int success, int total) {
+    return '已删除 $success/$total 个任务';
+  }
+
+  @override
+  String deleteFailedWithError(String error) {
+    return '删除失败: $error';
+  }
+
+  @override
+  String get noWorkMetadataForOffline => '该下载任务没有保存作品详情，无法离线查看';
+
+  @override
+  String openWorkDetailFailed(String error) {
+    return '打开作品详情失败: $error';
+  }
+
+  @override
+  String get noLocalDownloads => '暂无本地下载';
+
+  @override
+  String get exitSelection => '退出选择';
+
+  @override
+  String get reload => '重载';
+
+  @override
+  String get openFolder => '打开文件夹';
+
+  @override
+  String get playlistLink => '播放列表链接';
+
+  @override
+  String get playlistLinkHint =>
+      '粘贴播放列表链接，如:\nhttps://www.asmr.one/playlist?id=...';
+
+  @override
+  String get unrecognizedPlaylistLink => '无法识别的播放列表链接或ID';
+
+  @override
+  String get addingPlaylist => '正在添加播放列表...';
+
+  @override
+  String get playlistAddedSuccess => '播放列表添加成功';
+
+  @override
+  String get addFailed => '添加失败';
+
+  @override
+  String get playlistNotFound => '播放列表不存在或已被删除';
+
+  @override
+  String get noPermissionToAccessPlaylist => '没有权限访问此播放列表';
+
+  @override
+  String get networkConnectionFailed => '网络连接失败，请检查网络';
+
+  @override
+  String addFailedWithError(String error) {
+    return '添加失败: $error';
+  }
+
+  @override
+  String get creatingPlaylist => '正在创建播放列表...';
+
+  @override
+  String playlistCreatedSuccess(String name) {
+    return '播放列表 \"$name\" 创建成功';
+  }
+
+  @override
+  String createFailedWithError(String error) {
+    return '创建失败: $error';
+  }
+
+  @override
+  String get noPlaylists => '暂无播放列表';
+
+  @override
+  String get noPlaylistsDescription => '您还没有创建或收藏任何播放列表';
+
+  @override
+  String get myPlaylists => '我的播放列表';
+
+  @override
+  String totalNItems(int count) {
+    return '共 $count 个';
+  }
+
+  @override
+  String get systemPlaylistCannotDelete => '系统播放列表不能删除';
+
+  @override
+  String get deletePlaylist => '删除播放列表';
+
+  @override
+  String get unfavoritePlaylist => '取消收藏播放列表';
+
+  @override
+  String get deletePlaylistConfirm => '删除后不可恢复，收藏本列表的人将无法再访问。确定要删除吗？';
+
+  @override
+  String unfavoritePlaylistConfirm(String name) {
+    return '确定要取消收藏\"$name\"吗？';
+  }
+
+  @override
+  String get unfavorite => '取消收藏';
+
+  @override
+  String get deleting => '正在删除...';
+
+  @override
+  String get deleteSuccess => '删除成功';
+
+  @override
+  String get onlyOwnerCanEdit => '只有播放列表作者才能编辑';
+
+  @override
+  String get editPlaylist => '编辑播放列表';
+
+  @override
+  String get playlistNameRequired => '播放列表名称不能为空';
+
+  @override
+  String get privacyDescPrivate => '只有您可以观看';
+
+  @override
+  String get privacyDescUnlisted => '知道链接的人才能观看';
+
+  @override
+  String get privacyDescPublic => '任何人都可以观看';
+
+  @override
+  String get addWorks => '添加作品';
+
+  @override
+  String get addWorksInputHint => '输入包含作品号的文本，自动识别RJ号';
+
+  @override
+  String get workId => '作品号';
+
+  @override
+  String get workIdHint => '例如：RJ123456\nrj233333';
+
+  @override
+  String detectedNWorkIds(int count) {
+    return '识别到 $count 个作品号';
+  }
+
+  @override
+  String addNWorks(int count) {
+    return '添加 $count 个';
+  }
+
+  @override
+  String get noValidWorkIds => '未找到有效的作品号（RJ开头）';
+
+  @override
+  String addingNWorks(int count) {
+    return '正在添加 $count 个作品...';
+  }
+
+  @override
+  String addedNWorksSuccess(int count) {
+    return '成功添加 $count 个作品';
+  }
+
+  @override
+  String get removeWork => '移除作品';
+
+  @override
+  String removeWorkConfirm(String title) {
+    return '确定要从播放列表中移除「$title」吗？';
+  }
+
+  @override
+  String get removeSuccess => '移除成功';
+
+  @override
+  String removeFailedWithError(String error) {
+    return '移除失败: $error';
+  }
+
+  @override
+  String get saving => '正在保存...';
+
+  @override
+  String get saveSuccess => '保存成功';
+
+  @override
+  String saveFailedWithError(String error) {
+    return '保存失败: $error';
+  }
+
+  @override
+  String get noWorks => '暂无作品';
+
+  @override
+  String get playlistNoWorksDescription => '此播放列表还没有添加任何作品';
+
+  @override
+  String get lastUpdated => '最近更新';
+
+  @override
+  String get createdTime => '创建时间';
+
+  @override
+  String nWorksCount(int count) {
+    return '$count 作品';
+  }
+
+  @override
+  String nPlaysCount(int count) {
+    return '$count 播放';
+  }
+
+  @override
+  String get removeFromPlaylist => '从播放列表移除';
+
+  @override
+  String get checkNetworkOrRetry => '请检查网络连接或稍后重试';
+
+  @override
+  String get reachedEnd => '已经到底啦~杂库~';
+
+  @override
+  String excludedNWorks(int count) {
+    return '已排除 $count 个作品';
+  }
+
+  @override
+  String pageExcludedNWorks(int count) {
+    return '本页已排除 $count 个作品';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2862,4 +3315,457 @@ class SZhHant extends SZh {
 
   @override
   String get hasNewVersion => '有新版本';
+
+  @override
+  String get themeMode => '主題模式';
+
+  @override
+  String get colorTheme => '顏色主題';
+
+  @override
+  String get themePreview => '主題預覽';
+
+  @override
+  String get themeModeSystemDesc => '自動適應系統的深色/淺色模式';
+
+  @override
+  String get themeModeLightDesc => '始終使用淺色主題';
+
+  @override
+  String get themeModeDarkDesc => '始終使用深色主題';
+
+  @override
+  String get colorSchemeOceanBlueDesc => '藍藍路，藍藍路！';
+
+  @override
+  String get colorSchemeSakuraPinkDesc => '( ゜- ゜)つロ 乾杯~';
+
+  @override
+  String get colorSchemeSunsetOrangeDesc => '軟體一定要能換主題✍🏻✍🏻✍🏻';
+
+  @override
+  String get colorSchemeLavenderPurpleDesc => '兄弟，兄弟...';
+
+  @override
+  String get colorSchemeForestGreenDesc => '草草草';
+
+  @override
+  String get colorSchemeDynamicDesc => '使用系統桌布的顏色 (Android 12+)';
+
+  @override
+  String get primaryContainer => '主色容器';
+
+  @override
+  String get secondaryContainer => '輔色容器';
+
+  @override
+  String get tertiaryContainer => '第三色容器';
+
+  @override
+  String get surfaceColor => '表面色';
+
+  @override
+  String get playerButtonSettingsSubtitle => '自訂播放器控制按鈕順序';
+
+  @override
+  String get playerLyricStyleSubtitle => '自訂迷你播放器和全螢幕播放器的字幕樣式';
+
+  @override
+  String get workDetailDisplaySubtitle => '控制作品詳情頁顯示的資訊項';
+
+  @override
+  String get workCardDisplaySubtitle => '控制作品卡片顯示的資訊項';
+
+  @override
+  String get myTabsDisplaySubtitle => '控制「我的」介面中標籤頁的顯示';
+
+  @override
+  String get pageSizeSettings => '每頁顯示數量';
+
+  @override
+  String pageSizeCurrent(int size) {
+    return '目前設定: $size 條/頁';
+  }
+
+  @override
+  String currentSettingLabel(String value) {
+    return '目前: $value';
+  }
+
+  @override
+  String setToValue(String value) {
+    return '已設定為: $value';
+  }
+
+  @override
+  String get llmConfigRequiredMessage => '使用LLM翻譯需要設定 API Key。請先前往設定進行配置。';
+
+  @override
+  String get autoSwitchedToLlm => '已自動切換至: 大型語言模型翻譯';
+
+  @override
+  String get translationDescGoogle => '需要網路環境支援';
+
+  @override
+  String get translationDescYoudao => '支援預設網路環境';
+
+  @override
+  String get translationDescMicrosoft => '支援預設網路環境';
+
+  @override
+  String get translationDescLlm => 'OpenAI 相容介面，需要手動設定API Key';
+
+  @override
+  String get audioPassthroughDescAndroid =>
+      '允許輸出原始位元流 (AC3/DTS) 到外部解碼器。可能會獨佔音訊裝置。';
+
+  @override
+  String get permissionExplanation => '權限說明';
+
+  @override
+  String get backgroundRunningPermission => '背景執行權限';
+
+  @override
+  String get notificationPermissionDesc => '用於顯示媒體播放通知欄，讓您可以在鎖定畫面和通知欄中控制播放。';
+
+  @override
+  String get backgroundRunningPermissionDesc =>
+      '讓應用免受電池最佳化限制，確保音訊在背景持續播放不被系統終止。';
+
+  @override
+  String get notificationGrantedStatus => '已授權 - 可以顯示播放通知和控制器';
+
+  @override
+  String get notificationDeniedStatus => '未授權 - 點擊申請權限';
+
+  @override
+  String get backgroundGrantedStatus => '已授權 - 應用可以在背景持續執行';
+
+  @override
+  String get backgroundDeniedStatus => '未授權 - 點擊申請權限';
+
+  @override
+  String get notificationPermissionGranted => '通知權限已授予';
+
+  @override
+  String get notificationPermissionDenied => '通知權限被拒絕';
+
+  @override
+  String requestNotificationFailed(String error) {
+    return '請求通知權限失敗: $error';
+  }
+
+  @override
+  String get backgroundPermissionGranted => '背景執行權限已授予';
+
+  @override
+  String get backgroundPermissionDenied => '背景執行權限被拒絕';
+
+  @override
+  String requestBackgroundFailed(String error) {
+    return '請求背景執行權限失敗: $error';
+  }
+
+  @override
+  String permissionRequired(String permission) {
+    return '需要$permission';
+  }
+
+  @override
+  String permissionPermanentlyDenied(String permission) {
+    return '$permission已被永久拒絕，請在系統設定中手動開啟。';
+  }
+
+  @override
+  String get openSettings => '開啟設定';
+
+  @override
+  String get permissionsAndroidOnly => '權限管理僅在安卓平台可用';
+
+  @override
+  String get permissionsNotNeeded => '其他平台不需要手動管理這些權限';
+
+  @override
+  String get refreshPermissionStatus => '重新整理權限狀態';
+
+  @override
+  String deleteFileConfirm(String fileName) {
+    return '確定要刪除 \"$fileName\" 嗎？';
+  }
+
+  @override
+  String deleteSelectedFilesConfirm(int count) {
+    return '確定要刪除選中的 $count 個檔案嗎？';
+  }
+
+  @override
+  String get deleted => '已刪除';
+
+  @override
+  String cannotOpenFolder(String path) {
+    return '無法開啟資料夾: $path';
+  }
+
+  @override
+  String openFolderFailed(String error) {
+    return '開啟資料夾失敗: $error';
+  }
+
+  @override
+  String get reloadingFromDisk => '正在從硬碟重新載入...';
+
+  @override
+  String get refreshComplete => '重新整理完成';
+
+  @override
+  String refreshFailed(String error) {
+    return '重新整理失敗: $error';
+  }
+
+  @override
+  String deleteSelectedWorksConfirm(int count) {
+    return '確定要刪除選中的 $count 個作品嗎？';
+  }
+
+  @override
+  String partialDeleteFailed(String error) {
+    return '部分刪除失敗: $error';
+  }
+
+  @override
+  String deletedNOfTotal(int success, int total) {
+    return '已刪除 $success/$total 個任務';
+  }
+
+  @override
+  String deleteFailedWithError(String error) {
+    return '刪除失敗: $error';
+  }
+
+  @override
+  String get noWorkMetadataForOffline => '該下載任務沒有儲存作品詳情，無法離線查看';
+
+  @override
+  String openWorkDetailFailed(String error) {
+    return '開啟作品詳情失敗: $error';
+  }
+
+  @override
+  String get noLocalDownloads => '暫無本地下載';
+
+  @override
+  String get exitSelection => '退出選擇';
+
+  @override
+  String get reload => '重新載入';
+
+  @override
+  String get openFolder => '開啟資料夾';
+
+  @override
+  String get playlistLink => '播放清單連結';
+
+  @override
+  String get playlistLinkHint =>
+      '貼上播放清單連結，如:\nhttps://www.asmr.one/playlist?id=...';
+
+  @override
+  String get unrecognizedPlaylistLink => '無法辨識的播放清單連結或ID';
+
+  @override
+  String get addingPlaylist => '正在新增播放清單...';
+
+  @override
+  String get playlistAddedSuccess => '播放清單新增成功';
+
+  @override
+  String get addFailed => '新增失敗';
+
+  @override
+  String get playlistNotFound => '播放清單不存在或已被刪除';
+
+  @override
+  String get noPermissionToAccessPlaylist => '沒有權限存取此播放清單';
+
+  @override
+  String get networkConnectionFailed => '網路連線失敗，請檢查網路';
+
+  @override
+  String addFailedWithError(String error) {
+    return '新增失敗: $error';
+  }
+
+  @override
+  String get creatingPlaylist => '正在建立播放清單...';
+
+  @override
+  String playlistCreatedSuccess(String name) {
+    return '播放清單 \"$name\" 建立成功';
+  }
+
+  @override
+  String createFailedWithError(String error) {
+    return '建立失敗: $error';
+  }
+
+  @override
+  String get noPlaylists => '暫無播放清單';
+
+  @override
+  String get noPlaylistsDescription => '您還沒有建立或收藏任何播放清單';
+
+  @override
+  String get myPlaylists => '我的播放清單';
+
+  @override
+  String totalNItems(int count) {
+    return '共 $count 個';
+  }
+
+  @override
+  String get systemPlaylistCannotDelete => '系統播放清單不能刪除';
+
+  @override
+  String get deletePlaylist => '刪除播放清單';
+
+  @override
+  String get unfavoritePlaylist => '取消收藏播放清單';
+
+  @override
+  String get deletePlaylistConfirm => '刪除後不可恢復，收藏本清單的人將無法再存取。確定要刪除嗎？';
+
+  @override
+  String unfavoritePlaylistConfirm(String name) {
+    return '確定要取消收藏「$name」嗎？';
+  }
+
+  @override
+  String get unfavorite => '取消收藏';
+
+  @override
+  String get deleting => '正在刪除...';
+
+  @override
+  String get deleteSuccess => '刪除成功';
+
+  @override
+  String get onlyOwnerCanEdit => '只有播放清單作者才能編輯';
+
+  @override
+  String get editPlaylist => '編輯播放清單';
+
+  @override
+  String get playlistNameRequired => '播放清單名稱不能為空';
+
+  @override
+  String get privacyDescPrivate => '只有您可以觀看';
+
+  @override
+  String get privacyDescUnlisted => '知道連結的人才能觀看';
+
+  @override
+  String get privacyDescPublic => '任何人都可以觀看';
+
+  @override
+  String get addWorks => '新增作品';
+
+  @override
+  String get addWorksInputHint => '輸入包含作品號的文字，自動辨識RJ號';
+
+  @override
+  String get workId => '作品號';
+
+  @override
+  String get workIdHint => '例如：RJ123456\nrj233333';
+
+  @override
+  String detectedNWorkIds(int count) {
+    return '辨識到 $count 個作品號';
+  }
+
+  @override
+  String addNWorks(int count) {
+    return '新增 $count 個';
+  }
+
+  @override
+  String get noValidWorkIds => '未找到有效的作品號（RJ開頭）';
+
+  @override
+  String addingNWorks(int count) {
+    return '正在新增 $count 個作品...';
+  }
+
+  @override
+  String addedNWorksSuccess(int count) {
+    return '成功新增 $count 個作品';
+  }
+
+  @override
+  String get removeWork => '移除作品';
+
+  @override
+  String removeWorkConfirm(String title) {
+    return '確定要從播放清單中移除「$title」嗎？';
+  }
+
+  @override
+  String get removeSuccess => '移除成功';
+
+  @override
+  String removeFailedWithError(String error) {
+    return '移除失敗: $error';
+  }
+
+  @override
+  String get saving => '正在儲存...';
+
+  @override
+  String get saveSuccess => '儲存成功';
+
+  @override
+  String saveFailedWithError(String error) {
+    return '儲存失敗: $error';
+  }
+
+  @override
+  String get noWorks => '暫無作品';
+
+  @override
+  String get playlistNoWorksDescription => '此播放清單還沒有新增任何作品';
+
+  @override
+  String get lastUpdated => '最近更新';
+
+  @override
+  String get createdTime => '建立時間';
+
+  @override
+  String nWorksCount(int count) {
+    return '$count 作品';
+  }
+
+  @override
+  String nPlaysCount(int count) {
+    return '$count 播放';
+  }
+
+  @override
+  String get removeFromPlaylist => '從播放清單移除';
+
+  @override
+  String get checkNetworkOrRetry => '請檢查網路連線或稍後重試';
+
+  @override
+  String get reachedEnd => '已經到底啦~雜庫~';
+
+  @override
+  String excludedNWorks(int count) {
+    return '已排除 $count 個作品';
+  }
+
+  @override
+  String pageExcludedNWorks(int count) {
+    return '本頁已排除 $count 個作品';
+  }
 }

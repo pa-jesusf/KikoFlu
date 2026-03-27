@@ -13,6 +13,7 @@ import '../widgets/overscroll_next_page_detector.dart';
 import '../utils/responsive_grid_helper.dart';
 import '../utils/snackbar_util.dart';
 import '../widgets/scrollable_appbar.dart';
+import '../../l10n/app_localizations.dart';
 import '../widgets/download_fab.dart';
 import '../models/sort_options.dart';
 
@@ -115,7 +116,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
     if (isRecommendMode) {
       SnackBarUtil.showInfo(
         context,
-        displayMode == DisplayMode.popular ? '热门推荐模式不支持排序' : '推荐模式不支持排序',
+        displayMode == DisplayMode.popular ? S.of(context).popularNoSort : S.of(context).recommendedNoSort,
       );
       return;
     }
@@ -153,11 +154,11 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
   String _getLayoutTooltip(LayoutType layoutType) {
     switch (layoutType) {
       case LayoutType.bigGrid:
-        return '切换到小网格视图';
+        return S.of(context).switchToSmallGrid;
       case LayoutType.smallGrid:
-        return '切换到列表视图';
+        return S.of(context).switchToList;
       case LayoutType.list:
-        return '切换到大网格视图';
+        return S.of(context).switchToLargeGrid;
     }
   }
 
@@ -289,7 +290,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
                 constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                 onPressed: () =>
                     ref.read(worksProvider.notifier).toggleSubtitleFilter(),
-                tooltip: worksState.subtitleFilter == 1 ? '显示全部作品' : '仅显示带字幕作品',
+                tooltip: worksState.subtitleFilter == 1 ? S.of(context).showAllWorks : S.of(context).showOnlySubtitled,
               ),
               // 第四列：排序按钮
               Padding(
@@ -305,7 +306,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
                       const BoxConstraints(minWidth: 36, minHeight: 36),
                   onPressed:
                       isRecommendMode ? null : () => _showSortDialog(context),
-                  tooltip: isRecommendMode ? '推荐模式不支持排序' : '排序',
+                  tooltip: isRecommendMode ? S.of(context).recommendedNoSort : S.of(context).sort,
                 ),
               ),
             ],
@@ -351,7 +352,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
         _buildModeButton(
           context: context,
           icon: Icons.grid_view,
-          label: '全部',
+          label: S.of(context).displayModeAll,
           isSelected: worksState.displayMode == DisplayMode.all,
           index: 0,
           total: 3,
@@ -360,7 +361,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
         _buildModeButton(
           context: context,
           icon: Icons.local_fire_department,
-          label: '热门',
+          label: S.of(context).displayModePopular,
           isSelected: worksState.displayMode == DisplayMode.popular,
           index: 1,
           total: 3,
@@ -369,7 +370,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
         _buildModeButton(
           context: context,
           icon: Icons.auto_awesome,
-          label: '推荐',
+          label: S.of(context).displayModeRecommended,
           isSelected: worksState.displayMode == DisplayMode.recommended,
           index: 2,
           total: 3,
@@ -470,7 +471,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
               ),
               const SizedBox(height: 16),
               Text(
-                '加载失败',
+                S.of(context).loadFailed,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
@@ -485,7 +486,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
               ElevatedButton.icon(
                 onPressed: () => ref.read(worksProvider.notifier).refresh(),
                 icon: const Icon(Icons.refresh),
-                label: const Text('重试'),
+                label: Text(S.of(context).retry),
               ),
             ],
           ),
@@ -494,13 +495,13 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
 
       // 加载中
       if (worksState.isLoading) {
-        return const Center(
+        return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('加载中...'),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(S.of(context).loading),
             ],
           ),
         );
@@ -515,12 +516,12 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
                 size: 64, color: Theme.of(context).colorScheme.outline),
             const SizedBox(height: 16),
             Text(
-              '暂无作品',
+              S.of(context).noWorks,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
             Text(
-              '请检查网络连接或稍后重试',
+              S.of(context).checkNetworkOrRetry,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -631,7 +632,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '已经到底啦~杂库~',
+                        S.of(context).reachedEnd,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                           fontSize: 14,
@@ -642,7 +643,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
                   if (worksState.rawWorks.length > worksState.works.length) ...[
                     const SizedBox(height: 8),
                     Text(
-                      '已排除 ${worksState.rawWorks.length - worksState.works.length} 个作品',
+                      S.of(context).excludedNWorks(worksState.rawWorks.length - worksState.works.length),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 12,
@@ -683,7 +684,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
                   if (worksState.rawWorks.length > worksState.works.length) ...[
                     const SizedBox(height: 8),
                     Text(
-                      '本页已排除 ${worksState.rawWorks.length - worksState.works.length} 个作品',
+                      S.of(context).pageExcludedNWorks(worksState.rawWorks.length - worksState.works.length),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 12,
@@ -759,7 +760,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '已经到底啦~杂库~',
+                          S.of(context).reachedEnd,
                           style: TextStyle(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,

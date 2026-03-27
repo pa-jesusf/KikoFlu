@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/history_provider.dart';
 import '../widgets/history_work_card.dart';
 import '../widgets/pagination_bar.dart';
+import '../../l10n/app_localizations.dart';
 
 class HistoryScreen extends ConsumerWidget {
   const HistoryScreen({super.key});
@@ -26,7 +27,7 @@ class HistoryScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    '暂无播放历史',
+                    S.of(context).noPlayHistory,
                     style: TextStyle(
                       fontSize: 16,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -83,7 +84,7 @@ class HistoryScreen extends ConsumerWidget {
       floatingActionButton: history.isNotEmpty
           ? FloatingActionButton(
               onPressed: () => _showClearConfirmation(context, ref),
-              tooltip: '清空历史',
+              tooltip: S.of(context).clearHistory,
               child: const Icon(Icons.delete_outline),
             )
           : null,
@@ -95,16 +96,16 @@ class HistoryScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('清空历史'),
-        content: const Text('确定要清空所有播放历史吗？此操作无法撤销。'),
+        title: Text(S.of(context).clearHistoryTitle),
+        content: Text(S.of(context).clearHistoryConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('清空'),
+            child: Text(S.of(context).clear),
           ),
         ],
       ),

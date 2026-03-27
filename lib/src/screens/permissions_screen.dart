@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../utils/snackbar_util.dart';
 
 /// 权限管理页面（仅安卓平台）
@@ -53,17 +54,17 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
 
       if (mounted) {
         if (status.isGranted) {
-          SnackBarUtil.showSuccess(context, '通知权限已授予');
+          SnackBarUtil.showSuccess(context, S.of(context).notificationPermissionGranted);
           await _checkPermissions();
         } else if (status.isDenied) {
-          SnackBarUtil.showWarning(context, '通知权限被拒绝');
+          SnackBarUtil.showWarning(context, S.of(context).notificationPermissionDenied);
         } else if (status.isPermanentlyDenied) {
-          _showOpenSettingsDialog('通知权限');
+          _showOpenSettingsDialog(S.of(context).notificationPermission);
         }
       }
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, '请求通知权限失败: $e');
+        SnackBarUtil.showError(context, S.of(context).requestNotificationFailed(e.toString()));
       }
     }
   }
@@ -74,17 +75,17 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
 
       if (mounted) {
         if (status.isGranted) {
-          SnackBarUtil.showSuccess(context, '后台运行权限已授予');
+          SnackBarUtil.showSuccess(context, S.of(context).backgroundPermissionGranted);
           await _checkPermissions();
         } else if (status.isDenied) {
-          SnackBarUtil.showWarning(context, '后台运行权限被拒绝');
+          SnackBarUtil.showWarning(context, S.of(context).backgroundPermissionDenied);
         } else if (status.isPermanentlyDenied) {
-          _showOpenSettingsDialog('后台运行权限');
+          _showOpenSettingsDialog(S.of(context).backgroundRunningPermission);
         }
       }
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, '请求后台运行权限失败: $e');
+        SnackBarUtil.showError(context, S.of(context).requestBackgroundFailed(e.toString()));
       }
     }
   }
@@ -93,12 +94,12 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('需要$permissionName'),
-        content: Text('$permissionName已被永久拒绝，请在系统设置中手动开启。'),
+        title: Text(S.of(context).permissionRequired(permissionName)),
+        content: Text(S.of(context).permissionPermanentlyDenied(permissionName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -109,7 +110,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                 await _checkPermissions();
               }
             },
-            child: const Text('打开设置'),
+            child: Text(S.of(context).openSettings),
           ),
         ],
       ),
@@ -122,7 +123,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     if (!Platform.isAndroid) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('权限管理', style: TextStyle(fontSize: 18)),
+          title: Text(S.of(context).permissionManagement, style: const TextStyle(fontSize: 18)),
         ),
         body: Center(
           child: Column(
@@ -135,12 +136,12 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                '权限管理仅在安卓平台可用',
+                S.of(context).permissionsAndroidOnly,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
               Text(
-                '其他平台不需要手动管理这些权限',
+                S.of(context).permissionsNotNeeded,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -153,12 +154,12 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('权限管理', style: TextStyle(fontSize: 18)),
+        title: Text(S.of(context).permissionManagement, style: const TextStyle(fontSize: 18)),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _checkPermissions,
-            tooltip: '刷新权限状态',
+            tooltip: S.of(context).refreshPermissionStatus,
           ),
         ],
       ),
@@ -186,7 +187,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              '权限说明',
+                              S.of(context).permissionExplanation,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleSmall
@@ -199,14 +200,14 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                         const SizedBox(height: 12),
                         _buildPermissionExplanation(
                           context,
-                          '通知权限',
-                          '用于显示媒体播放通知栏，让您可以在锁屏和通知栏中控制播放。',
+                          S.of(context).notificationPermission,
+                          S.of(context).notificationPermissionDesc,
                         ),
                         const SizedBox(height: 8),
                         _buildPermissionExplanation(
                           context,
-                          '后台运行权限',
-                          '让应用免受电池优化限制，确保音频在后台持续播放不被系统杀死。',
+                          S.of(context).backgroundRunningPermission,
+                          S.of(context).backgroundRunningPermissionDesc,
                         ),
                       ],
                     ),
@@ -224,17 +225,17 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                           : Theme.of(context).colorScheme.primary,
                       size: 32,
                     ),
-                    title: const Text('通知权限'),
+                    title: Text(S.of(context).notificationPermission),
                     subtitle: Text(
                       _notificationGranted
-                          ? '已授权 - 可以显示播放通知和控制器'
-                          : '未授权 - 点击申请权限',
+                          ? S.of(context).notificationGrantedStatus
+                          : S.of(context).notificationDeniedStatus,
                     ),
                     trailing: _notificationGranted
                         ? const Icon(Icons.check_circle, color: Colors.green)
                         : FilledButton(
                             onPressed: _requestNotificationPermission,
-                            child: const Text('申请'),
+                            child: Text(S.of(context).requestPermission),
                           ),
                   ),
                 ),
@@ -250,17 +251,17 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                           : Theme.of(context).colorScheme.primary,
                       size: 32,
                     ),
-                    title: const Text('后台运行权限'),
+                    title: Text(S.of(context).backgroundRunningPermission),
                     subtitle: Text(
                       _ignoreBatteryOptimizationsGranted
-                          ? '已授权 - 应用可以在后台持续运行'
-                          : '未授权 - 点击申请权限',
+                          ? S.of(context).backgroundGrantedStatus
+                          : S.of(context).notificationDeniedStatus,
                     ),
                     trailing: _ignoreBatteryOptimizationsGranted
                         ? const Icon(Icons.check_circle, color: Colors.green)
                         : FilledButton(
                             onPressed: _requestIgnoreBatteryOptimizations,
-                            child: const Text('申请'),
+                            child: Text(S.of(context).requestPermission),
                           ),
                   ),
                 ),

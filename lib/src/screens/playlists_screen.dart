@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
 import '../providers/playlists_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/playlist_card.dart';
@@ -82,7 +83,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
                       child: Row(
                         children: [
                           Text(
-                            isCreateMode ? '创建播放列表' : '添加播放列表',
+                            isCreateMode ? S.of(context).createPlaylist : S.of(context).addPlaylist,
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                         ],
@@ -93,16 +94,16 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: SegmentedButton<bool>(
-                        segments: const [
+                        segments: [
                           ButtonSegment<bool>(
                             value: true,
-                            label: Text('创建'),
-                            icon: Icon(Icons.add),
+                            label: Text(S.of(context).create),
+                            icon: const Icon(Icons.add),
                           ),
                           ButtonSegment<bool>(
                             value: false,
-                            label: Text('添加'),
-                            icon: Icon(Icons.link),
+                            label: Text(S.of(context).add),
+                            icon: const Icon(Icons.link),
                           ),
                         ],
                         selected: {isCreateMode},
@@ -127,11 +128,11 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
                                 // 名称输入
                                 TextField(
                                   controller: nameController,
-                                  decoration: const InputDecoration(
-                                    labelText: '播放列表名称',
-                                    hintText: '请输入名称',
-                                    border: OutlineInputBorder(),
-                                    prefixIcon: Icon(Icons.title),
+                                  decoration: InputDecoration(
+                                    labelText: S.of(context).playlistName,
+                                    hintText: S.of(context).enterPlaylistName,
+                                    border: const OutlineInputBorder(),
+                                    prefixIcon: const Icon(Icons.title),
                                   ),
                                   autofocus: true,
                                   maxLength: 50,
@@ -142,7 +143,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
                                 DropdownButtonFormField<PlaylistPrivacy>(
                                   value: selectedPrivacy,
                                   decoration: InputDecoration(
-                                    labelText: '隐私设置',
+                                    labelText: S.of(context).privacySetting,
                                     border: const OutlineInputBorder(),
                                     prefixIcon: const Icon(Icons.lock_outline),
                                     helperText: selectedPrivacy.description,
@@ -167,11 +168,11 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
                                 // 描述输入
                                 TextField(
                                   controller: descriptionController,
-                                  decoration: const InputDecoration(
-                                    labelText: '描述（可选）',
-                                    hintText: '添加一些描述信息',
-                                    border: OutlineInputBorder(),
-                                    prefixIcon: Icon(Icons.description),
+                                  decoration: InputDecoration(
+                                    labelText: S.of(context).playlistDescription,
+                                    hintText: S.of(context).addDescription,
+                                    border: const OutlineInputBorder(),
+                                    prefixIcon: const Icon(Icons.description),
                                   ),
                                   maxLines: 1,
                                   maxLength: 200,
@@ -182,12 +183,11 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
                                 // 添加链接模式的输入框
                                 TextField(
                                   controller: linkController,
-                                  decoration: const InputDecoration(
-                                    labelText: '播放列表链接',
-                                    hintText:
-                                        '粘贴播放列表链接，如:\nhttps://www.asmr.one/playlist?id=...',
-                                    border: OutlineInputBorder(),
-                                    prefixIcon: Icon(Icons.link),
+                                  decoration: InputDecoration(
+                                    labelText: S.of(context).playlistLink,
+                                    hintText: S.of(context).playlistLinkHint,
+                                    border: const OutlineInputBorder(),
+                                    prefixIcon: const Icon(Icons.link),
                                   ),
                                   autofocus: true,
                                   maxLines: 3,
@@ -205,7 +205,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
                         children: [
                           TextButton(
                             onPressed: () => Navigator.pop(context, false),
-                            child: const Text('取消'),
+                            child: Text(S.of(context).cancel),
                           ),
                           const SizedBox(width: 8),
                           FilledButton(
@@ -213,8 +213,8 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
                               if (isCreateMode) {
                                 if (nameController.text.trim().isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('请输入播放列表名称'),
+                                    SnackBar(
+                                      content: Text(S.of(context).enterPlaylistNameWarning),
                                       behavior: SnackBarBehavior.floating,
                                     ),
                                   );
@@ -223,8 +223,8 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
                               } else {
                                 if (linkController.text.trim().isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('请输入播放列表链接'),
+                                    SnackBar(
+                                      content: Text(S.of(context).enterPlaylistLink),
                                       behavior: SnackBarBehavior.floating,
                                     ),
                                   );
@@ -233,7 +233,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
                               }
                               Navigator.pop(context, true);
                             },
-                            child: Text(isCreateMode ? '创建' : '添加'),
+                            child: Text(isCreateMode ? S.of(context).create : S.of(context).add),
                           ),
                         ],
                       ),
@@ -298,8 +298,8 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
       if (playlistId == null || playlistId.isEmpty) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('无法识别的播放列表链接或ID'),
+          SnackBar(
+            content: Text(S.of(context).unrecognizedPlaylistLink),
             behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.orange,
           ),
@@ -310,19 +310,19 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
       // 显示加载提示
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
-              SizedBox(width: 12),
-              Text('正在添加播放列表...'),
+              const SizedBox(width: 12),
+              Text(S.of(context).addingPlaylist),
             ],
           ),
-          duration: Duration(seconds: 30),
+          duration: const Duration(seconds: 30),
         ),
       );
 
@@ -337,7 +337,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
       // 显示成功提示
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('播放列表添加成功'),
+          content: Text(S.of(context).playlistAddedSuccess),
           behavior: SnackBarBehavior.floating,
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
@@ -352,20 +352,20 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
       // 解析错误信息
-      String errorMessage = '添加失败';
+      String errorMessage = S.of(context).addFailed;
       final errorString = e.toString();
 
       if (errorString.contains('playlist.playlistNotFound') ||
           errorString.contains('404')) {
-        errorMessage = '播放列表不存在或已被删除';
+        errorMessage = S.of(context).playlistNotFound;
       } else if (errorString.contains('401') || errorString.contains('403')) {
-        errorMessage = '没有权限访问此播放列表';
+        errorMessage = S.of(context).noPermissionToAccessPlaylist;
       } else if (errorString.contains('Network') ||
           errorString.contains('connect')) {
-        errorMessage = '网络连接失败，请检查网络';
+        errorMessage = S.of(context).networkConnectionFailed;
       } else {
-        errorMessage =
-            '添加失败: ${errorString.length > 50 ? errorString.substring(0, 50) + "..." : errorString}';
+        errorMessage = S.of(context).addFailedWithError(
+            errorString.length > 50 ? '${errorString.substring(0, 50)}...' : errorString);
       }
 
       // 显示错误提示
@@ -390,19 +390,19 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
       // 显示加载提示
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
-              SizedBox(width: 12),
-              Text('正在创建播放列表...'),
+              const SizedBox(width: 12),
+              Text(S.of(context).creatingPlaylist),
             ],
           ),
-          duration: Duration(seconds: 30),
+          duration: const Duration(seconds: 30),
         ),
       );
 
@@ -421,7 +421,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
       // 显示成功提示
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('播放列表 "$name" 创建成功'),
+          content: Text(S.of(context).playlistCreatedSuccess(name)),
           behavior: SnackBarBehavior.floating,
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
@@ -438,7 +438,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
       // 显示错误提示
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('创建失败: $e'),
+          content: Text(S.of(context).createFailedWithError(e.toString())),
           behavior: SnackBarBehavior.floating,
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
@@ -465,7 +465,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              '加载失败',
+              S.of(context).loadFailed,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
@@ -480,7 +480,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
             ElevatedButton.icon(
               onPressed: () => ref.read(playlistsProvider.notifier).refresh(),
               icon: const Icon(Icons.refresh),
-              label: const Text('重试'),
+              label: Text(S.of(context).retry),
             ),
           ],
         ),
@@ -499,7 +499,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
       return Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: _showCreatePlaylistDialog,
-          tooltip: '创建播放列表',
+          tooltip: S.of(context).createPlaylist,
           child: const Icon(Icons.add),
         ),
         body: Center(
@@ -513,12 +513,12 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
               ),
               const SizedBox(height: 16),
               Text(
-                '暂无播放列表',
+                S.of(context).noPlaylists,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
               Text(
-                '您还没有创建或收藏任何播放列表',
+                S.of(context).noPlaylistsDescription,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -533,7 +533,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: _showCreatePlaylistDialog,
-        tooltip: '创建播放列表',
+        tooltip: S.of(context).createPlaylist,
         child: const Icon(Icons.add),
       ),
       body: RefreshIndicator(
@@ -564,7 +564,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  '我的播放列表',
+                  S.of(context).myPlaylists,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
@@ -572,7 +572,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
                 ),
                 const Spacer(),
                 Text(
-                  '共 ${state.totalCount} 个',
+                  S.of(context).totalNItems(state.totalCount),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),

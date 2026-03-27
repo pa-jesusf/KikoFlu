@@ -1457,4 +1457,485 @@ class SRu extends S {
 
   @override
   String get hasNewVersion => 'Новая версия';
+
+  @override
+  String get themeMode => 'Режим темы';
+
+  @override
+  String get colorTheme => 'Цветовая тема';
+
+  @override
+  String get themePreview => 'Предпросмотр темы';
+
+  @override
+  String get themeModeSystemDesc => 'Автоматическая адаптация к системной теме';
+
+  @override
+  String get themeModeLightDesc => 'Всегда использовать светлую тему';
+
+  @override
+  String get themeModeDarkDesc => 'Всегда использовать тёмную тему';
+
+  @override
+  String get colorSchemeOceanBlueDesc => 'Синий, синий, синий!';
+
+  @override
+  String get colorSchemeSakuraPinkDesc => '( ゜- ゜)つロ Ура~';
+
+  @override
+  String get colorSchemeSunsetOrangeDesc => 'Смена тем — обязательно ✍🏻✍🏻✍🏻';
+
+  @override
+  String get colorSchemeLavenderPurpleDesc => 'Братан, братан...';
+
+  @override
+  String get colorSchemeForestGreenDesc => 'Зелень, зелень, зелень';
+
+  @override
+  String get colorSchemeDynamicDesc =>
+      'Использовать цвета обоев системы (Android 12+)';
+
+  @override
+  String get primaryContainer => 'Основной контейнер';
+
+  @override
+  String get secondaryContainer => 'Вторичный контейнер';
+
+  @override
+  String get tertiaryContainer => 'Третичный контейнер';
+
+  @override
+  String get surfaceColor => 'Поверхность';
+
+  @override
+  String get playerButtonSettingsSubtitle =>
+      'Настроить порядок кнопок управления плеером';
+
+  @override
+  String get playerLyricStyleSubtitle =>
+      'Настроить стиль субтитров мини- и полноэкранного плеера';
+
+  @override
+  String get workDetailDisplaySubtitle =>
+      'Управление информацией на странице деталей';
+
+  @override
+  String get workCardDisplaySubtitle =>
+      'Управление информацией на карточках работ';
+
+  @override
+  String get myTabsDisplaySubtitle =>
+      'Управление отображением вкладок на странице «Моё»';
+
+  @override
+  String get pageSizeSettings => 'Элементов на странице';
+
+  @override
+  String pageSizeCurrent(int size) {
+    return 'Текущее: $size элементов/стр.';
+  }
+
+  @override
+  String currentSettingLabel(String value) {
+    return 'Текущее: $value';
+  }
+
+  @override
+  String setToValue(String value) {
+    return 'Установлено: $value';
+  }
+
+  @override
+  String get llmConfigRequiredMessage =>
+      'Для перевода LLM требуется API Key. Сначала настройте его в параметрах.';
+
+  @override
+  String get autoSwitchedToLlm => 'Автопереключение: перевод LLM';
+
+  @override
+  String get translationDescGoogle => 'Требуется доступ к сервисам Google';
+
+  @override
+  String get translationDescYoudao => 'Работает с сетью по умолчанию';
+
+  @override
+  String get translationDescMicrosoft => 'Работает с сетью по умолчанию';
+
+  @override
+  String get translationDescLlm =>
+      'OpenAI-совместимый API, требуется ручная настройка API Key';
+
+  @override
+  String get audioPassthroughDescAndroid =>
+      'Разрешить вывод необработанного битового потока (AC3/DTS) на внешний декодер. Может занять эксклюзивный доступ к аудио.';
+
+  @override
+  String get permissionExplanation => 'Описание разрешений';
+
+  @override
+  String get backgroundRunningPermission => 'Разрешение на фоновую работу';
+
+  @override
+  String get notificationPermissionDesc =>
+      'Для отображения уведомлений о воспроизведении, позволяющих управлять с экрана блокировки и панели уведомлений.';
+
+  @override
+  String get backgroundRunningPermissionDesc =>
+      'Исключает приложение из оптимизации батареи для непрерывного воспроизведения в фоне.';
+
+  @override
+  String get notificationGrantedStatus =>
+      'Разрешено — можно отображать уведомления и элементы управления';
+
+  @override
+  String get notificationDeniedStatus => 'Не разрешено — нажмите для запроса';
+
+  @override
+  String get backgroundGrantedStatus =>
+      'Разрешено — приложение может работать в фоне';
+
+  @override
+  String get backgroundDeniedStatus => 'Не разрешено — нажмите для запроса';
+
+  @override
+  String get notificationPermissionGranted =>
+      'Разрешение на уведомления получено';
+
+  @override
+  String get notificationPermissionDenied =>
+      'Разрешение на уведомления отклонено';
+
+  @override
+  String requestNotificationFailed(String error) {
+    return 'Ошибка запроса разрешения на уведомления: $error';
+  }
+
+  @override
+  String get backgroundPermissionGranted =>
+      'Разрешение на фоновую работу получено';
+
+  @override
+  String get backgroundPermissionDenied =>
+      'Разрешение на фоновую работу отклонено';
+
+  @override
+  String requestBackgroundFailed(String error) {
+    return 'Ошибка запроса разрешения на фоновую работу: $error';
+  }
+
+  @override
+  String permissionRequired(String permission) {
+    return 'Требуется $permission';
+  }
+
+  @override
+  String permissionPermanentlyDenied(String permission) {
+    return '$permission отклонено навсегда. Включите вручную в настройках системы.';
+  }
+
+  @override
+  String get openSettings => 'Открыть настройки';
+
+  @override
+  String get permissionsAndroidOnly =>
+      'Управление разрешениями доступно только на Android';
+
+  @override
+  String get permissionsNotNeeded =>
+      'На других платформах ручное управление разрешениями не требуется';
+
+  @override
+  String get refreshPermissionStatus => 'Обновить статус разрешений';
+
+  @override
+  String deleteFileConfirm(String fileName) {
+    return 'Удалить \"$fileName\"?';
+  }
+
+  @override
+  String deleteSelectedFilesConfirm(int count) {
+    return 'Удалить $count выбранных файлов?';
+  }
+
+  @override
+  String get deleted => 'Удалено';
+
+  @override
+  String cannotOpenFolder(String path) {
+    return 'Не удалось открыть папку: $path';
+  }
+
+  @override
+  String openFolderFailed(String error) {
+    return 'Ошибка открытия папки: $error';
+  }
+
+  @override
+  String get reloadingFromDisk => 'Перезагрузка с диска...';
+
+  @override
+  String get refreshComplete => 'Обновление завершено';
+
+  @override
+  String refreshFailed(String error) {
+    return 'Ошибка обновления: $error';
+  }
+
+  @override
+  String deleteSelectedWorksConfirm(int count) {
+    return 'Удалить $count выбранных работ?';
+  }
+
+  @override
+  String partialDeleteFailed(String error) {
+    return 'Частичная ошибка удаления: $error';
+  }
+
+  @override
+  String deletedNOfTotal(int success, int total) {
+    return 'Удалено $success/$total задач';
+  }
+
+  @override
+  String deleteFailedWithError(String error) {
+    return 'Ошибка удаления: $error';
+  }
+
+  @override
+  String get noWorkMetadataForOffline =>
+      'У этой загрузки нет сохранённых данных о работе для просмотра офлайн';
+
+  @override
+  String openWorkDetailFailed(String error) {
+    return 'Ошибка открытия деталей работы: $error';
+  }
+
+  @override
+  String get noLocalDownloads => 'Нет локальных загрузок';
+
+  @override
+  String get exitSelection => 'Выйти из выбора';
+
+  @override
+  String get reload => 'Перезагрузить';
+
+  @override
+  String get openFolder => 'Открыть папку';
+
+  @override
+  String get playlistLink => 'Ссылка на плейлист';
+
+  @override
+  String get playlistLinkHint =>
+      'Вставьте ссылку на плейлист, например:\nhttps://www.asmr.one/playlist?id=...';
+
+  @override
+  String get unrecognizedPlaylistLink =>
+      'Нераспознанная ссылка или ID плейлиста';
+
+  @override
+  String get addingPlaylist => 'Добавление плейлиста...';
+
+  @override
+  String get playlistAddedSuccess => 'Плейлист успешно добавлен';
+
+  @override
+  String get addFailed => 'Ошибка добавления';
+
+  @override
+  String get playlistNotFound => 'Плейлист не существует или был удалён';
+
+  @override
+  String get noPermissionToAccessPlaylist =>
+      'Нет прав доступа к этому плейлисту';
+
+  @override
+  String get networkConnectionFailed =>
+      'Ошибка сетевого подключения, проверьте сеть';
+
+  @override
+  String addFailedWithError(String error) {
+    return 'Ошибка добавления: $error';
+  }
+
+  @override
+  String get creatingPlaylist => 'Создание плейлиста...';
+
+  @override
+  String playlistCreatedSuccess(String name) {
+    return 'Плейлист \"$name\" создан';
+  }
+
+  @override
+  String createFailedWithError(String error) {
+    return 'Ошибка создания: $error';
+  }
+
+  @override
+  String get noPlaylists => 'Нет плейлистов';
+
+  @override
+  String get noPlaylistsDescription =>
+      'Вы ещё не создали и не добавили в избранное ни одного плейлиста';
+
+  @override
+  String get myPlaylists => 'Мои плейлисты';
+
+  @override
+  String totalNItems(int count) {
+    return 'Всего $count';
+  }
+
+  @override
+  String get systemPlaylistCannotDelete => 'Системные плейлисты нельзя удалить';
+
+  @override
+  String get deletePlaylist => 'Удалить плейлист';
+
+  @override
+  String get unfavoritePlaylist => 'Убрать из избранного';
+
+  @override
+  String get deletePlaylistConfirm =>
+      'Удаление необратимо. Пользователи, добавившие этот плейлист в избранное, потеряют к нему доступ. Продолжить?';
+
+  @override
+  String unfavoritePlaylistConfirm(String name) {
+    return 'Убрать \"$name\" из избранного?';
+  }
+
+  @override
+  String get unfavorite => 'Убрать из избранного';
+
+  @override
+  String get deleting => 'Удаление...';
+
+  @override
+  String get deleteSuccess => 'Успешно удалено';
+
+  @override
+  String get onlyOwnerCanEdit => 'Редактировать может только автор плейлиста';
+
+  @override
+  String get editPlaylist => 'Редактировать плейлист';
+
+  @override
+  String get playlistNameRequired => 'Название плейлиста не может быть пустым';
+
+  @override
+  String get privacyDescPrivate => 'Только вы можете просматривать';
+
+  @override
+  String get privacyDescUnlisted =>
+      'Только люди со ссылкой могут просматривать';
+
+  @override
+  String get privacyDescPublic => 'Любой может просматривать';
+
+  @override
+  String get addWorks => 'Добавить работы';
+
+  @override
+  String get addWorksInputHint =>
+      'Введите текст с номерами работ, RJ-номера определяются автоматически';
+
+  @override
+  String get workId => 'Номер работы';
+
+  @override
+  String get workIdHint => 'Например: RJ123456\nrj233333';
+
+  @override
+  String detectedNWorkIds(int count) {
+    return 'Обнаружено $count номеров работ';
+  }
+
+  @override
+  String addNWorks(int count) {
+    return 'Добавить $count';
+  }
+
+  @override
+  String get noValidWorkIds =>
+      'Не найдено действительных номеров работ (начинающихся с RJ)';
+
+  @override
+  String addingNWorks(int count) {
+    return 'Добавление $count работ...';
+  }
+
+  @override
+  String addedNWorksSuccess(int count) {
+    return 'Успешно добавлено $count работ';
+  }
+
+  @override
+  String get removeWork => 'Удалить работу';
+
+  @override
+  String removeWorkConfirm(String title) {
+    return 'Удалить «$title» из плейлиста?';
+  }
+
+  @override
+  String get removeSuccess => 'Успешно удалено';
+
+  @override
+  String removeFailedWithError(String error) {
+    return 'Ошибка удаления: $error';
+  }
+
+  @override
+  String get saving => 'Сохранение...';
+
+  @override
+  String get saveSuccess => 'Сохранено';
+
+  @override
+  String saveFailedWithError(String error) {
+    return 'Ошибка сохранения: $error';
+  }
+
+  @override
+  String get noWorks => 'Нет работ';
+
+  @override
+  String get playlistNoWorksDescription =>
+      'В этот плейлист ещё не добавлено ни одной работы';
+
+  @override
+  String get lastUpdated => 'Последнее обновление';
+
+  @override
+  String get createdTime => 'Дата создания';
+
+  @override
+  String nWorksCount(int count) {
+    return '$count работ';
+  }
+
+  @override
+  String nPlaysCount(int count) {
+    return '$count воспроизведений';
+  }
+
+  @override
+  String get removeFromPlaylist => 'Удалить из плейлиста';
+
+  @override
+  String get checkNetworkOrRetry =>
+      'Проверьте сетевое подключение или повторите попытку позже';
+
+  @override
+  String get reachedEnd => 'Вы добрались до конца~';
+
+  @override
+  String excludedNWorks(int count) {
+    return 'Исключено $count работ';
+  }
+
+  @override
+  String pageExcludedNWorks(int count) {
+    return 'На этой странице исключено $count работ';
+  }
 }

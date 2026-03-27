@@ -2801,6 +2801,774 @@ abstract class S {
   /// In en, this message translates to:
   /// **'New version'**
   String get hasNewVersion;
+
+  /// No description provided for @themeMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme Mode'**
+  String get themeMode;
+
+  /// No description provided for @colorTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Color Theme'**
+  String get colorTheme;
+
+  /// No description provided for @themePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme Preview'**
+  String get themePreview;
+
+  /// No description provided for @themeModeSystemDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically adapt to system dark/light mode'**
+  String get themeModeSystemDesc;
+
+  /// No description provided for @themeModeLightDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Always use light theme'**
+  String get themeModeLightDesc;
+
+  /// No description provided for @themeModeDarkDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Always use dark theme'**
+  String get themeModeDarkDesc;
+
+  /// No description provided for @colorSchemeOceanBlueDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue, blue, blue!'**
+  String get colorSchemeOceanBlueDesc;
+
+  /// No description provided for @colorSchemeSakuraPinkDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'( ゜- ゜)つロ Cheers~'**
+  String get colorSchemeSakuraPinkDesc;
+
+  /// No description provided for @colorSchemeSunsetOrangeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Themes are a must ✍🏻✍🏻✍🏻'**
+  String get colorSchemeSunsetOrangeDesc;
+
+  /// No description provided for @colorSchemeLavenderPurpleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Bro, bro...'**
+  String get colorSchemeLavenderPurpleDesc;
+
+  /// No description provided for @colorSchemeForestGreenDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Green, green, green'**
+  String get colorSchemeForestGreenDesc;
+
+  /// No description provided for @colorSchemeDynamicDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Use wallpaper colors from system (Android 12+)'**
+  String get colorSchemeDynamicDesc;
+
+  /// No description provided for @primaryContainer.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary Container'**
+  String get primaryContainer;
+
+  /// No description provided for @secondaryContainer.
+  ///
+  /// In en, this message translates to:
+  /// **'Secondary Container'**
+  String get secondaryContainer;
+
+  /// No description provided for @tertiaryContainer.
+  ///
+  /// In en, this message translates to:
+  /// **'Tertiary Container'**
+  String get tertiaryContainer;
+
+  /// No description provided for @surfaceColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Surface'**
+  String get surfaceColor;
+
+  /// No description provided for @playerButtonSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize player control button order'**
+  String get playerButtonSettingsSubtitle;
+
+  /// No description provided for @playerLyricStyleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize subtitle style for mini and fullscreen player'**
+  String get playerLyricStyleSubtitle;
+
+  /// No description provided for @workDetailDisplaySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Control info items on work detail page'**
+  String get workDetailDisplaySubtitle;
+
+  /// No description provided for @workCardDisplaySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Control info items on work cards'**
+  String get workCardDisplaySubtitle;
+
+  /// No description provided for @myTabsDisplaySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Control tab display in My page'**
+  String get myTabsDisplaySubtitle;
+
+  /// No description provided for @pageSizeSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Items Per Page'**
+  String get pageSizeSettings;
+
+  /// No description provided for @pageSizeCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current: {size} items/page'**
+  String pageSizeCurrent(int size);
+
+  /// No description provided for @currentSettingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current: {value}'**
+  String currentSettingLabel(String value);
+
+  /// No description provided for @setToValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Set to: {value}'**
+  String setToValue(String value);
+
+  /// No description provided for @llmConfigRequiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'LLM translation requires an API Key. Please configure it in settings first.'**
+  String get llmConfigRequiredMessage;
+
+  /// No description provided for @autoSwitchedToLlm.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-switched to: LLM Translation'**
+  String get autoSwitchedToLlm;
+
+  /// No description provided for @translationDescGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires network access to Google services'**
+  String get translationDescGoogle;
+
+  /// No description provided for @translationDescYoudao.
+  ///
+  /// In en, this message translates to:
+  /// **'Works with default network'**
+  String get translationDescYoudao;
+
+  /// No description provided for @translationDescMicrosoft.
+  ///
+  /// In en, this message translates to:
+  /// **'Works with default network'**
+  String get translationDescMicrosoft;
+
+  /// No description provided for @translationDescLlm.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI-compatible API, requires manual API Key configuration'**
+  String get translationDescLlm;
+
+  /// No description provided for @audioPassthroughDescAndroid.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow raw bitstream output (AC3/DTS) to external decoder. May take exclusive audio control.'**
+  String get audioPassthroughDescAndroid;
+
+  /// No description provided for @permissionExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission Explanation'**
+  String get permissionExplanation;
+
+  /// No description provided for @backgroundRunningPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Background Running Permission'**
+  String get backgroundRunningPermission;
+
+  /// No description provided for @notificationPermissionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Used for showing media playback notification, allowing control from lock screen and notification bar.'**
+  String get notificationPermissionDesc;
+
+  /// No description provided for @backgroundRunningPermissionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Exempts app from battery optimization to ensure audio continues playing in background.'**
+  String get backgroundRunningPermissionDesc;
+
+  /// No description provided for @notificationGrantedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Granted - Can show playback notification and controls'**
+  String get notificationGrantedStatus;
+
+  /// No description provided for @notificationDeniedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Not granted - Tap to request permission'**
+  String get notificationDeniedStatus;
+
+  /// No description provided for @backgroundGrantedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Granted - App can run continuously in background'**
+  String get backgroundGrantedStatus;
+
+  /// No description provided for @backgroundDeniedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Not granted - Tap to request permission'**
+  String get backgroundDeniedStatus;
+
+  /// No description provided for @notificationPermissionGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission granted'**
+  String get notificationPermissionGranted;
+
+  /// No description provided for @notificationPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission denied'**
+  String get notificationPermissionDenied;
+
+  /// No description provided for @requestNotificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to request notification permission: {error}'**
+  String requestNotificationFailed(String error);
+
+  /// No description provided for @backgroundPermissionGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'Background running permission granted'**
+  String get backgroundPermissionGranted;
+
+  /// No description provided for @backgroundPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Background running permission denied'**
+  String get backgroundPermissionDenied;
+
+  /// No description provided for @requestBackgroundFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to request background permission: {error}'**
+  String requestBackgroundFailed(String error);
+
+  /// No description provided for @permissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'{permission} Required'**
+  String permissionRequired(String permission);
+
+  /// No description provided for @permissionPermanentlyDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'{permission} has been permanently denied. Please enable it manually in system settings.'**
+  String permissionPermanentlyDenied(String permission);
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
+  /// No description provided for @permissionsAndroidOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission management is only available on Android'**
+  String get permissionsAndroidOnly;
+
+  /// No description provided for @permissionsNotNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Other platforms do not require manual permission management'**
+  String get permissionsNotNeeded;
+
+  /// No description provided for @refreshPermissionStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh permission status'**
+  String get refreshPermissionStatus;
+
+  /// No description provided for @deleteFileConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{fileName}\"?'**
+  String deleteFileConfirm(String fileName);
+
+  /// No description provided for @deleteSelectedFilesConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete {count} selected files?'**
+  String deleteSelectedFilesConfirm(int count);
+
+  /// No description provided for @deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get deleted;
+
+  /// No description provided for @cannotOpenFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot open folder: {path}'**
+  String cannotOpenFolder(String path);
+
+  /// No description provided for @openFolderFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to open folder: {error}'**
+  String openFolderFailed(String error);
+
+  /// No description provided for @reloadingFromDisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Reloading from disk...'**
+  String get reloadingFromDisk;
+
+  /// No description provided for @refreshComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh complete'**
+  String get refreshComplete;
+
+  /// No description provided for @refreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh failed: {error}'**
+  String refreshFailed(String error);
+
+  /// No description provided for @deleteSelectedWorksConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete {count} selected works?'**
+  String deleteSelectedWorksConfirm(int count);
+
+  /// No description provided for @partialDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial deletion failed: {error}'**
+  String partialDeleteFailed(String error);
+
+  /// No description provided for @deletedNOfTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted {success}/{total} tasks'**
+  String deletedNOfTotal(int success, int total);
+
+  /// No description provided for @deleteFailedWithError.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion failed: {error}'**
+  String deleteFailedWithError(String error);
+
+  /// No description provided for @noWorkMetadataForOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'This download has no saved work details and cannot be viewed offline'**
+  String get noWorkMetadataForOffline;
+
+  /// No description provided for @openWorkDetailFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to open work detail: {error}'**
+  String openWorkDetailFailed(String error);
+
+  /// No description provided for @noLocalDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'No local downloads'**
+  String get noLocalDownloads;
+
+  /// No description provided for @exitSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit selection'**
+  String get exitSelection;
+
+  /// No description provided for @reload.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get reload;
+
+  /// No description provided for @openFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Folder'**
+  String get openFolder;
+
+  /// No description provided for @playlistLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist Link'**
+  String get playlistLink;
+
+  /// No description provided for @playlistLinkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste playlist link, e.g.:\nhttps://www.asmr.one/playlist?id=...'**
+  String get playlistLinkHint;
+
+  /// No description provided for @unrecognizedPlaylistLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Unrecognized playlist link or ID'**
+  String get unrecognizedPlaylistLink;
+
+  /// No description provided for @addingPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding playlist...'**
+  String get addingPlaylist;
+
+  /// No description provided for @playlistAddedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist added successfully'**
+  String get playlistAddedSuccess;
+
+  /// No description provided for @addFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Add failed'**
+  String get addFailed;
+
+  /// No description provided for @playlistNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist does not exist or has been deleted'**
+  String get playlistNotFound;
+
+  /// No description provided for @noPermissionToAccessPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'No permission to access this playlist'**
+  String get noPermissionToAccessPlaylist;
+
+  /// No description provided for @networkConnectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Network connection failed, please check network'**
+  String get networkConnectionFailed;
+
+  /// No description provided for @addFailedWithError.
+  ///
+  /// In en, this message translates to:
+  /// **'Add failed: {error}'**
+  String addFailedWithError(String error);
+
+  /// No description provided for @creatingPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating playlist...'**
+  String get creatingPlaylist;
+
+  /// No description provided for @playlistCreatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist \"{name}\" created successfully'**
+  String playlistCreatedSuccess(String name);
+
+  /// No description provided for @createFailedWithError.
+  ///
+  /// In en, this message translates to:
+  /// **'Creation failed: {error}'**
+  String createFailedWithError(String error);
+
+  /// No description provided for @noPlaylists.
+  ///
+  /// In en, this message translates to:
+  /// **'No playlists'**
+  String get noPlaylists;
+
+  /// No description provided for @noPlaylistsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t created or favorited any playlists yet'**
+  String get noPlaylistsDescription;
+
+  /// No description provided for @myPlaylists.
+  ///
+  /// In en, this message translates to:
+  /// **'My Playlists'**
+  String get myPlaylists;
+
+  /// No description provided for @totalNItems.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} total'**
+  String totalNItems(int count);
+
+  /// No description provided for @systemPlaylistCannotDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'System playlists cannot be deleted'**
+  String get systemPlaylistCannotDelete;
+
+  /// No description provided for @deletePlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Playlist'**
+  String get deletePlaylist;
+
+  /// No description provided for @unfavoritePlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfavorite Playlist'**
+  String get unfavoritePlaylist;
+
+  /// No description provided for @deletePlaylistConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion is irreversible. Users who favorited this playlist will lose access. Are you sure?'**
+  String get deletePlaylistConfirm;
+
+  /// No description provided for @unfavoritePlaylistConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to unfavorite \"{name}\"?'**
+  String unfavoritePlaylistConfirm(String name);
+
+  /// No description provided for @unfavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfavorite'**
+  String get unfavorite;
+
+  /// No description provided for @deleting.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting...'**
+  String get deleting;
+
+  /// No description provided for @deleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted successfully'**
+  String get deleteSuccess;
+
+  /// No description provided for @onlyOwnerCanEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the playlist owner can edit'**
+  String get onlyOwnerCanEdit;
+
+  /// No description provided for @editPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Playlist'**
+  String get editPlaylist;
+
+  /// No description provided for @playlistNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist name cannot be empty'**
+  String get playlistNameRequired;
+
+  /// No description provided for @privacyDescPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Only you can view'**
+  String get privacyDescPrivate;
+
+  /// No description provided for @privacyDescUnlisted.
+  ///
+  /// In en, this message translates to:
+  /// **'Only people with the link can view'**
+  String get privacyDescUnlisted;
+
+  /// No description provided for @privacyDescPublic.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone can view'**
+  String get privacyDescPublic;
+
+  /// No description provided for @addWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Works'**
+  String get addWorks;
+
+  /// No description provided for @addWorksInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter text containing work IDs, RJ numbers will be auto-detected'**
+  String get addWorksInputHint;
+
+  /// No description provided for @workId.
+  ///
+  /// In en, this message translates to:
+  /// **'Work ID'**
+  String get workId;
+
+  /// No description provided for @workIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g.: RJ123456\nrj233333'**
+  String get workIdHint;
+
+  /// No description provided for @detectedNWorkIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected {count} work IDs'**
+  String detectedNWorkIds(int count);
+
+  /// No description provided for @addNWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {count}'**
+  String addNWorks(int count);
+
+  /// No description provided for @noValidWorkIds.
+  ///
+  /// In en, this message translates to:
+  /// **'No valid work IDs found (starting with RJ)'**
+  String get noValidWorkIds;
+
+  /// No description provided for @addingNWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding {count} works...'**
+  String addingNWorks(int count);
+
+  /// No description provided for @addedNWorksSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully added {count} works'**
+  String addedNWorksSuccess(int count);
+
+  /// No description provided for @removeWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Work'**
+  String get removeWork;
+
+  /// No description provided for @removeWorkConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove \"{title}\" from the playlist?'**
+  String removeWorkConfirm(String title);
+
+  /// No description provided for @removeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed successfully'**
+  String get removeSuccess;
+
+  /// No description provided for @removeFailedWithError.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove failed: {error}'**
+  String removeFailedWithError(String error);
+
+  /// No description provided for @saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get saving;
+
+  /// No description provided for @saveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved successfully'**
+  String get saveSuccess;
+
+  /// No description provided for @saveFailedWithError.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed: {error}'**
+  String saveFailedWithError(String error);
+
+  /// No description provided for @noWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'No works'**
+  String get noWorks;
+
+  /// No description provided for @playlistNoWorksDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No works have been added to this playlist yet'**
+  String get playlistNoWorksDescription;
+
+  /// No description provided for @lastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated'**
+  String get lastUpdated;
+
+  /// No description provided for @createdTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get createdTime;
+
+  /// No description provided for @nWorksCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} works'**
+  String nWorksCount(int count);
+
+  /// No description provided for @nPlaysCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} plays'**
+  String nPlaysCount(int count);
+
+  /// No description provided for @removeFromPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from playlist'**
+  String get removeFromPlaylist;
+
+  /// No description provided for @checkNetworkOrRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your network connection or try again later'**
+  String get checkNetworkOrRetry;
+
+  /// No description provided for @reachedEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the end~'**
+  String get reachedEnd;
+
+  /// No description provided for @excludedNWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'Excluded {count} works'**
+  String excludedNWorks(int count);
+
+  /// No description provided for @pageExcludedNWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'This page excluded {count} works'**
+  String pageExcludedNWorks(int count);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

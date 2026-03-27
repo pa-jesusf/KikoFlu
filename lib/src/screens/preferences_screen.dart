@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/app_localizations.dart';
 import 'audio_format_settings_screen.dart';
 import 'blocked_items_screen.dart';
 import 'llm_settings_screen.dart';
 import '../models/sort_options.dart';
 import '../providers/settings_provider.dart';
+import '../utils/l10n_extensions.dart';
 import '../utils/snackbar_util.dart';
 import '../widgets/scrollable_appbar.dart';
 import '../widgets/sort_dialog.dart';
@@ -20,26 +22,26 @@ class PreferencesScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text(
-          '字幕库优先级',
-          style: TextStyle(fontSize: 18),
+        title: Text(
+          S.of(context).subtitleLibraryPriority,
+          style: const TextStyle(fontSize: 18),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '选择字幕库在自动加载中的优先级：',
-              style: TextStyle(fontSize: 14),
+            Text(
+              S.of(context).selectSubtitlePriority,
+              style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 16),
             ...SubtitleLibraryPriority.values.map((priority) {
               return RadioListTile<SubtitleLibraryPriority>(
-                title: Text(priority.displayName),
+                title: Text(priority.localizedName(context)),
                 subtitle: Text(
                   priority == SubtitleLibraryPriority.highest
-                      ? '优先查找字幕库，再查找在线/下载'
-                      : '优先查找在线/下载，再查找字幕库',
+                      ? S.of(context).subtitlePriorityHighestDesc
+                      : S.of(context).subtitlePriorityLowestDesc,
                   style: TextStyle(
                     fontSize: 12,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -55,7 +57,7 @@ class PreferencesScreen extends ConsumerWidget {
                     Navigator.pop(context);
                     SnackBarUtil.showSuccess(
                       context,
-                      '已设置为: ${value.displayName}',
+                      S.of(context).setToValue(value.localizedName(context)),
                     );
                   }
                 },
@@ -66,7 +68,7 @@ class PreferencesScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('关闭'),
+            child: Text(S.of(context).close),
           ),
         ],
       ),
@@ -79,7 +81,7 @@ class PreferencesScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => CommonSortDialog(
-        title: '默认排序设置',
+        title: S.of(context).defaultSortSettings,
         currentOption: currentSort.order,
         currentDirection: currentSort.direction,
         availableOptions: SortOrder.values
@@ -91,7 +93,7 @@ class PreferencesScreen extends ConsumerWidget {
               .updateDefaultSort(option, direction);
           SnackBarUtil.showSuccess(
             context,
-            '默认排序已更新',
+            S.of(context).defaultSortUpdated,
           );
         },
         autoClose: false,
@@ -105,24 +107,24 @@ class PreferencesScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text(
-          '翻译源设置',
-          style: TextStyle(fontSize: 18),
+        title: Text(
+          S.of(context).translationSourceSettings,
+          style: const TextStyle(fontSize: 18),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '选择翻译服务提供商：',
-              style: TextStyle(fontSize: 14),
+            Text(
+              S.of(context).selectTranslationProvider,
+              style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 16),
             ...TranslationSource.values.map((source) {
               return RadioListTile<TranslationSource>(
-                title: Text(source.displayName),
+                title: Text(source.localizedName(context)),
                 subtitle: Text(
-                  _getTranslationSourceDescription(source),
+                  _getTranslationSourceDescription(context, source),
                   style: TextStyle(
                     fontSize: 12,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -138,13 +140,13 @@ class PreferencesScreen extends ConsumerWidget {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('需要配置'),
+                            title: Text(S.of(context).needsConfiguration),
                             content:
-                                const Text('使用LLM翻译需要配置 API Key。请先前往设置进行配置。'),
+                                Text(S.of(context).llmConfigRequiredMessage),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
-                                child: const Text('取消'),
+                                child: Text(S.of(context).cancel),
                               ),
                               TextButton(
                                 onPressed: () async {
@@ -169,12 +171,12 @@ class PreferencesScreen extends ConsumerWidget {
                                     if (context.mounted) {
                                       SnackBarUtil.showSuccess(
                                         context,
-                                        '已自动切换至: 大模型翻译',
+                                        S.of(context).autoSwitchedToLlm,
                                       );
                                     }
                                   }
                                 },
-                                child: const Text('去配置'),
+                                child: Text(S.of(context).goToConfigure),
                               ),
                             ],
                           ),
@@ -189,7 +191,7 @@ class PreferencesScreen extends ConsumerWidget {
                     Navigator.pop(context);
                     SnackBarUtil.showSuccess(
                       context,
-                      '已设置为: ${value.displayName}',
+                      S.of(context).setToValue(value.localizedName(context)),
                     );
                   }
                 },
@@ -200,23 +202,24 @@ class PreferencesScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('关闭'),
+            child: Text(S.of(context).close),
           ),
         ],
       ),
     );
   }
 
-  String _getTranslationSourceDescription(TranslationSource source) {
+  String _getTranslationSourceDescription(BuildContext context, TranslationSource source) {
+    final s = S.of(context);
     switch (source) {
       case TranslationSource.google:
-        return '需要网络环境支持';
+        return s.translationDescGoogle;
       case TranslationSource.youdao:
-        return '支持默认网络环境';
+        return s.translationDescYoudao;
       case TranslationSource.microsoft:
-        return '支持默认网络环境';
+        return s.translationDescMicrosoft;
       case TranslationSource.llm:
-        return 'OpenAI 兼容接口, 需要手动配置API Key';
+        return s.translationDescLlm;
     }
   }
 
@@ -227,8 +230,8 @@ class PreferencesScreen extends ConsumerWidget {
     final translationSource = ref.watch(translationSourceProvider);
 
     return Scaffold(
-      appBar: const ScrollableAppBar(
-        title: Text('偏好设置', style: TextStyle(fontSize: 18)),
+      appBar: ScrollableAppBar(
+        title: Text(S.of(context).preferenceSettings, style: const TextStyle(fontSize: 18)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -239,8 +242,8 @@ class PreferencesScreen extends ConsumerWidget {
                 ListTile(
                   leading: Icon(Icons.library_books,
                       color: Theme.of(context).colorScheme.primary),
-                  title: const Text('字幕库优先级'),
-                  subtitle: Text('当前: ${priority.displayName}'),
+                  title: Text(S.of(context).subtitleLibraryPriority),
+                  subtitle: Text(S.of(context).currentSettingLabel(priority.localizedName(context))),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     _showSubtitleLibraryPriorityDialog(context, ref);
@@ -250,9 +253,9 @@ class PreferencesScreen extends ConsumerWidget {
                 ListTile(
                   leading: Icon(Icons.sort,
                       color: Theme.of(context).colorScheme.primary),
-                  title: const Text('首页默认排序方式'),
+                  title: Text(S.of(context).defaultSortSettingTitle),
                   subtitle: Text(
-                      '${defaultSort.order.label} - ${defaultSort.direction.label}'),
+                      '${defaultSort.order.localizedLabel(context)} - ${defaultSort.direction.localizedLabel(context)}'),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     _showDefaultSortDialog(context, ref);
@@ -262,8 +265,8 @@ class PreferencesScreen extends ConsumerWidget {
                 ListTile(
                   leading: Icon(Icons.translate,
                       color: Theme.of(context).colorScheme.primary),
-                  title: const Text('翻译源'),
-                  subtitle: Text('当前: ${translationSource.displayName}'),
+                  title: Text(S.of(context).translationSource),
+                  subtitle: Text(S.of(context).currentSettingLabel(translationSource.localizedName(context))),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     _showTranslationSourceDialog(context, ref);
@@ -274,8 +277,8 @@ class PreferencesScreen extends ConsumerWidget {
                   ListTile(
                     leading: Icon(Icons.settings_input_component,
                         color: Theme.of(context).colorScheme.primary),
-                    title: const Text('LLM设置'),
-                    subtitle: const Text('配置 API 地址、Key 和模型'),
+                    title: Text(S.of(context).llmSettings),
+                    subtitle: Text(S.of(context).llmSettingsSubtitle),
                     trailing: const Icon(Icons.arrow_forward_ios),
                     onTap: () {
                       Navigator.of(context).push(
@@ -290,8 +293,8 @@ class PreferencesScreen extends ConsumerWidget {
                 ListTile(
                   leading: Icon(Icons.audio_file,
                       color: Theme.of(context).colorScheme.primary),
-                  title: const Text('音频格式偏好'),
-                  subtitle: const Text('设置音频格式的优先级顺序'),
+                  title: Text(S.of(context).audioFormatPreference),
+                  subtitle: Text(S.of(context).audioFormatSubtitle),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     Navigator.of(context).push(
@@ -305,8 +308,8 @@ class PreferencesScreen extends ConsumerWidget {
                 ListTile(
                   leading: Icon(Icons.block,
                       color: Theme.of(context).colorScheme.primary),
-                  title: const Text('屏蔽设置'),
-                  subtitle: const Text('管理屏蔽的标签、声优和社团'),
+                  title: Text(S.of(context).blockingSettings),
+                  subtitle: Text(S.of(context).blockingSettingsSubtitle),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     Navigator.of(context).push(
@@ -324,13 +327,13 @@ class PreferencesScreen extends ConsumerWidget {
                   SwitchListTile(
                     secondary: Icon(Icons.surround_sound,
                         color: Theme.of(context).colorScheme.primary),
-                    title: const Text('音频直通(Beta)'),
+                    title: Text(S.of(context).audioPassthrough),
                     subtitle: Text(
                       (Theme.of(context).platform == TargetPlatform.windows ||
                               Theme.of(context).platform ==
                                   TargetPlatform.macOS)
-                          ? '使用音频直通输出音频。需要重启应用生效。'
-                          : '允许输出原始比特流 (AC3/DTS) 到外部解码器。可能会独占音频设备。',
+                          ? S.of(context).audioPassthroughDescWindows
+                          : S.of(context).audioPassthroughDescAndroid,
                       style: const TextStyle(fontSize: 12),
                     ),
                     value: ref.watch(audioPassthroughProvider),
@@ -339,19 +342,19 @@ class PreferencesScreen extends ConsumerWidget {
                         final confirmed = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('警告'),
+                            title: Text(S.of(context).warning),
                             content:
-                                const Text('此功能未经完全测试，可能会带来意外外放等风险。确定要开启吗？'),
+                                Text(S.of(context).audioPassthroughWarning),
                             actions: [
                               TextButton(
                                 onPressed: () =>
                                     Navigator.of(context).pop(false),
-                                child: const Text('取消'),
+                                child: Text(S.of(context).cancel),
                               ),
                               TextButton(
                                 onPressed: () =>
                                     Navigator.of(context).pop(true),
-                                child: const Text('确定'),
+                                child: Text(S.of(context).confirm),
                               ),
                             ],
                           ),
@@ -369,9 +372,9 @@ class PreferencesScreen extends ConsumerWidget {
                                           TargetPlatform.windows ||
                                       Theme.of(context).platform ==
                                           TargetPlatform.macOS)
-                                  ? '已开启独占模式 (重启生效)'
-                                  : '已开启音频直通模式')
-                              : '已关闭音频直通模式',
+                                  ? S.of(context).exclusiveModeEnabled
+                                  : S.of(context).audioPassthroughEnabled)
+                              : S.of(context).audioPassthroughDisabled,
                         );
                       }
                     },

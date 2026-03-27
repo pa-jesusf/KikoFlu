@@ -21,6 +21,7 @@ import '../models/sort_options.dart';
 export '../providers/my_reviews_provider.dart' show MyReviewLayoutType;
 
 import '../widgets/overscroll_next_page_detector.dart';
+import '../../l10n/app_localizations.dart';
 
 class MyScreen extends ConsumerStatefulWidget {
   const MyScreen({super.key});
@@ -44,7 +45,7 @@ class _MyScreenState extends ConsumerState<MyScreen>
 
     if (settings.showOnlineMarks) {
       tabs.add(_TabInfo(
-        title: '在线标记',
+        title: S.of(context).onlineMarks,
         index: 0,
         widget: _buildOnlineBookmarksTab(),
         showFab: true,
@@ -54,14 +55,14 @@ class _MyScreenState extends ConsumerState<MyScreen>
 
     // 历史记录
     tabs.add(_TabInfo(
-      title: '历史记录',
+      title: S.of(context).historyRecord,
       index: tabs.length,
       widget: const HistoryScreen(),
     ));
 
     if (settings.showPlaylists && isOfficialServer) {
       tabs.add(_TabInfo(
-        title: '播放列表',
+        title: S.of(context).playlists,
         index: 1,
         widget: const PlaylistsScreen(),
       ));
@@ -69,7 +70,7 @@ class _MyScreenState extends ConsumerState<MyScreen>
 
     // 已下载始终显示
     tabs.add(_TabInfo(
-      title: '已下载',
+      title: S.of(context).downloaded,
       index: 2,
       widget: const LocalDownloadsScreen(),
       showFab: true,
@@ -82,7 +83,7 @@ class _MyScreenState extends ConsumerState<MyScreen>
             label: Text('$activeCount'),
             child: FloatingActionButton(
               onPressed: _navigateToDownloads,
-              tooltip: '下载任务',
+              tooltip: S.of(context).downloadTasks,
               child: const Icon(Icons.download),
             ),
           );
@@ -92,7 +93,7 @@ class _MyScreenState extends ConsumerState<MyScreen>
 
     if (settings.showSubtitleLibrary) {
       tabs.add(_TabInfo(
-        title: '字幕库',
+        title: S.of(context).subtitleLibrary,
         index: 3,
         widget: const SubtitleLibraryScreen(),
       ));
@@ -153,11 +154,11 @@ class _MyScreenState extends ConsumerState<MyScreen>
   String _getLayoutTooltip(MyReviewLayoutType layoutType) {
     switch (layoutType) {
       case MyReviewLayoutType.bigGrid:
-        return '切换到小网格视图';
+        return S.of(context).switchToSmallGrid;
       case MyReviewLayoutType.smallGrid:
-        return '切换到列表视图';
+        return S.of(context).switchToList;
       case MyReviewLayoutType.list:
-        return '切换到大网格视图';
+        return S.of(context).switchToLargeGrid;
     }
   }
 
@@ -256,7 +257,7 @@ class _MyScreenState extends ConsumerState<MyScreen>
     showDialog(
       context: context,
       builder: (context) => CommonSortDialog(
-        title: '排序方式',
+        title: S.of(context).sortOptions,
         currentOption: state.sortType,
         currentDirection: state.sortOrder,
         availableOptions: const [
@@ -374,7 +375,7 @@ class _MyScreenState extends ConsumerState<MyScreen>
                       constraints:
                           const BoxConstraints(minWidth: 40, minHeight: 40),
                       onPressed: _showSortDialog,
-                      tooltip: '排序',
+                      tooltip: S.of(context).sort,
                     ),
                     IconButton(
                       icon: _getLayoutIcon(state.layoutType),
@@ -407,7 +408,7 @@ class _MyScreenState extends ConsumerState<MyScreen>
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        '加载失败',
+                        S.of(context).loadFailed,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 8),
@@ -425,7 +426,7 @@ class _MyScreenState extends ConsumerState<MyScreen>
                         onPressed: () =>
                             ref.read(myReviewsProvider.notifier).refresh(),
                         icon: const Icon(Icons.refresh),
-                        label: const Text('重试'),
+                        label: Text(S.of(context).retry),
                       ),
                     ],
                   ),

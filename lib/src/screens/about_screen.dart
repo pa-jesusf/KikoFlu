@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/update_provider.dart';
 import '../widgets/scrollable_appbar.dart';
+import '../../l10n/app_localizations.dart';
 
 class AboutScreen extends ConsumerStatefulWidget {
   const AboutScreen({super.key});
@@ -35,7 +36,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
   }
 
   Future<_AboutData> _loadAboutData() async {
-    var version = '未知';
+    var version = 'Unknown';
     var buildNumber = '';
     try {
       final info = await PackageInfo.fromPlatform();
@@ -46,10 +47,10 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
       debugPrint(stackTrace.toString());
     }
 
-    var licenseText = '未能加载 LICENSE 文件';
+    var licenseText = 'Failed to load LICENSE';
     try {
       final raw = await rootBundle.loadString('LICENSE');
-      licenseText = raw.trim().isEmpty ? 'LICENSE 内容为空' : raw.trim();
+      licenseText = raw.trim().isEmpty ? 'LICENSE is empty' : raw.trim();
     } catch (error, stackTrace) {
       debugPrint('AboutScreen: failed to load license: $error');
       debugPrint(stackTrace.toString());
@@ -65,8 +66,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const ScrollableAppBar(
-        title: Text('关于', style: TextStyle(fontSize: 18)),
+      appBar: ScrollableAppBar(
+        title: Text(S.of(context).aboutTitle, style: const TextStyle(fontSize: 18)),
       ),
       body: FutureBuilder<_AboutData>(
         future: _aboutFuture,
@@ -84,7 +85,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                   children: [
                     const Icon(Icons.sentiment_dissatisfied, size: 48),
                     const SizedBox(height: 12),
-                    const Text('无法加载关于信息'),
+                    Text(S.of(context).failedToLoadAbout),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
@@ -92,7 +93,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                           _aboutFuture = _loadAboutData();
                         });
                       },
-                      child: const Text('重试'),
+                      child: Text(S.of(context).retry),
                     ),
                   ],
                 ),
@@ -122,7 +123,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                       color: Theme.of(context).colorScheme.onSecondaryContainer,
                     ),
                     title: Text(
-                      '发现新版本',
+                      S.of(context).newVersionFound,
                       style: TextStyle(
                         color:
                             Theme.of(context).colorScheme.onSecondaryContainer,
@@ -130,7 +131,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                       ),
                     ),
                     subtitle: Text(
-                      '${updateInfo.latestVersion} 可用 (当前版本: ${updateInfo.currentVersion})',
+                      S.of(context).newVersionAvailable(updateInfo.latestVersion, updateInfo.currentVersion),
                       style: TextStyle(
                         color:
                             Theme.of(context).colorScheme.onSecondaryContainer,
@@ -149,8 +150,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
               Card(
                 child: ListTile(
                   leading: Icon(Icons.verified, color: primaryColor),
-                  title: const Text('版本信息'),
-                  subtitle: Text('当前版本：$versionLabel'),
+                  title: Text(S.of(context).versionInfo),
+                  subtitle: Text(S.of(context).currentVersion(versionLabel)),
                   trailing: isCheckingUpdate
                       ? const SizedBox(
                           width: 20,
@@ -159,7 +160,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                         )
                       : TextButton(
                           onPressed: _manualCheckUpdate,
-                          child: const Text('检查更新'),
+                          child: Text(S.of(context).checkUpdate),
                         ),
                 ),
               ),
@@ -167,7 +168,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
               Card(
                 child: ListTile(
                   leading: Icon(Icons.person_outline, color: primaryColor),
-                  title: const Text('作者'),
+                  title: Text(S.of(context).author),
                   subtitle: const Text('Meteor-Sage'),
                 ),
               ),
@@ -175,7 +176,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
               Card(
                 child: ListTile(
                   leading: Icon(Icons.link, color: primaryColor),
-                  title: const Text('项目仓库'),
+                  title: Text(S.of(context).projectRepo),
                   subtitle: Text(_repoUri.toString()),
                   trailing: const Icon(Icons.open_in_new),
                   onTap: () => _openRepository(),
@@ -185,7 +186,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
               Card(
                 child: ListTile(
                   leading: Icon(Icons.gavel_outlined, color: primaryColor),
-                  title: const Text('开源协议'),
+                  title: Text(S.of(context).openSourceLicense),
                   subtitle: const Text('LICENSE'),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () => _showLicenseDialog(data.license),
@@ -211,13 +212,13 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
       );
       if (!launched && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('无法打开链接')),
+          SnackBar(content: Text(S.of(context).cannotOpenLink)),
         );
       }
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('打开链接失败：$error')),
+        SnackBar(content: Text(S.of(context).openLinkFailed(error.toString()))),
       );
     }
   }
@@ -237,22 +238,22 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
         ref.read(updateInfoProvider.notifier).state = updateInfo;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('发现新版本 ${updateInfo.latestVersion}'),
+            content: Text(S.of(context).foundNewVersion(updateInfo.latestVersion)),
             action: SnackBarAction(
-              label: '查看',
+              label: S.of(context).view,
               onPressed: () => _openUrl(updateInfo.releaseUrl),
             ),
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('当前已是最新版本')),
+          SnackBar(content: Text(S.of(context).alreadyLatestVersion)),
         );
       }
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('检查更新失败，请检查网络连接')),
+          SnackBar(content: Text(S.of(context).checkUpdateFailed)),
       );
     } finally {
       if (mounted) {
@@ -266,7 +267,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('开源协议'),
+          title: Text(S.of(context).openSourceLicense),
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
@@ -276,7 +277,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('关闭'),
+              child: Text(S.of(context).close),
             ),
           ],
         );

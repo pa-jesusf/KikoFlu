@@ -47,7 +47,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // 缓存 ScaffoldMessenger 以避免在 dispose 后访问
+    if (_cacheSize.isEmpty) {
+      _cacheSize = S.of(context).calculating;
+    }
     _scaffoldMessenger = ScaffoldMessenger.of(context);
   }
 
@@ -991,7 +993,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             color: Colors.blue.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Column(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
@@ -1037,7 +1039,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
-                          child: const Text('取消'),
+                          child: Text(S.of(context).cancel),
                         ),
                         ElevatedButton(
                           onPressed: () => Navigator.pop(context, true),
@@ -1045,7 +1047,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
                           ),
-                          child: const Text('确认清除'),
+                          child: Text(S.of(context).confirmClear),
                         ),
                       ],
                     ),
@@ -1070,8 +1072,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         await _updateCacheSize(); // 更新缓存大小
 
                         _showSnackBar(
-                          const SnackBar(
-                            content: Text('缓存已清除'),
+                          SnackBar(
+                            content: Text(S.of(context).cacheCleared),
                             backgroundColor: Colors.green,
                           ),
                         );
@@ -1081,7 +1083,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         Navigator.of(context).pop(); // 关闭加载指示器
                         _showSnackBar(
                           SnackBar(
-                            content: Text('清除缓存失败: $e'),
+                            content: Text(S.of(context).clearCacheFailedWithError(e.toString())),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -1090,7 +1092,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   }
                 },
                 icon: const Icon(Icons.delete_outline),
-                label: const Text('清除缓存'),
+                label: Text(S.of(context).clearCache),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,

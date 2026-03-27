@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../providers/theme_provider.dart';
 import '../widgets/scrollable_appbar.dart';
 
@@ -12,8 +13,8 @@ class ThemeSettingsScreen extends ConsumerWidget {
     final themeSettings = ref.watch(themeSettingsProvider);
 
     return Scaffold(
-      appBar: const ScrollableAppBar(
-        title: Text('主题设置', style: TextStyle(fontSize: 18)),
+      appBar: ScrollableAppBar(
+        title: Text(S.of(context).themeSettings, style: const TextStyle(fontSize: 18)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -26,15 +27,15 @@ class ThemeSettingsScreen extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    '主题模式',
+                    S.of(context).themeMode,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                   ),
                 ),
                 RadioListTile<AppThemeMode>(
-                  title: const Text('跟随系统'),
-                  subtitle: const Text('自动适应系统的深色/浅色模式'),
+                  title: Text(S.of(context).themeModeSystem),
+                  subtitle: Text(S.of(context).themeModeSystemDesc),
                   value: AppThemeMode.system,
                   groupValue: themeSettings.themeMode,
                   onChanged: (value) {
@@ -46,8 +47,8 @@ class ThemeSettingsScreen extends ConsumerWidget {
                   },
                 ),
                 RadioListTile<AppThemeMode>(
-                  title: const Text('浅色模式'),
-                  subtitle: const Text('始终使用浅色主题'),
+                  title: Text(S.of(context).themeModeLight),
+                  subtitle: Text(S.of(context).themeModeLightDesc),
                   value: AppThemeMode.light,
                   groupValue: themeSettings.themeMode,
                   onChanged: (value) {
@@ -59,8 +60,8 @@ class ThemeSettingsScreen extends ConsumerWidget {
                   },
                 ),
                 RadioListTile<AppThemeMode>(
-                  title: const Text('深色模式'),
-                  subtitle: const Text('始终使用深色主题'),
+                  title: Text(S.of(context).themeModeDark),
+                  subtitle: Text(S.of(context).themeModeDarkDesc),
                   value: AppThemeMode.dark,
                   groupValue: themeSettings.themeMode,
                   onChanged: (value) {
@@ -85,7 +86,7 @@ class ThemeSettingsScreen extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    '颜色主题',
+                    S.of(context).colorTheme,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -96,8 +97,8 @@ class ThemeSettingsScreen extends ConsumerWidget {
                   ref,
                   themeSettings,
                   ColorSchemeType.oceanBlue,
-                  '胖次蓝',
-                  '蓝蓝路，蓝蓝路！',
+                  S.of(context).colorSchemeOceanBlue,
+                  S.of(context).colorSchemeOceanBlueDesc,
                   const Color(0xFF146683),
                 ),
                 _buildColorSchemeOption(
@@ -105,8 +106,8 @@ class ThemeSettingsScreen extends ConsumerWidget {
                   ref,
                   themeSettings,
                   ColorSchemeType.sakuraPink,
-                  '哔哩粉',
-                  '( ゜- ゜)つロ 乾杯~',
+                  S.of(context).colorSchemeSakuraPink,
+                  S.of(context).colorSchemeSakuraPinkDesc,
                   const Color(0xFFB4276E),
                 ),
                 _buildColorSchemeOption(
@@ -114,8 +115,8 @@ class ThemeSettingsScreen extends ConsumerWidget {
                   ref,
                   themeSettings,
                   ColorSchemeType.sunsetOrange,
-                  '今日橙',
-                  '软件一定要能换主题✍🏻✍🏻✍🏻',
+                  S.of(context).colorSchemeSunsetOrange,
+                  S.of(context).colorSchemeSunsetOrangeDesc,
                   const Color(0xFF904D00),
                 ),
                 _buildColorSchemeOption(
@@ -123,8 +124,8 @@ class ThemeSettingsScreen extends ConsumerWidget {
                   ref,
                   themeSettings,
                   ColorSchemeType.lavenderPurple,
-                  '基佬紫',
-                  '兄弟，兄弟...',
+                  S.of(context).colorSchemeLavenderPurple,
+                  S.of(context).colorSchemeLavenderPurpleDesc,
                   const Color(0xFF6750A4),
                 ),
                 _buildColorSchemeOption(
@@ -132,8 +133,8 @@ class ThemeSettingsScreen extends ConsumerWidget {
                   ref,
                   themeSettings,
                   ColorSchemeType.forestGreen,
-                  '青草绿',
-                  '艹艹艹',
+                  S.of(context).colorSchemeForestGreen,
+                  S.of(context).colorSchemeForestGreenDesc,
                   const Color(0xFF3A6F41),
                 ),
                 const Divider(),
@@ -189,7 +190,7 @@ class ThemeSettingsScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '系统动态取色',
+                                S.of(context).colorSchemeDynamic,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleMedium
@@ -203,7 +204,7 @@ class ThemeSettingsScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                '使用系统壁纸的颜色 (Android 12+)',
+                                S.of(context).colorSchemeDynamicDesc,
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall
@@ -245,7 +246,7 @@ class ThemeSettingsScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '主题预览',
+                    S.of(context).themePreview,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -263,7 +264,7 @@ class ThemeSettingsScreen extends ConsumerWidget {
                           ),
                           child: Center(
                             child: Text(
-                              '主色容器',
+                              S.of(context).primaryContainer,
                               style: TextStyle(
                                 color: Theme.of(context)
                                     .colorScheme
@@ -285,7 +286,7 @@ class ThemeSettingsScreen extends ConsumerWidget {
                           ),
                           child: Center(
                             child: Text(
-                              '辅色容器',
+                              S.of(context).secondaryContainer,
                               style: TextStyle(
                                 color: Theme.of(context)
                                     .colorScheme
@@ -310,7 +311,7 @@ class ThemeSettingsScreen extends ConsumerWidget {
                           ),
                           child: Center(
                             child: Text(
-                              '第三色容器',
+                              S.of(context).tertiaryContainer,
                               style: TextStyle(
                                 color: Theme.of(context)
                                     .colorScheme
@@ -333,7 +334,7 @@ class ThemeSettingsScreen extends ConsumerWidget {
                           ),
                           child: Center(
                             child: Text(
-                              '表面色',
+                              S.of(context).surfaceColor,
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),
