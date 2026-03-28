@@ -247,3 +247,83 @@ jobs:
         with:
           name: linux-release
           path: KikoFlu-linux-x64.tar.gz
+
+  update-altsource:
+    name: Update AltStore Source
+    runs-on: ubuntu-latest
+    needs: [ios]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Download iOS Artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: ios-unsigned-release
+          path: ./ios-artifact
+
+      - name: Update app.json
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: *//' | tr -d '[:space:]')
+          TAG="${GITHUB_REF#refs/tags/}"
+          DATE=$(date -u +"%Y-%m-%d")
+          IPA_SIZE=$(stat -c%s ./ios-artifact/KikoFlu-ios-unsigned.ipa 2>/dev/null || stat -f%z ./ios-artifact/KikoFlu-ios-unsigned.ipa)
+          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/KikoFlu-ios-unsigned.ipa"
+
+          # Use python for reliable JSON manipulation
+          python3 << 'EOF'
+          import json, os
+
+          version = os.environ.get("VERSION", "0.0.0")
+          date = os.environ.get("DATE", "2026-01-01")
+          size = int(os.environ.get("IPA_SIZE", "0"))
+          download_url = os.environ.get("DOWNLOAD_URL", "")
+
+          with open("app.json", "r", encoding="utf-8") as f:
+              source = json.load(f)
+
+          app = source["apps"][0]
+
+          # Check if this version already exists
+          existing_versions = [v["version"] for v in app["versions"]]
+          new_version = {
+              "version": version,
+              "buildVersion": "1",
+              "date": date,
+              "localizedDescription": f"Release {version}",
+              "downloadURL": download_url,
+              "size": size,
+              "minOSVersion": "13.0"
+          }
+
+          if version in existing_versions:
+              # Update existing entry
+              for i, v in enumerate(app["versions"]):
+                  if v["version"] == version:
+                      # Preserve localizedDescription if manually set
+                      new_version["localizedDescription"] = v.get("localizedDescription", new_version["localizedDescription"])
+                      app["versions"][i] = new_version
+                      break
+          else:
+              # Insert at beginning (latest first)
+              app["versions"].insert(0, new_version)
+
+          with open("app.json", "w", encoding="utf-8") as f:
+              json.dump(source, f, indent=2, ensure_ascii=False)
+              f.write("\n")
+
+          print(f"Updated app.json: version={version}, size={size}, url={download_url}")
+          EOF
+
+      - name: Commit and Push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add app.json
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "chore: update AltStore source for ${GITHUB_REF#refs/tags/}"
+          git push

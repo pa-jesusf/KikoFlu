@@ -1,0 +1,46 @@
+{
+  "name": "KikoFlu Source",
+  "subtitle": "跨平台同人音声客户端 | Cross-platform Doujin Voice Client",
+  "description": "KikoFlu 是一个基于 Kikoeru 的跨平台同人音声客户端，支持浏览、搜索、播放和管理音声作品。\n\nKikoFlu is a cross-platform doujin voice work client based on Kikoeru, supporting browsing, searching, playing and managing voice works.\n\nKikoFluはKikoeruをベースにしたクロスプラットフォーム同人音声クライアントです。",
+  "iconURL": "https://raw.githubusercontent.com/Meteor-Sage/Kikoeru-Flutter/main/assets/icons/app_icon_opaque.png",
+  "website": "https://github.com/Meteor-Sage/Kikoeru-Flutter",
+  "tintColor": "#6750A4",
+  "apps": [
+    {
+      "name": "KikoFlu",
+      "bundleIdentifier": "com.meteor.kikoeruflutter",
+      "developerName": "Meteor-Sage",
+      "subtitle": "跨平台同人音声客户端 | Cross-platform Doujin Voice Client",
+      "localizedDescription": "KikoFlu 是一个基于 Kikoeru 的跨平台同人音声客户端。\n\n主要功能：\n- 浏览和搜索音声作品\n- 在线播放与字幕显示\n- 标签与声优筛选\n- 多语言支持（中文/英语/日语/俄语）\n- Material Design 3 自适应主题\n- 支持自定义服务器\n\nFeatures:\n- Browse and search voice works\n- Online playback with subtitle display\n- Filter by tags and voice actors\n- Multi-language support (Chinese/English/Japanese/Russian)\n- Material Design 3 adaptive theming\n- Custom server support\n\n主な機能：\n- 音声作品の閲覧と検索\n- オンライン再生と字幕表示\n- タグ・声優によるフィルタリング\n- 多言語対応（中国語/英語/日本語/ロシア語）\n- Material Design 3 アダプティブテーマ\n- カスタムサーバー対応",
+      "iconURL": "https://raw.githubusercontent.com/Meteor-Sage/Kikoeru-Flutter/main/assets/icons/app_icon_opaque.png",
+      "tintColor": "#6750A4",
+      "category": "entertainment",
+      "screenshots": [
+        "https://raw.githubusercontent.com/Meteor-Sage/Kikoeru-Flutter/main/screenshots/8.png",
+        "https://raw.githubusercontent.com/Meteor-Sage/Kikoeru-Flutter/main/screenshots/1.png",
+        "https://raw.githubusercontent.com/Meteor-Sage/Kikoeru-Flutter/main/screenshots/2.png",
+        "https://raw.githubusercontent.com/Meteor-Sage/Kikoeru-Flutter/main/screenshots/9.png"
+      ],
+      "versions": [
+        {
+          "version": "2.2.8",
+          "buildVersion": "1",
+          "date": "2026-03-29",
+          "localizedDescription": "Initial AltStore release.",
+          "downloadURL": "https://github.com/Meteor-Sage/Kikoeru-Flutter/releases/latest/download/KikoFlu-ios-unsigned.ipa",
+          "size": 0,
+          "minOSVersion": "13.0"
+        }
+      ],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": {
+          "NSMicrophoneUsageDescription": "This app needs access to microphone for audio recording features.",
+          "NSPhotoLibraryAddUsageDescription": "需要访问相册权限以保存图片",
+          "NSPhotoLibraryUsageDescription": "需要访问相册权限以保存图片"
+        }
+      }
+    }
+  ],
+  "news": []
+}
