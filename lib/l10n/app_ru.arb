@@ -657,6 +657,11 @@
   "pageExcludedNWorks": "На этой странице исключено {count} работ",
 
   "noSubtitlesAvailable": "Субтитры отсутствуют",
+  "translateLyrics": "Перевести текст",
+  "showOriginalLyrics": "Показать оригинал",
+  "showTranslatedLyrics": "Показать перевод",
+  "translatingLyrics": "Перевод...",
+  "lyricTranslationFailed": "Не удалось перевести текст",
   "unlock": "Разблокировать",
   "backToCover": "Вернуться к обложке",
   "lyricHintTapCover": "Нажмите на обложку или название для перехода к субтитрам",

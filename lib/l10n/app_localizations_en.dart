@@ -1940,6 +1940,21 @@ class SEn extends S {
   String get noSubtitlesAvailable => 'No subtitles available';
 
   @override
+  String get translateLyrics => 'Translate lyrics';
+
+  @override
+  String get showOriginalLyrics => 'Show original';
+
+  @override
+  String get showTranslatedLyrics => 'Show translation';
+
+  @override
+  String get translatingLyrics => 'Translating...';
+
+  @override
+  String get lyricTranslationFailed => 'Lyric translation failed';
+
+  @override
   String get unlock => 'Unlock';
 
   @override

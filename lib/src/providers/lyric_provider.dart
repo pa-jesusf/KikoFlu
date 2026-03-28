@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' show Locale;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 
@@ -7,6 +8,7 @@ import '../models/audio_track.dart';
 import '../services/cache_service.dart';
 import '../services/subtitle_library_service.dart';
 import '../utils/encoding_utils.dart';
+import '../services/translation_service.dart';
 import 'auth_provider.dart';
 import 'audio_provider.dart';
 import 'settings_provider.dart';
@@ -18,6 +20,9 @@ class LyricState {
   final String? error;
   final String? lyricUrl;
   final Duration timelineOffset; // 时间轴偏移（毫秒）
+  final List<LyricLine>? translatedLyrics; // 翻译后的歌词
+  final bool isTranslating; // 是否正在翻译
+  final bool showTranslated; // 是否显示翻译
 
   LyricState({
     this.lyrics = const [],
@@ -25,6 +30,9 @@ class LyricState {
     this.error,
     this.lyricUrl,
     this.timelineOffset = Duration.zero,
+    this.translatedLyrics,
+    this.isTranslating = false,
+    this.showTranslated = false,
   });
 
   LyricState copyWith({
@@ -33,6 +41,9 @@ class LyricState {
     String? error,
     String? lyricUrl,
     Duration? timelineOffset,
+    List<LyricLine>? translatedLyrics,
+    bool? isTranslating,
+    bool? showTranslated,
   }) {
     return LyricState(
       lyrics: lyrics ?? this.lyrics,
@@ -40,6 +51,9 @@ class LyricState {
       error: error ?? this.error,
       lyricUrl: lyricUrl ?? this.lyricUrl,
       timelineOffset: timelineOffset ?? this.timelineOffset,
+      translatedLyrics: translatedLyrics ?? this.translatedLyrics,
+      isTranslating: isTranslating ?? this.isTranslating,
+      showTranslated: showTranslated ?? this.showTranslated,
     );
   }
 
@@ -49,6 +63,61 @@ class LyricState {
       return lyrics;
     }
     return lyrics.map((lyric) => lyric.applyOffset(timelineOffset)).toList();
+  }
+
+  /// 是否已翻译
+  bool get isTranslated => translatedLyrics != null;
+
+  /// 用于显示的歌词列表（翻译后 > 原文，均应用时间轴偏移）
+  List<LyricLine> get displayLyrics {
+    final source =
+        (showTranslated && translatedLyrics != null) ? translatedLyrics! : lyrics;
+    if (timelineOffset == Duration.zero) return source;
+    return source.map((lyric) => lyric.applyOffset(timelineOffset)).toList();
+  }
+
+  /// 判断歌词是否需要翻译（大部分字符已经是当前语言则不需要）
+  bool needsTranslation(Locale appLocale) {
+    final allText = lyrics
+        .where((l) => l.text.isNotEmpty && l.text != '♪ - ♪')
+        .map((l) => l.text)
+        .join();
+    if (allText.length < 5) return false;
+
+    int cjk = 0, hiragana = 0, katakana = 0, latin = 0, cyrillic = 0;
+    for (final code in allText.runes) {
+      if (code >= 0x4E00 && code <= 0x9FFF) {
+        cjk++;
+      } else if (code >= 0x3040 && code <= 0x309F) {
+        hiragana++;
+      } else if (code >= 0x30A0 && code <= 0x30FF) {
+        katakana++;
+      } else if ((code >= 0x0041 && code <= 0x005A) ||
+          (code >= 0x0061 && code <= 0x007A)) {
+        latin++;
+      } else if (code >= 0x0400 && code <= 0x04FF) {
+        cyrillic++;
+      }
+    }
+
+    final total = cjk + hiragana + katakana + latin + cyrillic;
+    if (total == 0) return false;
+
+    switch (appLocale.languageCode) {
+      case 'ja':
+        // 日文：包含平/片假名+汉字
+        return (hiragana + katakana + cjk) / total < 0.5;
+      case 'zh':
+        // 中文：纯汉字；有假名则可能是日语
+        if (hiragana + katakana > 0) return true;
+        return cjk / total < 0.5;
+      case 'en':
+        return latin / total < 0.5;
+      case 'ru':
+        return cyrillic / total < 0.5;
+      default:
+        return true;
+    }
   }
 }
 
@@ -413,6 +482,73 @@ class LyricController extends StateNotifier<LyricState> {
     state = state.copyWith(timelineOffset: Duration.zero);
   }
 
+  /// 切换歌词翻译（首次点击翻译，之后切换原文/翻译）
+  Future<void> toggleTranslation() async {
+    if (state.lyrics.isEmpty || state.isTranslating) return;
+
+    // 已有翻译结果，切换显示
+    if (state.isTranslated) {
+      state = state.copyWith(showTranslated: !state.showTranslated);
+      return;
+    }
+
+    // 首次翻译
+    state = state.copyWith(isTranslating: true);
+
+    try {
+      final translationService = TranslationService();
+
+      // 收集需要翻译的文本（跳过空行和音符占位）
+      final textsToTranslate = <String>[];
+      final indexMap = <int>[];
+
+      for (int i = 0; i < state.lyrics.length; i++) {
+        final text = state.lyrics[i].text;
+        if (text.isNotEmpty && text != '♪ - ♪') {
+          textsToTranslate.add(text);
+          indexMap.add(i);
+        }
+      }
+
+      if (textsToTranslate.isEmpty) {
+        state = state.copyWith(isTranslating: false);
+        return;
+      }
+
+      // 批量翻译
+      final translatedTexts =
+          await translationService.translateBatch(textsToTranslate);
+
+      // 构建翻译后的歌词列表（保留原时间戳）
+      final translated = List<LyricLine>.from(state.lyrics);
+      for (int i = 0; i < indexMap.length; i++) {
+        final idx = indexMap[i];
+        translated[idx] = state.lyrics[idx].copyWith(text: translatedTexts[i]);
+      }
+
+      state = state.copyWith(
+        translatedLyrics: translated,
+        showTranslated: true,
+        isTranslating: false,
+      );
+    } catch (e) {
+      print('[Lyric] 翻译失败: $e');
+      state = state.copyWith(isTranslating: false);
+      rethrow;
+    }
+  }
+
+  /// 清除翻译结果
+  void clearTranslation() {
+    state = LyricState(
+      lyrics: state.lyrics,
+      isLoading: state.isLoading,
+      error: state.error,
+      lyricUrl: state.lyricUrl,
+      timelineOffset: state.timelineOffset,
+    );
+  }
+
   /// 获取导出格式的字幕内容（应用了时间轴偏移）
   String exportLyrics({String format = 'lrc'}) {
     final adjustedLyrics = state.adjustedLyrics;
@@ -666,11 +802,11 @@ final currentLyricTextProvider = Provider<String?>((ref) {
 
   if (lyricState.lyrics.isEmpty) return null;
 
-  // 使用调整后的字幕
-  final adjustedLyrics = lyricState.adjustedLyrics;
+  // 使用显示用歌词（翻译后 > 原文）
+  final displayLyrics = lyricState.displayLyrics;
 
   return position.when(
-    data: (pos) => LyricParser.getCurrentLyric(adjustedLyrics, pos),
+    data: (pos) => LyricParser.getCurrentLyric(displayLyrics, pos),
     loading: () => null,
     error: (_, __) => null,
   );

@@ -657,6 +657,11 @@
   "pageExcludedNWorks": "このページで {count} 作品を除外しました",
 
   "noSubtitlesAvailable": "字幕がありません",
+  "translateLyrics": "歌詞を翻訳",
+  "showOriginalLyrics": "原文を表示",
+  "showTranslatedLyrics": "翻訳を表示",
+  "translatingLyrics": "翻訳中...",
+  "lyricTranslationFailed": "歌詞の翻訳に失敗しました",
   "unlock": "ロック解除",
   "backToCover": "カバーに戻る",
   "lyricHintTapCover": "カバーまたはタイトルをタップして字幕画面に入る",

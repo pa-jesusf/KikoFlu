@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/work.dart';
 import '../providers/audio_provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/locale_provider.dart';
 import '../providers/lyric_provider.dart';
 import '../widgets/player/player_cover_widget.dart';
 import '../widgets/player/player_controls_widget.dart';
@@ -612,8 +613,17 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
                     );
                   }
 
-                  return FullLyricDisplay(
-                    seekingPosition: _seekingPosition,
+                  return Stack(
+                    children: [
+                      FullLyricDisplay(
+                        seekingPosition: _seekingPosition,
+                      ),
+                      Positioned(
+                        right: 16,
+                        bottom: 16,
+                        child: _buildTranslateButton(context),
+                      ),
+                    ],
                   );
                 },
               ),
@@ -713,6 +723,11 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
           onLongPress: _enterLyricFullscreen,
         ),
         Positioned(
+          left: 16,
+          bottom: 16,
+          child: _buildTranslateButton(context),
+        ),
+        Positioned(
           right: 16,
           bottom: 16,
           child: FloatingActionButton(
@@ -726,6 +741,86 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  /// 构建翻译按钮
+  Widget _buildTranslateButton(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final lyricState = ref.watch(lyricControllerProvider);
+
+        // 没有歌词时不显示
+        if (lyricState.lyrics.isEmpty) return const SizedBox.shrink();
+
+        // 获取应用 locale
+        final appLocale = ref.watch(localeProvider) ??
+            Localizations.localeOf(context);
+
+        // 歌词大部分已经是当前语言，不显示翻译按钮
+        if (!lyricState.needsTranslation(appLocale) &&
+            !lyricState.isTranslated) {
+          return const SizedBox.shrink();
+        }
+
+        final isTranslating = lyricState.isTranslating;
+        final isTranslated = lyricState.isTranslated;
+        final showTranslated = lyricState.showTranslated;
+
+        // 确定按钮图标和提示
+        final IconData icon;
+        final String tooltip;
+        if (isTranslating) {
+          icon = Icons.translate;
+          tooltip = S.of(context).translatingLyrics;
+        } else if (isTranslated && showTranslated) {
+          icon = Icons.translate;
+          tooltip = S.of(context).showOriginalLyrics;
+        } else if (isTranslated && !showTranslated) {
+          icon = Icons.translate;
+          tooltip = S.of(context).showTranslatedLyrics;
+        } else {
+          icon = Icons.translate;
+          tooltip = S.of(context).translateLyrics;
+        }
+
+        return FloatingActionButton.small(
+          heroTag: 'translate_lyrics',
+          onPressed: isTranslating
+              ? null
+              : () async {
+                  try {
+                    await ref
+                        .read(lyricControllerProvider.notifier)
+                        .toggleTranslation();
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(S.of(context).lyricTranslationFailed),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  }
+                },
+          tooltip: tooltip,
+          child: isTranslating
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                )
+              : Icon(
+                  icon,
+                  color: (isTranslated && showTranslated)
+                      ? Theme.of(context).colorScheme.primary
+                      : null,
+                ),
+        );
+      },
     );
   }
 

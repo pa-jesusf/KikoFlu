@@ -861,6 +861,11 @@
   "@pageExcludedNWorks": { "placeholders": { "count": { "type": "int" } } },
 
   "noSubtitlesAvailable": "No subtitles available",
+  "translateLyrics": "Translate lyrics",
+  "showOriginalLyrics": "Show original",
+  "showTranslatedLyrics": "Show translation",
+  "translatingLyrics": "Translating...",
+  "lyricTranslationFailed": "Lyric translation failed",
   "unlock": "Unlock",
   "backToCover": "Back to cover",
   "lyricHintTapCover": "Tap cover or title to enter subtitle view",

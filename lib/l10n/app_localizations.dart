@@ -3576,6 +3576,36 @@ abstract class S {
   /// **'No subtitles available'**
   String get noSubtitlesAvailable;
 
+  /// No description provided for @translateLyrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate lyrics'**
+  String get translateLyrics;
+
+  /// No description provided for @showOriginalLyrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Show original'**
+  String get showOriginalLyrics;
+
+  /// No description provided for @showTranslatedLyrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Show translation'**
+  String get showTranslatedLyrics;
+
+  /// No description provided for @translatingLyrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Translating...'**
+  String get translatingLyrics;
+
+  /// No description provided for @lyricTranslationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Lyric translation failed'**
+  String get lyricTranslationFailed;
+
   /// No description provided for @unlock.
   ///
   /// In en, this message translates to:

@@ -657,6 +657,11 @@
   "pageExcludedNWorks": "本頁已排除 {count} 個作品",
 
   "noSubtitlesAvailable": "暫無字幕",
+  "translateLyrics": "翻譯歌詞",
+  "showOriginalLyrics": "顯示原文",
+  "showTranslatedLyrics": "顯示翻譯",
+  "translatingLyrics": "翻譯中...",
+  "lyricTranslationFailed": "歌詞翻譯失敗",
   "unlock": "解鎖",
   "backToCover": "返回封面",
   "lyricHintTapCover": "點擊封面或標題可以進入字幕介面",

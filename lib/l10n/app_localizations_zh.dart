@@ -1890,6 +1890,21 @@ class SZh extends S {
   String get noSubtitlesAvailable => '暂无字幕';
 
   @override
+  String get translateLyrics => '翻译歌词';
+
+  @override
+  String get showOriginalLyrics => '显示原文';
+
+  @override
+  String get showTranslatedLyrics => '显示翻译';
+
+  @override
+  String get translatingLyrics => '翻译中...';
+
+  @override
+  String get lyricTranslationFailed => '歌词翻译失败';
+
+  @override
   String get unlock => '解锁';
 
   @override
@@ -5138,6 +5153,21 @@ class SZhHant extends SZh {
 
   @override
   String get noSubtitlesAvailable => '暫無字幕';
+
+  @override
+  String get translateLyrics => '翻譯歌詞';
+
+  @override
+  String get showOriginalLyrics => '顯示原文';
+
+  @override
+  String get showTranslatedLyrics => '顯示翻譯';
+
+  @override
+  String get translatingLyrics => '翻譯中...';
+
+  @override
+  String get lyricTranslationFailed => '歌詞翻譯失敗';
 
   @override
   String get unlock => '解鎖';

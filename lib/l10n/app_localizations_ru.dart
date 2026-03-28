@@ -1945,6 +1945,21 @@ class SRu extends S {
   String get noSubtitlesAvailable => 'Субтитры отсутствуют';
 
   @override
+  String get translateLyrics => 'Перевести текст';
+
+  @override
+  String get showOriginalLyrics => 'Показать оригинал';
+
+  @override
+  String get showTranslatedLyrics => 'Показать перевод';
+
+  @override
+  String get translatingLyrics => 'Перевод...';
+
+  @override
+  String get lyricTranslationFailed => 'Не удалось перевести текст';
+
+  @override
   String get unlock => 'Разблокировать';
 
   @override

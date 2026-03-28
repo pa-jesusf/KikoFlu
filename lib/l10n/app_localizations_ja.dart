@@ -1896,6 +1896,21 @@ class SJa extends S {
   String get noSubtitlesAvailable => '字幕がありません';
 
   @override
+  String get translateLyrics => '歌詞を翻訳';
+
+  @override
+  String get showOriginalLyrics => '原文を表示';
+
+  @override
+  String get showTranslatedLyrics => '翻訳を表示';
+
+  @override
+  String get translatingLyrics => '翻訳中...';
+
+  @override
+  String get lyricTranslationFailed => '歌詞の翻訳に失敗しました';
+
+  @override
   String get unlock => 'ロック解除';
 
   @override

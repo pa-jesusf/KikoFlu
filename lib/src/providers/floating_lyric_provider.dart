@@ -207,10 +207,10 @@ class FloatingLyricEnabledNotifier extends StateNotifier<bool> {
     if (!isPlaying) {
       displayText = '♪ - ♪';
     } else if (lyricState.lyrics.isNotEmpty) {
-      // 使用调整后的字幕
-      final adjustedLyrics = lyricState.adjustedLyrics;
+      // 使用显示用歌词（翻译后 > 原文）
+      final displayLyrics = lyricState.displayLyrics;
       final currentLyric =
-          LyricParser.getCurrentLyric(adjustedLyrics, currentPosition);
+          LyricParser.getCurrentLyric(displayLyrics, currentPosition);
 
       if (currentLyric != null && currentLyric.trim().isNotEmpty) {
         displayText = currentLyric;
