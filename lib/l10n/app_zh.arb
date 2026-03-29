@@ -140,6 +140,8 @@
   "styleSettingsSubtitle": "自定义字体、颜色、透明度等",
   "downloadPath": "下载路径",
   "downloadPathSubtitle": "自定义下载文件保存位置",
+  "maxConcurrentDownloads": "最大同时下载数",
+  "maxConcurrentDownloadsSubtitle": "限制同时进行的下载任务数量",
   "cacheManagement": "缓存管理",
   "currentCache": "当前缓存: {size}",
   "themeSettings": "主题设置",

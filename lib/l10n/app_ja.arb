@@ -140,6 +140,8 @@
   "styleSettingsSubtitle": "フォント、色、透明度などをカスタマイズ",
   "downloadPath": "ダウンロードパス",
   "downloadPathSubtitle": "ダウンロードファイルの保存先をカスタマイズ",
+  "maxConcurrentDownloads": "最大同時ダウンロード数",
+  "maxConcurrentDownloadsSubtitle": "同時に実行するダウンロードタスクの上限",
   "cacheManagement": "キャッシュ管理",
   "currentCache": "現在のキャッシュ: {size}",
   "themeSettings": "テーマ設定",

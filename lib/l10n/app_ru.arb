@@ -140,6 +140,8 @@
   "styleSettingsSubtitle": "Шрифт, цвет, прозрачность и т.д.",
   "downloadPath": "Путь загрузки",
   "downloadPathSubtitle": "Настроить расположение загруженных файлов",
+  "maxConcurrentDownloads": "Макс. одновременных загрузок",
+  "maxConcurrentDownloadsSubtitle": "Ограничить количество одновременных задач загрузки",
   "cacheManagement": "Управление кешем",
   "currentCache": "Текущий кеш: {size}",
   "themeSettings": "Настройки темы",

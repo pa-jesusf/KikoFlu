@@ -160,6 +160,8 @@
   "styleSettingsSubtitle": "Customize font, color, transparency, etc.",
   "downloadPath": "Download Path",
   "downloadPathSubtitle": "Customize download file save location",
+  "maxConcurrentDownloads": "Max Concurrent Downloads",
+  "maxConcurrentDownloadsSubtitle": "Limit simultaneous download tasks",
   "cacheManagement": "Cache Management",
   "currentCache": "Current cache: {size}",
   "@currentCache": {

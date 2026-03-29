@@ -385,6 +385,13 @@ class SRu extends S {
       'Настроить расположение загруженных файлов';
 
   @override
+  String get maxConcurrentDownloads => 'Макс. одновременных загрузок';
+
+  @override
+  String get maxConcurrentDownloadsSubtitle =>
+      'Ограничить количество одновременных задач загрузки';
+
+  @override
   String get cacheManagement => 'Управление кешем';
 
   @override

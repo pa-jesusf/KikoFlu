@@ -21,6 +21,10 @@ class DownloadService {
   final List<DownloadTask> _tasks = [];
   final Dio _dio = Dio();
 
+  // 并发下载控制
+  static const int _maxConcurrentDownloads = 20;
+  int _activeDownloadCount = 0;
+
   // 用于延迟保存任务，避免频繁 I/O 操作
   Timer? _saveTimer;
   bool _needsSave = false;
@@ -287,10 +291,27 @@ class DownloadService {
       unawaited(_saveWorkMetadata(workId, workMetadata, coverUrl));
     }
 
-    // 自动开始下载（异步，不阻塞返回）
-    unawaited(_startDownload(task));
+    // 自动开始下载（通过队列调度）
+    unawaited(_processQueue());
 
     return task;
+  }
+
+  /// 处理下载队列：确保活跃下载数不超过上限
+  Future<void> _processQueue() async {
+    // 获取所有等待中的任务
+    final pendingTasks = _tasks
+        .where((t) => t.status == DownloadStatus.pending)
+        .toList();
+
+    for (final task in pendingTasks) {
+      if (_activeDownloadCount >= _maxConcurrentDownloads) break;
+      _activeDownloadCount++;
+      unawaited(_startDownload(task).whenComplete(() {
+        _activeDownloadCount--;
+        _processQueue(); // 完成后继续调度
+      }));
+    }
   }
 
   Future<void> _startDownload(DownloadTask task) async {
@@ -406,7 +427,9 @@ class DownloadService {
     final task = _tasks.firstWhere((t) => t.id == taskId);
     if (task.status == DownloadStatus.paused ||
         task.status == DownloadStatus.failed) {
-      await _startDownload(task);
+      _updateTask(task.copyWith(status: DownloadStatus.pending),
+          immediate: true);
+      unawaited(_processQueue());
     }
   }
 

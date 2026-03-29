@@ -822,6 +822,18 @@ abstract class S {
   /// **'Customize download file save location'**
   String get downloadPathSubtitle;
 
+  /// No description provided for @maxConcurrentDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Concurrent Downloads'**
+  String get maxConcurrentDownloads;
+
+  /// No description provided for @maxConcurrentDownloadsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit simultaneous download tasks'**
+  String get maxConcurrentDownloadsSubtitle;
+
   /// No description provided for @cacheManagement.
   ///
   /// In en, this message translates to:

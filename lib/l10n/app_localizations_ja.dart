@@ -379,6 +379,12 @@ class SJa extends S {
   String get downloadPathSubtitle => 'ダウンロードファイルの保存先をカスタマイズ';
 
   @override
+  String get maxConcurrentDownloads => '最大同時ダウンロード数';
+
+  @override
+  String get maxConcurrentDownloadsSubtitle => '同時に実行するダウンロードタスクの上限';
+
+  @override
   String get cacheManagement => 'キャッシュ管理';
 
   @override

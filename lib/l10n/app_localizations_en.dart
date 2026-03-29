@@ -384,6 +384,13 @@ class SEn extends S {
   String get downloadPathSubtitle => 'Customize download file save location';
 
   @override
+  String get maxConcurrentDownloads => 'Max Concurrent Downloads';
+
+  @override
+  String get maxConcurrentDownloadsSubtitle =>
+      'Limit simultaneous download tasks';
+
+  @override
   String get cacheManagement => 'Cache Management';
 
   @override

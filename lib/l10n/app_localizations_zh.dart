@@ -378,6 +378,12 @@ class SZh extends S {
   String get downloadPathSubtitle => '自定义下载文件保存位置';
 
   @override
+  String get maxConcurrentDownloads => '最大同时下载数';
+
+  @override
+  String get maxConcurrentDownloadsSubtitle => '限制同时进行的下载任务数量';
+
+  @override
   String get cacheManagement => '缓存管理';
 
   @override
@@ -3650,6 +3656,12 @@ class SZhHant extends SZh {
 
   @override
   String get downloadPathSubtitle => '自訂下載檔案儲存位置';
+
+  @override
+  String get maxConcurrentDownloads => '最大同時下載數';
+
+  @override
+  String get maxConcurrentDownloadsSubtitle => '限制同時進行的下載任務數量';
 
   @override
   String get cacheManagement => '快取管理';
