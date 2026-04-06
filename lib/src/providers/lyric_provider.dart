@@ -8,6 +8,7 @@ import '../models/lyric.dart';
 import '../models/audio_track.dart';
 import '../services/cache_service.dart';
 import '../services/subtitle_library_service.dart';
+import '../services/subtitle_database.dart';
 import '../utils/encoding_utils.dart';
 import '../services/translation_service.dart';
 import 'auth_provider.dart';
@@ -261,65 +262,68 @@ class LyricController extends StateNotifier<LyricState> {
     }
   }
 
-  // 从字幕库查找匹配的字幕文件
+  // 从字幕库查找匹配的字幕文件（使用数据库查询）
   Future<String?> _findLyricInLibrary(AudioTrack track) async {
     try {
-      final libraryDir =
-          await SubtitleLibraryService.getSubtitleLibraryDirectory();
-      if (!await libraryDir.exists()) {
-        return null;
-      }
-
       final trackTitle = track.title;
       final workId = track.workId;
 
       print('[Lyric] 在字幕库中查找: track="$trackTitle", workId=$workId');
 
-      // 优先级1: 查找作品ID文件夹（在"已解析"文件夹下）
+      // 优先级1: 通过 workId 查询数据库
       if (workId != null) {
-        final parsedFolderPath = '${libraryDir.path}/已解析';
-        final parsedFolder = Directory(parsedFolderPath);
+        final records =
+            await SubtitleDatabase.instance.getFilesByWorkId(workId);
+        if (records.isNotEmpty) {
+          String? bestMatchPath;
+          double bestScore = 0.0;
 
-        if (await parsedFolder.exists()) {
-          // 生成可能的文件夹名称列表（支持带前导零的格式）
-          final possibleFolderNames = [
-            'RJ$workId', // RJ1003058
-            'RJ0$workId', // RJ01003058
-            'BJ$workId', // BJ1003058
-            'BJ0$workId', // BJ01003058
-            'VJ$workId', // VJ1003058
-            'VJ0$workId', // VJ01003058
-          ];
-
-          // 尝试查找所有可能的文件夹
-          for (final folderName in possibleFolderNames) {
-            final folderPath = '$parsedFolderPath/$folderName';
-            final folder = Directory(folderPath);
-            if (await folder.exists()) {
-              final match = await _searchLyricInFolder(
-                folder,
-                trackTitle,
-              );
-              if (match != null) {
-                print('[Lyric] 在已解析/$folderName文件夹找到匹配: $match');
-                return match;
+          for (final record in records) {
+            final (isMatch, score) = SubtitleLibraryService.checkMatch(
+                record.fileName, trackTitle);
+            if (isMatch && score > bestScore) {
+              // 验证文件是否仍存在（DB 可能过期）
+              if (!await File(record.filePath).exists()) continue;
+              bestScore = score;
+              bestMatchPath = record.filePath;
+              if (score == 1.0) {
+                print('[Lyric] 在数据库中找到完美匹配 (workId=$workId): ${record.fileName}');
+                return record.filePath;
               }
             }
+          }
+
+          if (bestMatchPath != null) {
+            print('[Lyric] 在数据库中找到最佳匹配 (workId=$workId, score=$bestScore)');
+            return bestMatchPath;
           }
         }
       }
 
-      // 优先级2: 查找"已保存"文件夹
-      final savedFolderPath = '${libraryDir.path}/已保存';
-      final savedFolder = Directory(savedFolderPath);
-      if (await savedFolder.exists()) {
-        final match = await _searchLyricInFolder(
-          savedFolder,
-          trackTitle,
-        );
-        if (match != null) {
-          print('[Lyric] 在"已保存"文件夹找到匹配: $match');
-          return match;
+      // 优先级2: 在"已保存"分类中查找
+      final savedRecords = await SubtitleDatabase.instance
+          .getFilesByCategory(SubtitleLibraryService.savedFolderName);
+      if (savedRecords.isNotEmpty) {
+        String? bestMatchPath;
+        double bestScore = 0.0;
+
+        for (final record in savedRecords) {
+          final (isMatch, score) = SubtitleLibraryService.checkMatch(
+              record.fileName, trackTitle);
+          if (isMatch && score > bestScore) {
+            if (!await File(record.filePath).exists()) continue;
+            bestScore = score;
+            bestMatchPath = record.filePath;
+            if (score == 1.0) {
+              print('[Lyric] 在"已保存"中找到完美匹配: ${record.fileName}');
+              return record.filePath;
+            }
+          }
+        }
+
+        if (bestMatchPath != null) {
+          print('[Lyric] 在"已保存"中找到最佳匹配 (score=$bestScore)');
+          return bestMatchPath;
         }
       }
 
@@ -329,37 +333,6 @@ class LyricController extends StateNotifier<LyricState> {
       print('[Lyric] 字幕库查找出错: $e');
       return null;
     }
-  }
-
-  // 在指定文件夹中递归搜索匹配的字幕文件
-  Future<String?> _searchLyricInFolder(
-    Directory folder,
-    String trackTitle,
-  ) async {
-    String? bestMatchPath;
-    double bestScore = 0.0;
-
-    try {
-      await for (final entity in folder.list(recursive: true)) {
-        if (entity is File) {
-          final fileName = entity.path.split(Platform.pathSeparator).last;
-          final (isMatch, score) =
-              SubtitleLibraryService.checkMatch(fileName, trackTitle);
-
-          if (isMatch) {
-            if (score > bestScore) {
-              bestScore = score;
-              bestMatchPath = entity.path;
-              // 如果是完美匹配，直接返回
-              if (score == 1.0) return entity.path;
-            }
-          }
-        }
-      }
-    } catch (e) {
-      // 忽略权限错误等
-    }
-    return bestMatchPath;
   }
 
   // 查找字幕文件

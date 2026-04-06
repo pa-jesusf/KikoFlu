@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:archive/archive.dart';
 import 'package:gbk_codec/gbk_codec.dart';
 import 'download_path_service.dart';
+import 'subtitle_database.dart';
 import '../utils/file_icon_utils.dart';
 
 /// 字幕库管理服务
@@ -20,11 +21,9 @@ class SubtitleLibraryService {
   static const String unknownFolderName = '未知作品';
   static const String savedFolderName = '已保存';
 
-  // 缓存相关
-  static List<Map<String, dynamic>>? _cachedFileTree;
-  static LibraryStats? _cachedStats;
-  static DateTime? _lastKnownModified;
-  static String? _libraryRootPath;
+  // 数据库初始化标志
+  static bool _dbInitialized = false;
+  static Future<void>? _dbInitFuture;
 
   static final _cacheUpdateController = StreamController<void>.broadcast();
   static Stream<void> get onCacheUpdated => _cacheUpdateController.stream;
@@ -214,184 +213,343 @@ class SubtitleLibraryService {
 
   /// 获取已解析目录下的所有文件夹名称
   static Future<List<String>> getParsedSubtitleFolders() async {
-    if (_cachedFileTree == null) {
-      await getSubtitleFiles();
-    }
-
-    if (_cachedFileTree == null) return [];
-
     try {
-      final parsedFolder = _cachedFileTree!.firstWhere(
-        (item) =>
-            item['title'] == parsedFolderName && item['type'] == 'folder',
-        orElse: () => <String, dynamic>{},
-      );
-
-      if (parsedFolder.isEmpty || parsedFolder['children'] == null) {
-        return [];
-      }
-
-      final children = parsedFolder['children'] as List<dynamic>;
-      return children
-          .where((item) => item['type'] == 'folder')
-          .map((item) => item['title'] as String)
-          .toList();
+      await _ensureDatabase();
+      return await SubtitleDatabase.instance
+          .getParsedFolderNames(parsedFolderName);
     } catch (e) {
       print('[SubtitleLibrary] 获取已解析文件夹列表失败: $e');
       return [];
     }
   }
 
-  /// 清除缓存
+  /// 清除缓存并重建数据库索引
   static Future<void> clearCache() async {
-    _cachedFileTree = null;
-    _cachedStats = null;
-    _lastKnownModified = null;
-    _libraryRootPath = null;
-
     try {
       final libraryDir = await getSubtitleLibraryDirectory();
+
+      // 删除旧版 JSON 缓存（如果存在）
       final cacheFile = File('${libraryDir.path}/$_cacheFileName');
       if (await cacheFile.exists()) {
         await cacheFile.delete();
       }
+
+      // 重建数据库
+      await _rebuildDatabase(libraryDir);
     } catch (e) {
-      print('[SubtitleLibrary] 删除缓存文件失败: $e');
+      print('[SubtitleLibrary] 重建索引失败: $e');
     }
 
-    print('[SubtitleLibrary] 缓存已清除');
+    print('[SubtitleLibrary] 索引已重建');
     _cacheUpdateController.add(null);
   }
 
-  static Future<void> _ensureRootPath(String path) async {
-    if (_libraryRootPath == null) {
-      _libraryRootPath = path;
-      return;
-    }
-
-    if (_libraryRootPath != path) {
-      await clearCache();
-      _libraryRootPath = path;
-    }
+  /// 确保数据库已初始化并完成迁移
+  static Future<void> _ensureDatabase() async {
+    if (_dbInitialized) return;
+    // 防止并发重复初始化
+    _dbInitFuture ??= _initDatabase();
+    await _dbInitFuture;
   }
 
-  static Future<void> _updateLibraryModifiedTime([Directory? directory]) async {
-    try {
-      final dir = directory ?? await getSubtitleLibraryDirectory();
-      final stat = await dir.stat();
-      _lastKnownModified = stat.modified;
-    } catch (e) {
-      print('[SubtitleLibrary] 更新目录修改时间失败: $e');
-    }
-  }
+  static Future<void> _initDatabase() async {
+    if (_dbInitialized) return;
 
-  /// 保存缓存到磁盘
-  static Future<void> _saveCacheToDisk() async {
-    if (_cachedFileTree == null) return;
+    final libraryDir = await getSubtitleLibraryDirectory();
 
-    try {
-      final libraryDir = await getSubtitleLibraryDirectory();
+    // 先执行旧格式文件夹迁移（纯文件系统操作）
+    await _migrateOldFormatFolders(libraryDir);
+
+    final version =
+        await SubtitleDatabase.instance.getMeta('migration_version');
+
+    if (version == null) {
+      // 首次运行：尝试从 JSON 缓存快速迁移
       final cacheFile = File('${libraryDir.path}/$_cacheFileName');
+      if (await cacheFile.exists()) {
+        try {
+          print('[SubtitleLibrary] 从 JSON 缓存迁移到数据库...');
+          final content = await cacheFile.readAsString();
+          final cacheData = jsonDecode(content) as Map<String, dynamic>;
+          final tree = cacheData['fileTree'] as List<dynamic>?;
+          if (tree != null && tree.isNotEmpty) {
+            final records = <SubtitleFileRecord>[];
+            _flattenTreeToRecords(tree, libraryDir.path, records);
+            await SubtitleDatabase.instance.insertFiles(records);
+            print(
+                '[SubtitleLibrary] JSON 迁移完成: ${records.length} 条记录');
+          } else {
+            // JSON 为空，扫描文件系统
+            await _rebuildDatabase(libraryDir);
+          }
+          await cacheFile.delete();
+        } catch (e) {
+          print('[SubtitleLibrary] JSON 迁移失败，回退到文件系统扫描: $e');
+          await _rebuildDatabase(libraryDir);
+        }
+      } else {
+        // 无 JSON 缓存，扫描文件系统
+        final fileCount =
+            await SubtitleDatabase.instance.getFileCount();
+        if (fileCount == 0) {
+          await _rebuildDatabase(libraryDir);
+        }
+      }
+      await SubtitleDatabase.instance
+          .setMeta('migration_version', '1');
+    }
 
-      final cacheData = {
-        'timestamp': DateTime.now().toIso8601String(),
-        'lastKnownModified': _lastKnownModified?.toIso8601String(),
-        'stats': _cachedStats != null
-            ? {
-                'totalFiles': _cachedStats!.totalFiles,
-                'totalSize': _cachedStats!.totalSize,
-                'folderCount': _cachedStats!.folderCount,
-              }
-            : null,
-        'fileTree': _cachedFileTree,
+    _dbInitialized = true;
+  }
+
+  /// 重建数据库（清空后重新扫描文件系统）
+  static Future<void> _rebuildDatabase(Directory libraryDir) async {
+    await SubtitleDatabase.instance.clear();
+    final records = <SubtitleFileRecord>[];
+    await _scanDirectoryForRecords(libraryDir, libraryDir.path, records);
+    if (records.isNotEmpty) {
+      await SubtitleDatabase.instance.insertFiles(records);
+    }
+    print('[SubtitleLibrary] 数据库重建完成: ${records.length} 条记录');
+  }
+
+  /// 扫描目录，收集字幕文件记录
+  static Future<void> _scanDirectoryForRecords(
+    Directory dir,
+    String rootPath,
+    List<SubtitleFileRecord> records,
+  ) async {
+    try {
+      if (dir.path.length > _maxPathLength) return;
+
+      await for (final entity in dir.list(followLinks: false)) {
+        if (entity is Directory) {
+          final folderName = entity.path.split(Platform.pathSeparator).last;
+          // 跳过缓存文件和隐藏文件夹
+          if (folderName.startsWith('.')) continue;
+          await _scanDirectoryForRecords(entity, rootPath, records);
+        } else if (entity is File) {
+          final fileName =
+              entity.path.split(Platform.pathSeparator).last;
+          if (FileIconUtils.isLyricFile(fileName)) {
+            try {
+              final stat = await entity.stat();
+              final relativePath = _toRelativePath(
+                  entity.path.substring(rootPath.length + 1));
+              final category = _extractCategory(relativePath);
+              final workId = _extractWorkId(relativePath);
+
+              records.add(SubtitleFileRecord(
+                fileName: fileName,
+                filePath: entity.path,
+                relativePath: relativePath,
+                category: category,
+                workId: workId,
+                fileSize: stat.size,
+                modifiedAt: stat.modified.toIso8601String(),
+                normalizedName: _computeNormalizedName(fileName),
+              ));
+            } catch (e) {
+              // 跳过无法读取的文件
+            }
+          }
+        }
+      }
+    } catch (e) {
+      if (e is FileSystemException ||
+          e.toString().contains('PathNotFoundException') ||
+          e.toString().contains('系统找不到指定的路径')) {
+        print(
+            '[SubtitleLibrary] 路径过长导致访问失败，跳过: ${dir.path.split(Platform.pathSeparator).last}');
+      } else {
+        print('[SubtitleLibrary] 扫描目录失败: ${dir.path}, 错误: $e');
+      }
+    }
+  }
+
+  /// 同步单个目录到数据库（删除旧记录 + 重新扫描）
+  static Future<void> _syncDirectoryToDatabase(String directoryPath) async {
+    final libraryDir = await getSubtitleLibraryDirectory();
+
+    // 删除该目录下的旧记录
+    await SubtitleDatabase.instance.deleteByPathPrefix(directoryPath);
+
+    // 如果目录仍存在，重新扫描并插入
+    final dir = Directory(directoryPath);
+    if (await dir.exists()) {
+      final records = <SubtitleFileRecord>[];
+      await _scanDirectoryForRecords(dir, libraryDir.path, records);
+      if (records.isNotEmpty) {
+        await SubtitleDatabase.instance.insertFiles(records);
+      }
+    }
+  }
+
+  /// 从 JSON 文件树展平为数据库记录（用于迁移）
+  static void _flattenTreeToRecords(
+    List<dynamic> tree,
+    String rootPath,
+    List<SubtitleFileRecord> records,
+  ) {
+    for (final item in tree) {
+      final map = item as Map<String, dynamic>;
+      final type = map['type'] as String?;
+
+      if (type == 'folder') {
+        final children = map['children'];
+        if (children != null) {
+          _flattenTreeToRecords(children as List<dynamic>, rootPath, records);
+        }
+      } else if (type == 'text') {
+        final filePath = map['path'] as String;
+        final fileName = map['title'] as String;
+        final relativePath =
+            _toRelativePath(filePath.substring(rootPath.length + 1));
+        final category = _extractCategory(relativePath);
+        final workId = _extractWorkId(relativePath);
+
+        records.add(SubtitleFileRecord(
+          fileName: fileName,
+          filePath: filePath,
+          relativePath: relativePath,
+          category: category,
+          workId: workId,
+          fileSize: (map['size'] as int?) ?? 0,
+          modifiedAt: map['modified'] as String?,
+          normalizedName: _computeNormalizedName(fileName),
+        ));
+      }
+    }
+  }
+
+  /// 从相对路径提取分类
+  static String _extractCategory(String relativePath) {
+    final firstSlash = relativePath.indexOf('/');
+    if (firstSlash > 0) {
+      return relativePath.substring(0, firstSlash);
+    }
+    return '';
+  }
+
+  /// 从相对路径提取 workId
+  static int? _extractWorkId(String relativePath) {
+    final parts = relativePath.split('/');
+    if (parts.length < 2) return null;
+    final match = _workIdRegex.firstMatch(parts[1]);
+    if (match != null) {
+      return int.tryParse(match.group(1)!);
+    }
+    return null;
+  }
+
+  static final _workIdRegex = RegExp(r'[RrBbVv][Jj]0*(\d+)');
+
+  /// 将平台路径分隔符统一为 / （用于数据库存储）
+  static String _toRelativePath(String raw) {
+    return Platform.isWindows ? raw.replaceAll('\\', '/') : raw;
+  }
+
+  /// 预计算归一化文件名（用于匹配加速）
+  static String _computeNormalizedName(String fileName) {
+    // 去掉字幕扩展名
+    final textExtensions = ['.vtt', '.srt', '.txt', '.lrc'];
+    String baseName = fileName.toLowerCase();
+    for (final ext in textExtensions) {
+      if (baseName.endsWith(ext)) {
+        baseName = baseName.substring(0, baseName.length - ext.length);
+        break;
+      }
+    }
+    baseName = removeAudioExtension(baseName);
+    return _normalizeForMatching(baseName);
+  }
+
+  /// 从数据库记录构建文件树（用于 UI 展示）
+  static List<Map<String, dynamic>> _buildTreeFromRecords(
+    List<Map<String, dynamic>> records,
+    String libraryRootPath,
+  ) {
+    // 使用嵌套 Map 构建树结构
+    final rootChildren = <String, dynamic>{};
+
+    for (final record in records) {
+      final relativePath = record['relative_path'] as String;
+      final parts = relativePath.split('/');
+
+      Map<String, dynamic> current = rootChildren;
+      var currentFullPath = libraryRootPath;
+
+      // 遍历路径的每一级目录
+      for (int i = 0; i < parts.length - 1; i++) {
+        currentFullPath =
+            '$currentFullPath${Platform.pathSeparator}${parts[i]}';
+        if (!current.containsKey(parts[i])) {
+          current[parts[i]] = <String, dynamic>{
+            '_meta': {
+              'type': 'folder',
+              'title': parts[i],
+              'path': currentFullPath,
+            },
+            '_children': <String, dynamic>{},
+          };
+        }
+        current = (current[parts[i]]
+            as Map<String, dynamic>)['_children'] as Map<String, dynamic>;
+      }
+
+      // 添加文件叶节点
+      final fileName = parts.last;
+      current[fileName] = <String, dynamic>{
+        '_meta': {
+          'type': 'text',
+          'title': fileName,
+          'path': record['file_path'] as String,
+          'size': record['file_size'] as int?,
+          'modified': record['modified_at'] as String?,
+        },
       };
-
-      await cacheFile.writeAsString(jsonEncode(cacheData));
-      print('[SubtitleLibrary] 缓存已保存到磁盘');
-      _cacheUpdateController.add(null);
-    } catch (e) {
-      print('[SubtitleLibrary] 保存缓存失败: $e');
     }
+
+    return _convertNodeMapToList(rootChildren);
   }
 
-  /// 从磁盘加载缓存
-  static Future<bool> _loadCacheFromDisk() async {
-    try {
-      final libraryDir = await getSubtitleLibraryDirectory();
-      final cacheFile = File('${libraryDir.path}/$_cacheFileName');
+  /// 将嵌套 Map 转换为 UI 期望的 List 格式
+  static List<Map<String, dynamic>> _convertNodeMapToList(
+    Map<String, dynamic> nodeMap,
+  ) {
+    final items = <Map<String, dynamic>>[];
 
-      if (!await cacheFile.exists()) return false;
+    for (final entry in nodeMap.entries) {
+      final node = entry.value as Map<String, dynamic>;
+      final meta = node['_meta'] as Map<String, dynamic>;
 
-      final content = await cacheFile.readAsString();
-      final cacheData = jsonDecode(content) as Map<String, dynamic>;
-
-      // 恢复修改时间
-      if (cacheData['lastKnownModified'] != null) {
-        _lastKnownModified = DateTime.parse(cacheData['lastKnownModified']);
+      if (meta['type'] == 'folder') {
+        final childrenMap =
+            node['_children'] as Map<String, dynamic>?;
+        if (childrenMap != null && childrenMap.isNotEmpty) {
+          final children = _convertNodeMapToList(childrenMap);
+          if (children.isNotEmpty) {
+            items.add({
+              'type': 'folder',
+              'title': meta['title'],
+              'path': meta['path'],
+              'children': children,
+            });
+          }
+        }
+      } else {
+        items.add(Map<String, dynamic>.from(meta));
       }
-
-      // 恢复统计信息
-      if (cacheData['stats'] != null) {
-        final statsData = cacheData['stats'];
-        _cachedStats = LibraryStats(
-          totalFiles: statsData['totalFiles'],
-          totalSize: statsData['totalSize'],
-          folderCount: statsData['folderCount'],
-        );
-      }
-
-      // 恢复文件树
-      if (cacheData['fileTree'] != null) {
-        _cachedFileTree =
-            _convertDynamicList(cacheData['fileTree'] as List<dynamic>);
-        print('[SubtitleLibrary] 已从磁盘加载缓存');
-        return true;
-      }
-
-      return false;
-    } catch (e) {
-      print('[SubtitleLibrary] 加载缓存失败: $e');
-      return false;
-    }
-  }
-
-  static List<Map<String, dynamic>> _convertDynamicList(List<dynamic> list) {
-    return list.map((item) {
-      final Map<String, dynamic> map = Map<String, dynamic>.from(item);
-      if (map['children'] != null) {
-        map['children'] = _convertDynamicList(map['children'] as List<dynamic>);
-      }
-      return map;
-    }).toList();
-  }
-
-  /// 检查目录是否有变化
-  static Future<bool> _hasDirectoryChanged(Directory dir) async {
-    if (!await dir.exists()) {
-      return true;
     }
 
-    try {
-      final stat = await dir.stat();
-      final currentModified = stat.modified;
+    // 排序：文件夹在前，然后按名称排序
+    items.sort((a, b) {
+      if (a['type'] == 'folder' && b['type'] != 'folder') return -1;
+      if (a['type'] != 'folder' && b['type'] == 'folder') return 1;
+      return (a['title'] as String).compareTo(b['title'] as String);
+    });
 
-      // 如果没有记录上次修改时间，认为有变化
-      if (_lastKnownModified == null) {
-        _lastKnownModified = currentModified;
-        return true;
-      }
-
-      // 如果修改时间不同，说明有变化
-      if (currentModified != _lastKnownModified) {
-        _lastKnownModified = currentModified;
-        return true;
-      }
-
-      return false;
-    } catch (e) {
-      print('[SubtitleLibrary] 检查目录变化失败: $e');
-      return true; // 出错时认为有变化，重新扫描
-    }
+    return items;
   }
 
   /// 获取字幕库目录
@@ -405,7 +563,6 @@ class SubtitleLibraryService {
       print('[SubtitleLibrary] 创建字幕库目录: ${libraryDir.path}');
     }
 
-    await _ensureRootPath(libraryDir.path);
     return libraryDir;
   }
 
@@ -1057,246 +1214,53 @@ class SubtitleLibraryService {
       return [];
     }
 
-    // 向前兼容：迁移根目录的旧格式文件夹到"已解析"
-    await _migrateOldFormatFolders(libraryDir);
+    // 确保数据库已初始化
+    await _ensureDatabase();
 
-    // 尝试从磁盘加载缓存
-    if (!forceRefresh && _cachedFileTree == null) {
-      await _loadCacheFromDisk();
+    // 强制刷新：先迁移旧格式，再重建数据库
+    if (forceRefresh) {
+      await _migrateOldFormatFolders(libraryDir);
+      await _rebuildDatabase(libraryDir);
     }
 
-    // 检查是否需要刷新缓存
-    final hasChanged = await _hasDirectoryChanged(libraryDir);
-
-    // 如果缓存为空，强制刷新（解决Windows下时间戳可能不更新导致无法检测到新文件的问题）
-    final isCacheEmpty = _cachedFileTree != null && _cachedFileTree!.isEmpty;
-
-    if (!forceRefresh &&
-        !hasChanged &&
-        _cachedFileTree != null &&
-        !isCacheEmpty) {
-      print('[SubtitleLibrary] 使用缓存的文件树');
-      return _cachedFileTree!;
-    }
-
-    print('[SubtitleLibrary] 重新扫描文件树');
-    final fileTree = await _buildFileTree(libraryDir, libraryDir.path);
-
-    // 更新缓存
-    _cachedFileTree = fileTree;
-    await _saveCacheToDisk();
-
-    return fileTree;
+    // 从数据库查询所有记录并构建树
+    final records = await SubtitleDatabase.instance.getAllFiles();
+    return _buildTreeFromRecords(records, libraryDir.path);
   }
 
-  /// 构建文件树
-  static Future<List<Map<String, dynamic>>> _buildFileTree(
-      Directory dir, String rootPath) async {
-    final List<Map<String, dynamic>> items = [];
-
-    try {
-      // 检查路径长度
-      if (dir.path.length > _maxPathLength) {
-        print('[SubtitleLibrary] 路径过长，跳过目录: ${dir.path}');
-        return items;
-      }
-
-      await for (final entity in dir.list(followLinks: false)) {
-        if (entity is Directory) {
-          // 检查子目录路径长度
-          if (entity.path.length > _maxPathLength) {
-            print(
-                '[SubtitleLibrary] 子目录路径过长，跳过: ${entity.path.split(Platform.pathSeparator).last}');
-            continue;
-          }
-
-          final children = await _buildFileTree(entity, rootPath);
-          if (children.isNotEmpty) {
-            items.add({
-              'type': 'folder',
-              'title': entity.path.split(Platform.pathSeparator).last,
-              'path': entity.path,
-              'children': children,
-            });
-          }
-        } else if (entity is File) {
-          final fileName = entity.path.split(Platform.pathSeparator).last;
-          if (FileIconUtils.isLyricFile(fileName)) {
-            try {
-              final stat = await entity.stat();
-              items.add({
-                'type': 'text',
-                'title': fileName,
-                'path': entity.path,
-                'size': stat.size,
-                'modified': stat.modified.toIso8601String(),
-              });
-            } catch (e) {
-              print('[SubtitleLibrary] 读取文件信息失败: $fileName, 错误: $e');
-            }
-          }
-        }
-      }
-    } catch (e) {
-      // 检查是否是路径过长导致的错误
-      if (e is FileSystemException ||
-          e.toString().contains('PathNotFoundException') ||
-          e.toString().contains('系统找不到指定的路径')) {
-        print(
-            '[SubtitleLibrary] 路径过长导致访问失败，跳过: ${dir.path.split(Platform.pathSeparator).last}');
-      } else {
-        print('[SubtitleLibrary] 读取目录失败: ${dir.path}, 错误: $e');
-      }
-    }
-
-    // 按类型和名称排序
-    items.sort((a, b) {
-      if (a['type'] == 'folder' && b['type'] != 'folder') return -1;
-      if (a['type'] != 'folder' && b['type'] == 'folder') return 1;
-      return (a['title'] as String).compareTo(b['title'] as String);
-    });
-
-    return items;
-  }
-
-  /// 外部调用：刷新某个目录的缓存（仅在缓存已构建时生效）
+  /// 外部调用：刷新某个目录的缓存
   static Future<void> refreshDirectoryCache(String directoryPath) async {
     await _refreshDirectoriesAfterChange({directoryPath});
   }
 
   static Future<void> _refreshDirectoriesAfterChange(Set<String> directoryPaths,
       {Function(String)? onProgress}) async {
-    if (directoryPaths.isEmpty) {
-      await _updateLibraryModifiedTime();
-      return;
-    }
-
-    // 如果变更的文件夹数量过多（超过5个），直接进行全量刷新
-    // 因为逐个刷新几千个文件夹的开销远大于一次全量扫描
-    if (directoryPaths.length > 5) {
-      print('[SubtitleLibrary] 变更文件夹数量过多 (${directoryPaths.length})，切换为全量刷新');
-      onProgress?.call('正在重建缓存...');
-      await getSubtitleFiles(forceRefresh: true);
-      return;
-    }
+    if (directoryPaths.isEmpty) return;
 
     try {
-      final libraryDir = await getSubtitleLibraryDirectory();
-
-      if (_cachedFileTree != null && _libraryRootPath != null) {
-        final targets = directoryPaths
-            .where((path) => path.startsWith(_libraryRootPath!))
-            .toSet();
-
-        int count = 0;
-        final total = targets.length;
-        for (final dir in targets) {
-          count++;
-          // 如果数量较多，显示进度
-          if (total > 5 && onProgress != null) {
-            onProgress('正在刷新缓存: $count/$total');
-          }
-          await _refreshDirectorySnapshot(dir);
-        }
-      }
-
-      await _updateLibraryModifiedTime(libraryDir);
-      await _saveCacheToDisk();
-    } catch (e) {
-      print('[SubtitleLibrary] 局部刷新缓存失败: $e');
-    }
-  }
-
-  static Future<void> _refreshDirectorySnapshot(String directoryPath) async {
-    if (_cachedFileTree == null || _libraryRootPath == null) {
-      return;
-    }
-
-    try {
-      final directory = Directory(directoryPath);
-      List<Map<String, dynamic>> newChildren = [];
-      if (await directory.exists()) {
-        newChildren = await _buildFileTree(directory, _libraryRootPath!);
-      }
-
-      final bool isRoot = directoryPath == _libraryRootPath;
-      final List<Map<String, dynamic>>? oldChildren = isRoot
-          ? _cachedFileTree
-          : (_findNodeLocation(directoryPath, _cachedFileTree!)
-              ?.node['children'] as List<Map<String, dynamic>>?);
-
-      if (_cachedStats != null) {
-        final oldStats = _calculateStatsForChildren(
-          oldChildren,
-          includeSelf: !isRoot && oldChildren != null,
-        );
-        final newStats = _calculateStatsForChildren(
-          newChildren,
-          includeSelf: !isRoot,
-        );
-
-        // 如果新子节点为空且不是根目录，说明该文件夹变为空，应该被移除
-        // 这种情况下，统计数据需要减去文件夹本身
-        final bool shouldRemove = !isRoot && newChildren.isEmpty;
-
-        _applyStatsDelta(
-          filesDelta: newStats.files - oldStats.files,
-          foldersDelta:
-              (newStats.folders - (shouldRemove ? 1 : 0)) - oldStats.folders,
-          sizeDelta: newStats.size - oldStats.size,
-        );
-      }
-
-      if (isRoot) {
-        _cachedFileTree = newChildren;
+      // 如果变更目录过多，整体重建
+      if (directoryPaths.length > 50) {
+        print(
+            '[SubtitleLibrary] 变更文件夹数量过多 (${directoryPaths.length})，切换为全量重建');
+        onProgress?.call('正在重建索引...');
+        final libraryDir = await getSubtitleLibraryDirectory();
+        await _rebuildDatabase(libraryDir);
       } else {
-        final location = _findNodeLocation(directoryPath, _cachedFileTree!);
-        if (location == null) {
-          // 节点不存在，尝试添加到父节点
-          if (newChildren.isNotEmpty) {
-            final parentPath = FileSystemEntity.parentOf(directoryPath);
-            final parentLocation =
-                _findNodeLocation(parentPath, _cachedFileTree!);
-
-            if (parentLocation != null) {
-              final parentChildren = parentLocation.node['children']
-                  as List<Map<String, dynamic>>?;
-              if (parentChildren != null) {
-                parentChildren.add({
-                  'type': 'folder',
-                  'title': directoryPath.split(Platform.pathSeparator).last,
-                  'path': directoryPath,
-                  'children': newChildren,
-                });
-
-                // 重新排序
-                parentChildren.sort((a, b) {
-                  if (a['type'] == 'folder' && b['type'] != 'folder') return -1;
-                  if (a['type'] != 'folder' && b['type'] == 'folder') return 1;
-                  return (a['title'] as String).compareTo(b['title'] as String);
-                });
-                return;
-              }
-            }
+        int count = 0;
+        final total = directoryPaths.length;
+        for (final dirPath in directoryPaths) {
+          count++;
+          if (total > 5 && onProgress != null) {
+            onProgress('正在刷新索引: $count/$total');
           }
-
-          final parentPath = FileSystemEntity.parentOf(directoryPath);
-          if (parentPath != directoryPath) {
-            await _refreshDirectorySnapshot(parentPath);
-          }
-          return;
-        }
-
-        if (newChildren.isEmpty) {
-          // 如果文件夹变为空，从父列表中移除
-          location.parentList.removeAt(location.index);
-        } else {
-          location.node['children'] = newChildren;
+          await _syncDirectoryToDatabase(dirPath);
         }
       }
     } catch (e) {
-      print('[SubtitleLibrary] 更新目录缓存失败: $e');
+      print('[SubtitleLibrary] 刷新索引失败: $e');
     }
+
+    _cacheUpdateController.add(null);
   }
 
   /// 删除字幕文件或文件夹
@@ -1589,7 +1553,7 @@ class SubtitleLibraryService {
   }
 
   /// 获取字幕库统计信息
-  /// forceRefresh: 是否强制刷新，忽略缓存
+  /// forceRefresh: 是否强制刷新，重新扫描文件系统
   static Future<LibraryStats> getStats({bool forceRefresh = false}) async {
     final libraryDir = await getSubtitleLibraryDirectory();
 
@@ -1601,133 +1565,24 @@ class SubtitleLibraryService {
       );
     }
 
-    // 尝试从磁盘加载缓存
-    if (!forceRefresh && _cachedStats == null) {
-      await _loadCacheFromDisk();
+    // 确保数据库已初始化
+    await _ensureDatabase();
+
+    if (forceRefresh) {
+      await _rebuildDatabase(libraryDir);
     }
 
-    // 检查是否需要刷新缓存
-    final hasChanged = await _hasDirectoryChanged(libraryDir);
+    // 从数据库查询统计
+    final raw = await SubtitleDatabase.instance.getStatsRaw();
+    final totalFiles = raw['totalFiles'] ?? 0;
+    final totalSize = raw['totalSize'] ?? 0;
+    final folderCount = await SubtitleDatabase.instance.getFolderCount();
 
-    // 如果缓存显示0个文件，强制刷新（解决Windows下时间戳可能不更新导致无法检测到新文件的问题）
-    final isCacheEmpty = _cachedStats != null && _cachedStats!.totalFiles == 0;
-
-    if (!forceRefresh && !hasChanged && _cachedStats != null && !isCacheEmpty) {
-      print('[SubtitleLibrary] 使用缓存的统计信息');
-      return _cachedStats!;
-    }
-
-    print('[SubtitleLibrary] 重新计算统计信息');
-    int fileCount = 0;
-    int folderCount = 0;
-    int totalSize = 0;
-
-    await for (final entity
-        in libraryDir.list(recursive: true, followLinks: false)) {
-      try {
-        // 跳过路径过长的项
-        if (entity.path.length > _maxPathLength) {
-          continue;
-        }
-
-        if (entity is File) {
-          final fileName = entity.path.split(Platform.pathSeparator).last;
-          if (FileIconUtils.isLyricFile(fileName)) {
-            fileCount++;
-            try {
-              final stat = await entity.stat();
-              totalSize += stat.size;
-            } catch (e) {
-              // 忽略无法读取的文件
-            }
-          }
-        } else if (entity is Directory) {
-          folderCount++;
-        }
-      } catch (e) {
-        // 忽略单个文件/文件夹的错误
-        continue;
-      }
-    }
-
-    final stats = LibraryStats(
-      totalFiles: fileCount,
+    return LibraryStats(
+      totalFiles: totalFiles,
       totalSize: totalSize,
       folderCount: folderCount,
     );
-
-    // 更新缓存
-    _cachedStats = stats;
-    await _saveCacheToDisk();
-
-    return stats;
-  }
-
-  static _TreeStats _calculateStatsForChildren(
-      List<Map<String, dynamic>>? children,
-      {bool includeSelf = false}) {
-    final stats = _TreeStats();
-
-    if (children != null) {
-      for (final child in children) {
-        final type = child['type'];
-        if (type == 'text') {
-          stats.files++;
-          stats.size += (child['size'] as int?) ?? 0;
-        } else if (type == 'folder') {
-          stats.folders++;
-          final nestedStats = _calculateStatsForChildren(
-              child['children'] as List<Map<String, dynamic>>?);
-          stats.files += nestedStats.files;
-          stats.folders += nestedStats.folders;
-          stats.size += nestedStats.size;
-        }
-      }
-    }
-
-    if (includeSelf) {
-      stats.folders++;
-    }
-
-    return stats;
-  }
-
-  static void _applyStatsDelta({
-    int filesDelta = 0,
-    int foldersDelta = 0,
-    int sizeDelta = 0,
-  }) {
-    if (_cachedStats == null) return;
-
-    final newFiles = _cachedStats!.totalFiles + filesDelta;
-    final newFolders = _cachedStats!.folderCount + foldersDelta;
-    final newSize = _cachedStats!.totalSize + sizeDelta;
-
-    _cachedStats = LibraryStats(
-      totalFiles: newFiles < 0 ? 0 : newFiles,
-      totalSize: newSize < 0 ? 0 : newSize,
-      folderCount: newFolders < 0 ? 0 : newFolders,
-    );
-  }
-
-  static _NodeLocation? _findNodeLocation(
-      String path, List<Map<String, dynamic>> nodes) {
-    for (int i = 0; i < nodes.length; i++) {
-      final node = nodes[i];
-      if (node['path'] == path) {
-        return _NodeLocation(nodes, i);
-      }
-
-      if (node['type'] == 'folder') {
-        final children = node['children'] as List<Map<String, dynamic>>?;
-        if (children == null) continue;
-        final result = _findNodeLocation(path, children);
-        if (result != null) {
-          return result;
-        }
-      }
-    }
-    return null;
   }
 
   /// 缩短过长的路径
@@ -2068,6 +1923,7 @@ class SubtitleLibraryService {
   }
 
   /// 向前兼容：迁移根目录的旧格式文件夹到"已解析"
+  /// 纯文件系统操作，不依赖数据库
   static Future<void> _migrateOldFormatFolders(Directory libraryDir) async {
     try {
       final parsedFolderPath = '${libraryDir.path}/$parsedFolderName';
@@ -2097,23 +1953,21 @@ class SubtitleLibraryService {
           if (_matchFolderPattern(folderName)) {
             // 标准化文件夹名
             final normalizedName = _normalizeFolderName(folderName);
+            final targetPath = '$parsedFolderPath/$normalizedName';
 
             print(
                 '[SubtitleLibrary] 迁移旧格式文件夹: $folderName -> 已解析/$normalizedName');
 
-            // 使用 move 方法，会自动处理同名文件夹合并
-            final success = await move(entity.path, parsedFolderPath);
-
-            if (success) {
-              migratedCount++;
-
-              // 如果需要重命名（标准化后名称不同）
-              if (normalizedName != folderName) {
-                final movedPath = '$parsedFolderPath/$folderName';
-                if (await Directory(movedPath).exists()) {
-                  await rename(movedPath, normalizedName);
-                }
+            try {
+              if (await Directory(targetPath).exists()) {
+                // 同名文件夹已存在，合并内容
+                await _mergeFolders(entity.path, targetPath);
+              } else {
+                await entity.rename(targetPath);
               }
+              migratedCount++;
+            } catch (e) {
+              print('[SubtitleLibrary] 迁移文件夹失败: $folderName, $e');
             }
           }
         }
@@ -2278,19 +2132,4 @@ class _ImportStats {
   int sizeErrorCount = 0; // 因文件过大被跳过的数量
   int depthErrorCount = 0; // 因嵌套过深被跳过的数量
   int decodeErrorCount = 0; // 解压失败的数量
-}
-
-class _TreeStats {
-  int files = 0;
-  int folders = 0;
-  int size = 0;
-}
-
-class _NodeLocation {
-  final List<Map<String, dynamic>> parentList;
-  final int index;
-
-  _NodeLocation(this.parentList, this.index);
-
-  Map<String, dynamic> get node => parentList[index];
 }
