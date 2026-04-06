@@ -1117,5 +1117,18 @@
 
   "sortDownloadDate": "下載日期",
   "sortWorkId": "ID",
-  "searchDownloads": "搜尋已下載作品..."
+  "searchDownloads": "搜尋已下載作品...",
+
+  "logTitle": "應用日誌",
+  "logSubtitle": "查看、匯出應用運行日誌",
+  "logSearchHint": "搜尋日誌...",
+  "logFilterAll": "全部",
+  "logCopy": "複製日誌",
+  "logExport": "匯出日誌檔案",
+  "logClear": "清空日誌",
+  "logCopied": "日誌已複製到剪貼簿",
+  "logExported": "日誌已匯出到 {path}",
+  "logCount": "{count} 條日誌",
+  "logAutoScroll": "自動捲動",
+  "logEmpty": "暫無日誌"
 }

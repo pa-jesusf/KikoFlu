@@ -3428,4 +3428,44 @@ class SRu extends S {
 
   @override
   String get searchDownloads => 'Поиск загруженных...';
+
+  @override
+  String get logTitle => 'Логи приложения';
+
+  @override
+  String get logSubtitle => 'Просмотр и экспорт логов';
+
+  @override
+  String get logSearchHint => 'Поиск в логах...';
+
+  @override
+  String get logFilterAll => 'Все';
+
+  @override
+  String get logCopy => 'Копировать логи';
+
+  @override
+  String get logExport => 'Экспорт лог-файла';
+
+  @override
+  String get logClear => 'Очистить логи';
+
+  @override
+  String get logCopied => 'Логи скопированы в буфер обмена';
+
+  @override
+  String logExported(String path) {
+    return 'Логи экспортированы в $path';
+  }
+
+  @override
+  String logCount(int count) {
+    return '$count записей';
+  }
+
+  @override
+  String get logAutoScroll => 'Автопрокрутка';
+
+  @override
+  String get logEmpty => 'Логов пока нет';
 }

@@ -3409,4 +3409,44 @@ class SEn extends S {
 
   @override
   String get searchDownloads => 'Search downloaded works...';
+
+  @override
+  String get logTitle => 'App Logs';
+
+  @override
+  String get logSubtitle => 'View and export app logs';
+
+  @override
+  String get logSearchHint => 'Search logs...';
+
+  @override
+  String get logFilterAll => 'All';
+
+  @override
+  String get logCopy => 'Copy Logs';
+
+  @override
+  String get logExport => 'Export Log File';
+
+  @override
+  String get logClear => 'Clear Logs';
+
+  @override
+  String get logCopied => 'Logs copied to clipboard';
+
+  @override
+  String logExported(String path) {
+    return 'Logs exported to $path';
+  }
+
+  @override
+  String logCount(int count) {
+    return '$count entries';
+  }
+
+  @override
+  String get logAutoScroll => 'Auto scroll';
+
+  @override
+  String get logEmpty => 'No logs yet';
 }

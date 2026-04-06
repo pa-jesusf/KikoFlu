@@ -12,6 +12,7 @@ import 'about_screen.dart';
 import 'permissions_screen.dart';
 import 'privacy_mode_settings_screen.dart';
 import 'floating_lyric_style_screen.dart';
+import 'log_screen.dart';
 import '../providers/locale_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/update_provider.dart';
@@ -504,6 +505,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => const PreferencesScreen(),
+                ),
+              );
+            },
+          ),
+          Divider(color: Theme.of(context).colorScheme.outlineVariant),
+          ListTile(
+            leading: Icon(Icons.article_outlined,
+                color: Theme.of(context).colorScheme.primary),
+            title: Text(S.of(context).logTitle),
+            subtitle: Text(S.of(context).logSubtitle),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const LogScreen(),
                 ),
               );
             },

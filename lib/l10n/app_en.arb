@@ -1412,5 +1412,20 @@
 
   "sortDownloadDate": "Download Date",
   "sortWorkId": "ID",
-  "searchDownloads": "Search downloaded works..."
+  "searchDownloads": "Search downloaded works...",
+
+  "logTitle": "App Logs",
+  "logSubtitle": "View and export app logs",
+  "logSearchHint": "Search logs...",
+  "logFilterAll": "All",
+  "logCopy": "Copy Logs",
+  "logExport": "Export Log File",
+  "logClear": "Clear Logs",
+  "logCopied": "Logs copied to clipboard",
+  "logExported": "Logs exported to {path}",
+  "@logExported": { "placeholders": { "path": { "type": "String" } } },
+  "logCount": "{count} entries",
+  "@logCount": { "placeholders": { "count": { "type": "int" } } },
+  "logAutoScroll": "Auto scroll",
+  "logEmpty": "No logs yet"
 }

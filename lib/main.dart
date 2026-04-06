@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ import 'src/services/account_database.dart';
 import 'src/services/cache_service.dart';
 import 'src/services/download_service.dart';
 import 'src/services/floating_lyric_service.dart';
+import 'src/services/log_service.dart';
 import 'l10n/app_localizations.dart';
 import 'src/providers/audio_provider.dart';
 import 'src/providers/auth_provider.dart';
@@ -185,6 +187,9 @@ sub-auto=no
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 初始化日志系统，拦截 print/debugPrint 输出
+  setupLogCapture();
+
   if (args.firstOrNull == 'multi_window') {
     final windowId = args[1];
     final argument = args[2].isEmpty
@@ -269,7 +274,18 @@ void main(List<String> args) async {
     DeviceOrientation.landscapeRight,
   ]);
 
-  runApp(const ProviderScope(child: KikoeruApp()));
+  runZonedGuarded(
+    () => runApp(const ProviderScope(child: KikoeruApp())),
+    (error, stack) {
+      LogService.instance.error('$error\n$stack', tag: 'Zone');
+    },
+    zoneSpecification: ZoneSpecification(
+      print: (self, parent, zone, line) {
+        parent.print(zone, line);
+        LogService.instance.captureOutput(line);
+      },
+    ),
+  );
 }
 
 class KikoeruApp extends ConsumerStatefulWidget {

@@ -1117,5 +1117,18 @@
 
   "sortDownloadDate": "Дата загрузки",
   "sortWorkId": "ID",
-  "searchDownloads": "Поиск загруженных..."
+  "searchDownloads": "Поиск загруженных...",
+
+  "logTitle": "Логи приложения",
+  "logSubtitle": "Просмотр и экспорт логов",
+  "logSearchHint": "Поиск в логах...",
+  "logFilterAll": "Все",
+  "logCopy": "Копировать логи",
+  "logExport": "Экспорт лог-файла",
+  "logClear": "Очистить логи",
+  "logCopied": "Логи скопированы в буфер обмена",
+  "logExported": "Логи экспортированы в {path}",
+  "logCount": "{count} записей",
+  "logAutoScroll": "Автопрокрутка",
+  "logEmpty": "Логов пока нет"
 }

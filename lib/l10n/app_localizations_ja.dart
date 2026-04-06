@@ -3319,4 +3319,44 @@ class SJa extends S {
 
   @override
   String get searchDownloads => 'ダウンロード済み作品を検索...';
+
+  @override
+  String get logTitle => 'アプリログ';
+
+  @override
+  String get logSubtitle => 'アプリログの表示とエクスポート';
+
+  @override
+  String get logSearchHint => 'ログを検索...';
+
+  @override
+  String get logFilterAll => 'すべて';
+
+  @override
+  String get logCopy => 'ログをコピー';
+
+  @override
+  String get logExport => 'ログファイルをエクスポート';
+
+  @override
+  String get logClear => 'ログをクリア';
+
+  @override
+  String get logCopied => 'ログをクリップボードにコピーしました';
+
+  @override
+  String logExported(String path) {
+    return 'ログを $path にエクスポートしました';
+  }
+
+  @override
+  String logCount(int count) {
+    return '$count 件のログ';
+  }
+
+  @override
+  String get logAutoScroll => '自動スクロール';
+
+  @override
+  String get logEmpty => 'ログはありません';
 }

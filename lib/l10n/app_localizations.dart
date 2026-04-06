@@ -6071,6 +6071,78 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Search downloaded works...'**
   String get searchDownloads;
+
+  /// No description provided for @logTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App Logs'**
+  String get logTitle;
+
+  /// No description provided for @logSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View and export app logs'**
+  String get logSubtitle;
+
+  /// No description provided for @logSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search logs...'**
+  String get logSearchHint;
+
+  /// No description provided for @logFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get logFilterAll;
+
+  /// No description provided for @logCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Logs'**
+  String get logCopy;
+
+  /// No description provided for @logExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Log File'**
+  String get logExport;
+
+  /// No description provided for @logClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Logs'**
+  String get logClear;
+
+  /// No description provided for @logCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Logs copied to clipboard'**
+  String get logCopied;
+
+  /// No description provided for @logExported.
+  ///
+  /// In en, this message translates to:
+  /// **'Logs exported to {path}'**
+  String logExported(String path);
+
+  /// No description provided for @logCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entries'**
+  String logCount(int count);
+
+  /// No description provided for @logAutoScroll.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto scroll'**
+  String get logAutoScroll;
+
+  /// No description provided for @logEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No logs yet'**
+  String get logEmpty;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

@@ -1117,5 +1117,18 @@
 
   "sortDownloadDate": "ダウンロード日",
   "sortWorkId": "ID",
-  "searchDownloads": "ダウンロード済み作品を検索..."
+  "searchDownloads": "ダウンロード済み作品を検索...",
+
+  "logTitle": "アプリログ",
+  "logSubtitle": "アプリログの表示とエクスポート",
+  "logSearchHint": "ログを検索...",
+  "logFilterAll": "すべて",
+  "logCopy": "ログをコピー",
+  "logExport": "ログファイルをエクスポート",
+  "logClear": "ログをクリア",
+  "logCopied": "ログをクリップボードにコピーしました",
+  "logExported": "ログを {path} にエクスポートしました",
+  "logCount": "{count} 件のログ",
+  "logAutoScroll": "自動スクロール",
+  "logEmpty": "ログはありません"
 }

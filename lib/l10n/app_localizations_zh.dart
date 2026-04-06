@@ -3300,6 +3300,46 @@ class SZh extends S {
 
   @override
   String get searchDownloads => '搜索已下载作品...';
+
+  @override
+  String get logTitle => '应用日志';
+
+  @override
+  String get logSubtitle => '查看、导出应用运行日志';
+
+  @override
+  String get logSearchHint => '搜索日志...';
+
+  @override
+  String get logFilterAll => '全部';
+
+  @override
+  String get logCopy => '复制日志';
+
+  @override
+  String get logExport => '导出日志文件';
+
+  @override
+  String get logClear => '清空日志';
+
+  @override
+  String get logCopied => '日志已复制到剪贴板';
+
+  @override
+  String logExported(String path) {
+    return '日志已导出到 $path';
+  }
+
+  @override
+  String logCount(int count) {
+    return '$count 条日志';
+  }
+
+  @override
+  String get logAutoScroll => '自动滚动';
+
+  @override
+  String get logEmpty => '暂无日志';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -6598,4 +6638,44 @@ class SZhHant extends SZh {
 
   @override
   String get searchDownloads => '搜尋已下載作品...';
+
+  @override
+  String get logTitle => '應用日誌';
+
+  @override
+  String get logSubtitle => '查看、匯出應用運行日誌';
+
+  @override
+  String get logSearchHint => '搜尋日誌...';
+
+  @override
+  String get logFilterAll => '全部';
+
+  @override
+  String get logCopy => '複製日誌';
+
+  @override
+  String get logExport => '匯出日誌檔案';
+
+  @override
+  String get logClear => '清空日誌';
+
+  @override
+  String get logCopied => '日誌已複製到剪貼簿';
+
+  @override
+  String logExported(String path) {
+    return '日誌已匯出到 $path';
+  }
+
+  @override
+  String logCount(int count) {
+    return '$count 條日誌';
+  }
+
+  @override
+  String get logAutoScroll => '自動捲動';
+
+  @override
+  String get logEmpty => '暫無日誌';
 }
