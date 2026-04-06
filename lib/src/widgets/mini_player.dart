@@ -32,6 +32,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
   Widget build(BuildContext context) {
     final currentTrack = ref.watch(currentTrackProvider);
     final isPlaying = ref.watch(isPlayingProvider);
+    final isTrackLoading = ref.watch(isTrackLoadingProvider).valueOrNull ?? false;
     final position = ref.watch(positionProvider);
     final duration = ref.watch(durationProvider);
     final authState = ref.watch(authProvider);
@@ -424,6 +425,16 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
                                   icon: const Icon(Icons.skip_previous),
                                   iconSize: 24,
                                 ),
+                                if (isTrackLoading)
+                                  const SizedBox(
+                                    width: 28,
+                                    height: 28,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(2),
+                                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                                    ),
+                                  )
+                                else
                                 IconButton(
                                   onPressed: () {
                                     if (isPlaying) {

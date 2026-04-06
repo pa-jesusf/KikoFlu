@@ -726,14 +726,6 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
 
     // 注意：字幕会通过 lyricAutoLoaderProvider 自动加载
     // 不需要手动调用 loadLyricForTrack
-
-    // 显示提示
-    _showSnackBar(
-      SnackBar(
-        content: Text(S.of(context).nowPlayingNOfTotal(title, startIndex + 1, audioTracks.length)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 
   // 获取同一目录下的所有音频文件（不递归子文件夹）

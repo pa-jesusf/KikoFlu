@@ -54,6 +54,8 @@ class AudioPlayerService {
       StreamController.broadcast();
   final StreamController<AudioTrack?> _currentTrackController =
       StreamController.broadcast();
+  final StreamController<bool> _trackLoadingController =
+      StreamController<bool>.broadcast();
 
   // Initialize the service
   Future<void> initialize() async {
@@ -301,6 +303,10 @@ class AudioPlayerService {
   Future<void> _loadTrack(AudioTrack track) async {
     print('[Audio] _loadTrack: title="${track.title}", url="${track.url}"');
 
+    // Emit track immediately so MiniPlayer appears right away
+    _currentTrackController.add(track);
+    _trackLoadingController.add(true);
+
     // Set switching flag and update state to buffering immediately
     _isSwitchingTrack = true;
     _updatePlaybackState();
@@ -377,11 +383,11 @@ class AudioPlayerService {
         print('[Audio] 流式播放: ${track.url}');
       }
 
-      _currentTrackController.add(track);
     } catch (e) {
       print('Error loading audio source: $e');
     } finally {
       _isSwitchingTrack = false;
+      _trackLoadingController.add(false);
       _updatePlaybackState();
     }
   }
@@ -713,6 +719,7 @@ class AudioPlayerService {
   Stream<Duration?> get durationStream => _player.durationStream;
   Stream<List<AudioTrack>> get queueStream => _queueController.stream;
   Stream<AudioTrack?> get currentTrackStream => _currentTrackController.stream;
+  Stream<bool> get trackLoadingStream => _trackLoadingController.stream;
 
   Duration get position => _player.position;
   Duration? get duration => _player.duration;

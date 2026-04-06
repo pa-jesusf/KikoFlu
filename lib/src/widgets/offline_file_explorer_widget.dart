@@ -676,9 +676,6 @@ class _OfflineFileExplorerWidgetState
           startIndex: startIndex,
           work: widget.work,
         );
-
-    SnackBarUtil.showInfo(
-        context, S.of(context).nowPlayingNOfTotal(title, startIndex + 1, audioTracks.length));
   }
 
   // 获取同一目录下的所有音频文件（不递归子文件夹）

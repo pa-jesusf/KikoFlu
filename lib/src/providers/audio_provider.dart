@@ -56,6 +56,12 @@ final isPlayingProvider = Provider<bool>((ref) {
   );
 });
 
+// Track Loading Provider (true while audio source is being loaded)
+final isTrackLoadingProvider = StreamProvider<bool>((ref) {
+  final service = ref.watch(audioPlayerServiceProvider);
+  return service.trackLoadingStream;
+});
+
 // Progress Provider (convenience)
 final progressProvider = Provider<double>((ref) {
   final position = ref.watch(positionProvider);
