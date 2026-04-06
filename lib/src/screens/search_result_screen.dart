@@ -140,11 +140,11 @@ class _SearchResultContentState extends ConsumerState<_SearchResultContent> {
   String _getLayoutTooltip(SearchLayoutType layoutType) {
     switch (layoutType) {
       case SearchLayoutType.bigGrid:
-        return '切换到小网格视图';
+        return S.of(context).switchToSmallGrid;
       case SearchLayoutType.smallGrid:
-        return '切换到列表视图';
+        return S.of(context).switchToList;
       case SearchLayoutType.list:
-        return '切换到大网格视图';
+        return S.of(context).switchToLargeGrid;
     }
   }
 
@@ -515,7 +515,7 @@ class _SearchResultContentState extends ConsumerState<_SearchResultContent> {
             ref.read(searchResultProvider.notifier).goToPage(page);
           },
           onScrollToTop: _scrollToTop,
-          endMessage: '~',
+          endMessage: S.of(context).reachedEnd,
         ),
         if (searchState.rawWorks.length > searchState.works.length) ...[
           const SizedBox(height: 8),

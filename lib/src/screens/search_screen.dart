@@ -322,7 +322,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                   }
                 });
               },
-              tooltip: '筛选',
+              tooltip: S.of(context).filter,
             ),
           ],
         ),
