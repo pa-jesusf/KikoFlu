@@ -60,6 +60,8 @@ class FloatingLyricView(
     init {
         // 使用 GradientDrawable 创建圆角背景
         updateBackground()
+        clipChildren = false
+        clipToPadding = false
         
         setPadding(
             dpToPx(20f).toInt(),
@@ -92,11 +94,15 @@ class FloatingLyricView(
             alpha = 0.7f
         }
 
+        // 将图标放在 padding 区域（右上角边框空白处），使用负 margin 突破内容区
         addView(lockIndicator, LayoutParams(
-            dpToPx(12f).toInt(),
-            dpToPx(12f).toInt(),
+            dpToPx(10f).toInt(),
+            dpToPx(10f).toInt(),
             Gravity.END or Gravity.TOP
-        ))
+        ).apply {
+            topMargin = -dpToPx(8f).toInt()
+            rightMargin = -dpToPx(16f).toInt()
+        })
 
         updateLockIndicator()
     }
