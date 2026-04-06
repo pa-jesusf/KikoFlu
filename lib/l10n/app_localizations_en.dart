@@ -3398,4 +3398,13 @@ class SEn extends S {
 
   @override
   String get subtitleFolderUnknown => 'Unknown Works';
+
+  @override
+  String get sortDownloadDate => 'Download Date';
+
+  @override
+  String get sortWorkId => 'ID';
+
+  @override
+  String get searchDownloads => 'Search downloaded works...';
 }

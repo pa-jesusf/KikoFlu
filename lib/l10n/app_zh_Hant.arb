@@ -1113,5 +1113,9 @@
   "platformHintDefault": "選擇一個用於儲存下載檔案的目錄",
   "subtitleFolderParsed": "已解析",
   "subtitleFolderSaved": "已儲存",
-  "subtitleFolderUnknown": "未知作品"
+  "subtitleFolderUnknown": "未知作品",
+
+  "sortDownloadDate": "下載日期",
+  "sortWorkId": "ID",
+  "searchDownloads": "搜尋已下載作品..."
 }

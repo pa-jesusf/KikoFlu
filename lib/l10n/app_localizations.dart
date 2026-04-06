@@ -6053,6 +6053,24 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Unknown Works'**
   String get subtitleFolderUnknown;
+
+  /// No description provided for @sortDownloadDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Date'**
+  String get sortDownloadDate;
+
+  /// No description provided for @sortWorkId.
+  ///
+  /// In en, this message translates to:
+  /// **'ID'**
+  String get sortWorkId;
+
+  /// No description provided for @searchDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Search downloaded works...'**
+  String get searchDownloads;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

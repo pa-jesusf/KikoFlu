@@ -3291,6 +3291,15 @@ class SZh extends S {
 
   @override
   String get subtitleFolderUnknown => '未知作品';
+
+  @override
+  String get sortDownloadDate => '下载日期';
+
+  @override
+  String get sortWorkId => 'ID';
+
+  @override
+  String get searchDownloads => '搜索已下载作品...';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -6580,4 +6589,13 @@ class SZhHant extends SZh {
 
   @override
   String get subtitleFolderUnknown => '未知作品';
+
+  @override
+  String get sortDownloadDate => '下載日期';
+
+  @override
+  String get sortWorkId => 'ID';
+
+  @override
+  String get searchDownloads => '搜尋已下載作品...';
 }

@@ -1408,5 +1408,9 @@
   "platformHintDefault": "Select a directory to save downloaded files",
   "subtitleFolderParsed": "Parsed",
   "subtitleFolderSaved": "Saved",
-  "subtitleFolderUnknown": "Unknown Works"
+  "subtitleFolderUnknown": "Unknown Works",
+
+  "sortDownloadDate": "Download Date",
+  "sortWorkId": "ID",
+  "searchDownloads": "Search downloaded works..."
 }

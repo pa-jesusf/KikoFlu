@@ -3310,4 +3310,13 @@ class SJa extends S {
 
   @override
   String get subtitleFolderUnknown => '不明な作品';
+
+  @override
+  String get sortDownloadDate => 'ダウンロード日';
+
+  @override
+  String get sortWorkId => 'ID';
+
+  @override
+  String get searchDownloads => 'ダウンロード済み作品を検索...';
 }

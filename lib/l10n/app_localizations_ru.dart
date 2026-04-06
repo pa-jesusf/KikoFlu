@@ -3419,4 +3419,13 @@ class SRu extends S {
 
   @override
   String get subtitleFolderUnknown => 'Неизвестные';
+
+  @override
+  String get sortDownloadDate => 'Дата загрузки';
+
+  @override
+  String get sortWorkId => 'ID';
+
+  @override
+  String get searchDownloads => 'Поиск загруженных...';
 }

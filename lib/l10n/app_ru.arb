@@ -1113,5 +1113,9 @@
   "platformHintDefault": "Выберите директорию для сохранения загруженных файлов",
   "subtitleFolderParsed": "Разобранные",
   "subtitleFolderSaved": "Сохранённые",
-  "subtitleFolderUnknown": "Неизвестные"
+  "subtitleFolderUnknown": "Неизвестные",
+
+  "sortDownloadDate": "Дата загрузки",
+  "sortWorkId": "ID",
+  "searchDownloads": "Поиск загруженных..."
 }

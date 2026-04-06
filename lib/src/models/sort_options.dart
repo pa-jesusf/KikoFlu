@@ -8,6 +8,8 @@ enum SortOrder {
   price('price', '价格'),
   nsfw('nsfw', '全年龄'),
   updatedAt('updated_at', '标记时间'),
+  downloadDate('download_date', '下载日期'),
+  workId('work_id', 'ID'),
   ;
 
   const SortOrder(this.value, this.label);

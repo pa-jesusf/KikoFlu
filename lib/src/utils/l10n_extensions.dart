@@ -70,6 +70,8 @@ extension SortOrderL10n on SortOrder {
       SortOrder.price => s.sortPrice,
       SortOrder.nsfw => s.sortNsfw,
       SortOrder.updatedAt => s.sortUpdatedAt,
+      SortOrder.downloadDate => s.sortDownloadDate,
+      SortOrder.workId => s.sortWorkId,
     };
   }
 }

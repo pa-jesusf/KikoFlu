@@ -1113,5 +1113,9 @@
   "platformHintDefault": "ダウンロードファイルを保存するディレクトリを選択してください",
   "subtitleFolderParsed": "解析済み",
   "subtitleFolderSaved": "保存済み",
-  "subtitleFolderUnknown": "不明な作品"
+  "subtitleFolderUnknown": "不明な作品",
+
+  "sortDownloadDate": "ダウンロード日",
+  "sortWorkId": "ID",
+  "searchDownloads": "ダウンロード済み作品を検索..."
 }

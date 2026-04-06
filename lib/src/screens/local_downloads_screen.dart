@@ -6,12 +6,14 @@ import 'dart:io';
 
 import '../../l10n/app_localizations.dart';
 import '../models/download_task.dart';
+import '../models/sort_options.dart';
 import '../models/work.dart';
 import '../services/download_service.dart';
 import '../utils/string_utils.dart';
 import '../utils/snackbar_util.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/pagination_bar.dart';
+import '../widgets/sort_dialog.dart';
 import 'offline_work_detail_screen.dart';
 import '../widgets/overscroll_next_page_detector.dart';
 import '../widgets/privacy_blur_cover.dart';
@@ -32,6 +34,15 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
   final ScrollController _scrollController = ScrollController();
   int _currentPage = 1;
   final int _pageSize = 30;
+
+  // 搜索相关
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  bool _isSearchVisible = false;
+
+  // 排序相关
+  SortOrder _sortOrder = SortOrder.downloadDate;
+  SortDirection _sortDirection = SortDirection.desc;
 
   void _showSnackBarSafe(SnackBar snackBar) {
     if (!mounted) return;
@@ -92,6 +103,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -369,6 +381,96 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
     }
   }
 
+  // 显示排序对话框
+  void _showSortDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: !Platform.isIOS,
+      builder: (context) => CommonSortDialog(
+        title: S.of(context).sortOptions,
+        currentOption: _sortOrder,
+        currentDirection: _sortDirection,
+        availableOptions: const [
+          SortOrder.downloadDate,
+          SortOrder.workId,
+        ],
+        onSort: (option, direction) {
+          setState(() {
+            _sortOrder = option;
+            _sortDirection = direction;
+            _currentPage = 1;
+          });
+        },
+        autoClose: true,
+      ),
+    );
+  }
+
+  // 切换搜索栏可见性
+  void _toggleSearch() {
+    setState(() {
+      _isSearchVisible = !_isSearchVisible;
+      if (!_isSearchVisible) {
+        _searchController.clear();
+        _searchQuery = '';
+        _currentPage = 1;
+      }
+    });
+  }
+
+  // 过滤作品（根据搜索关键词）
+  Map<int, List<DownloadTask>> _filterTasks(
+      Map<int, List<DownloadTask>> groupedTasks) {
+    if (_searchQuery.isEmpty) return groupedTasks;
+
+    final query = _searchQuery.toLowerCase();
+    return Map.fromEntries(
+      groupedTasks.entries.where((entry) {
+        final workId = entry.key;
+        final tasks = entry.value;
+        final firstTask = tasks.first;
+
+        // 匹配作品标题
+        if (firstTask.workTitle.toLowerCase().contains(query)) return true;
+
+        // 匹配 RJ 号（workId）
+        final rjCode = 'RJ${workId.toString().padLeft(6, '0')}';
+        if (rjCode.toLowerCase().contains(query)) return true;
+        if (workId.toString().contains(query)) return true;
+
+        return false;
+      }),
+    );
+  }
+
+  // 排序作品
+  List<int> _sortWorkIds(Map<int, List<DownloadTask>> groupedTasks) {
+    final workIds = groupedTasks.keys.toList();
+
+    workIds.sort((a, b) {
+      int result;
+      switch (_sortOrder) {
+        case SortOrder.downloadDate:
+          final aDate = groupedTasks[a]!
+              .map((t) => t.completedAt ?? t.createdAt)
+              .reduce((a, b) => a.isAfter(b) ? a : b);
+          final bDate = groupedTasks[b]!
+              .map((t) => t.completedAt ?? t.createdAt)
+              .reduce((a, b) => a.isAfter(b) ? a : b);
+          result = aDate.compareTo(bDate);
+          break;
+        case SortOrder.workId:
+          result = a.compareTo(b);
+          break;
+        default:
+          result = 0;
+      }
+      return _sortDirection == SortDirection.asc ? result : -result;
+    });
+
+    return workIds;
+  }
+
   void _openWorkDetail(int workId, DownloadTask task) async {
     print(
         '[LocalDownloads] 打开作品详情: workId=$workId, hasMetadata=${task.workMetadata != null}');
@@ -472,19 +574,25 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
             tasks.where((t) => t.status == DownloadStatus.completed).toList();
 
         // 按作品分组
-        final Map<int, List<DownloadTask>> groupedTasks = {};
+        final Map<int, List<DownloadTask>> allGroupedTasks = {};
         for (final task in completedTasks) {
-          groupedTasks.putIfAbsent(task.workId, () => []).add(task);
+          allGroupedTasks.putIfAbsent(task.workId, () => []).add(task);
         }
 
+        // 应用搜索过滤
+        final groupedTasks = _filterTasks(allGroupedTasks);
+
+        // 应用排序
+        final sortedWorkIds = _sortWorkIds(groupedTasks);
+
         // 计算分页
-        final totalCount = groupedTasks.length;
+        final totalCount = sortedWorkIds.length;
         final totalPages = (totalCount / _pageSize).ceil();
         final startIndex = (_currentPage - 1) * _pageSize;
         final endIndex = (startIndex + _pageSize).clamp(0, totalCount);
 
         // 获取当前页的作品
-        final currentPageWorkIds = groupedTasks.keys.toList().sublist(
+        final currentPageWorkIds = sortedWorkIds.sublist(
               startIndex,
               endIndex,
             );
@@ -495,10 +603,12 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
         return Column(
           children: [
             // 顶部工具栏
-            _buildTopBar(groupedTasks),
+            _buildTopBar(allGroupedTasks),
+            // 搜索栏
+            if (_isSearchVisible) _buildSearchBar(),
             // 内容区域
             Expanded(
-              child: groupedTasks.isEmpty
+              child: allGroupedTasks.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -511,6 +621,29 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                           const SizedBox(height: 16),
                           Text(
                             S.of(context).noLocalDownloads,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : groupedTasks.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 64,
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            S.of(context).noResults,
                             style: TextStyle(
                               fontSize: 16,
                               color: Theme.of(context)
@@ -719,10 +852,79 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                           onPressed: _openDownloadFolder,
                         ),
                       ),
+                    // 搜索按钮
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: IconButton(
+                        icon: Icon(
+                          _isSearchVisible ? Icons.search_off : Icons.search,
+                          size: 22,
+                        ),
+                        padding: const EdgeInsets.all(8),
+                        constraints:
+                            const BoxConstraints(minWidth: 40, minHeight: 40),
+                        onPressed: _toggleSearch,
+                        tooltip: S.of(context).search,
+                      ),
+                    ),
+                    // 排序按钮
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: IconButton(
+                        icon: const Icon(Icons.sort, size: 22),
+                        padding: const EdgeInsets.all(8),
+                        constraints:
+                            const BoxConstraints(minWidth: 40, minHeight: 40),
+                        onPressed: _showSortDialog,
+                        tooltip: S.of(context).sortOptions,
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: Theme.of(context)
+          .colorScheme
+          .surfaceContainerHighest
+          .withOpacity(0.3),
+      child: TextField(
+        controller: _searchController,
+        autofocus: true,
+        decoration: InputDecoration(
+          hintText: S.of(context).searchDownloads,
+          prefixIcon: const Icon(Icons.search, size: 20),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 20),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      _searchQuery = '';
+                      _currentPage = 1;
+                    });
+                  },
+                )
+              : null,
+          isDense: true,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        onChanged: (value) {
+          setState(() {
+            _searchQuery = value;
+            _currentPage = 1;
+          });
+        },
+      ),
     );
   }
 
