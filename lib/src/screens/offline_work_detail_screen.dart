@@ -177,7 +177,13 @@ class _OfflineWorkDetailScreenState
         final tempFile = File('${tempDir.path}/$fileName');
         await tempFile.writeAsBytes(zipBytes);
         try {
-          await Share.shareXFiles([XFile(tempFile.path)]);
+          final box = context.findRenderObject() as RenderBox?;
+          await Share.shareXFiles(
+            [XFile(tempFile.path)],
+            sharePositionOrigin: box != null
+                ? box.localToGlobal(Offset.zero) & box.size
+                : Rect.fromLTWH(0, 0, MediaQuery.of(context).size.width, 80),
+          );
         } finally {
           if (await tempFile.exists()) {
             await tempFile.delete();

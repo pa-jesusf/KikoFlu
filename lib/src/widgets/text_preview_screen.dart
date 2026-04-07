@@ -165,7 +165,13 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
         final bytes = _encodeString(contentToSave);
         await tempFile.writeAsBytes(bytes);
         try {
-          await Share.shareXFiles([XFile(tempFile.path)]);
+          final box = context.findRenderObject() as RenderBox?;
+          await Share.shareXFiles(
+            [XFile(tempFile.path)],
+            sharePositionOrigin: box != null
+                ? box.localToGlobal(Offset.zero) & box.size
+                : Rect.fromLTWH(0, 0, MediaQuery.of(context).size.width, 80),
+          );
         } finally {
           if (await tempFile.exists()) {
             await tempFile.delete();
