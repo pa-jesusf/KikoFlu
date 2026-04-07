@@ -2482,6 +2482,9 @@ class SZh extends S {
   String get cornerRadius => '圆角半径';
 
   @override
+  String get textStroke => '文字描边';
+
+  @override
   String get horizontalPadding => '水平内边距';
 
   @override
@@ -5818,6 +5821,9 @@ class SZhHant extends SZh {
 
   @override
   String get cornerRadius => '圓角半徑';
+
+  @override
+  String get textStroke => '文字描邊';
 
   @override
   String get horizontalPadding => '水平內邊距';

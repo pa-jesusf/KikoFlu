@@ -1076,6 +1076,7 @@
   "colorSettings": "Color Settings",
   "shapeSettings": "Shape Settings",
   "cornerRadius": "Corner Radius",
+  "textStroke": "Text Stroke",
   "horizontalPadding": "Horizontal Padding",
   "verticalPadding": "Vertical Padding",
   "resetStyle": "Reset Style",

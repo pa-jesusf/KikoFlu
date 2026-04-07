@@ -198,7 +198,8 @@ class FloatingLyricView(
         backgroundColor: Int?,
         cornerRadius: Float?,
         paddingHorizontal: Float?,
-        paddingVertical: Float?
+        paddingVertical: Float?,
+        textStrokeWidth: Float?
     ) {
         fontSize?.let {
             textView.textSize = it
@@ -225,6 +226,17 @@ class FloatingLyricView(
             val pH = paddingHorizontal?.let { dpToPx(it).toInt() } ?: paddingLeft
             val pV = paddingVertical?.let { dpToPx(it).toInt() } ?: paddingTop
             setPadding(pH, pV, pH, pV)
+        }
+
+        textStrokeWidth?.let { width ->
+            if (width > 0f) {
+                val radius = dpToPx(width)
+                val color = textView.currentTextColor
+                // Use shadow to simulate stroke/outline effect
+                textView.setShadowLayer(radius, 0f, 0f, color)
+            } else {
+                textView.setShadowLayer(0f, 0f, 0f, Color.TRANSPARENT)
+            }
         }
     }
 

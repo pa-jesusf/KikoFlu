@@ -82,6 +82,20 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
                     fontSize: style.fontSize,
                     fontWeight: FontWeight.w500,
                     letterSpacing: 0.5,
+                    shadows: style.textStrokeWidth > 0
+                        ? [
+                            Shadow(
+                              offset: const Offset(1.0, 1.0),
+                              blurRadius: style.textStrokeWidth * 2,
+                              color: style.textColor.withValues(alpha: 0.9),
+                            ),
+                            Shadow(
+                              offset: const Offset(-1.0, -1.0),
+                              blurRadius: style.textStrokeWidth * 2,
+                              color: style.textColor.withValues(alpha: 0.9),
+                            ),
+                          ]
+                        : null,
                   ),
                 ),
               ),
@@ -423,6 +437,32 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
                 ref
                     .read(floatingLyricStyleProvider.notifier)
                     .updatePaddingVertical(value);
+              },
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(S.of(context).textStroke, style: Theme.of(context).textTheme.bodyMedium),
+                Text(
+                  style.textStrokeWidth.toStringAsFixed(1),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
+            ),
+            Slider(
+              value: style.textStrokeWidth,
+              min: 0,
+              max: 4,
+              divisions: 8,
+              label: style.textStrokeWidth.toStringAsFixed(1),
+              onChanged: (value) {
+                ref
+                    .read(floatingLyricStyleProvider.notifier)
+                    .updateTextStrokeWidth(value);
               },
             ),
           ],

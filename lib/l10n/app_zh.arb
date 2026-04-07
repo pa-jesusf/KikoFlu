@@ -831,6 +831,7 @@
   "colorSettings": "颜色设置",
   "shapeSettings": "形状设置",
   "cornerRadius": "圆角半径",
+  "textStroke": "文字描边",
   "horizontalPadding": "水平内边距",
   "verticalPadding": "垂直内边距",
   "resetStyle": "重置样式",

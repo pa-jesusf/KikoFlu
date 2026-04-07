@@ -831,6 +831,7 @@
   "colorSettings": "色設定",
   "shapeSettings": "形状設定",
   "cornerRadius": "角の半径",
+  "textStroke": "テキスト縁取り",
   "horizontalPadding": "水平パディング",
   "verticalPadding": "垂直パディング",
   "resetStyle": "スタイルをリセット",

@@ -2562,6 +2562,9 @@ class SRu extends S {
   String get cornerRadius => 'Радиус скругления';
 
   @override
+  String get textStroke => 'Обводка текста';
+
+  @override
   String get horizontalPadding => 'Горизонтальный отступ';
 
   @override

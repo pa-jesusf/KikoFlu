@@ -831,6 +831,7 @@
   "colorSettings": "Настройки цвета",
   "shapeSettings": "Настройки формы",
   "cornerRadius": "Радиус скругления",
+  "textStroke": "Обводка текста",
   "horizontalPadding": "Горизонтальный отступ",
   "verticalPadding": "Вертикальный отступ",
   "resetStyle": "Сбросить стиль",

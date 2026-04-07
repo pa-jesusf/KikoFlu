@@ -71,6 +71,7 @@ class FloatingLyricService {
                 cornerRadius: style['cornerRadius'],
                 paddingHorizontal: style['paddingHorizontal'],
                 paddingVertical: style['paddingVertical'],
+                textStrokeWidth: style['textStrokeWidth'],
               );
             }
             return true;
@@ -234,6 +235,7 @@ class FloatingLyricService {
     double? cornerRadius,
     double? paddingHorizontal,
     double? paddingVertical,
+    double? textStrokeWidth,
   }) async {
     if (!isSupported) {
       return false;
@@ -247,6 +249,7 @@ class FloatingLyricService {
     if (paddingHorizontal != null)
       params['paddingHorizontal'] = paddingHorizontal;
     if (paddingVertical != null) params['paddingVertical'] = paddingVertical;
+    if (textStrokeWidth != null) params['textStrokeWidth'] = textStrokeWidth;
 
     if (Platform.isWindows) {
       if (_windowId != null) {

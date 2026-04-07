@@ -4596,6 +4596,12 @@ abstract class S {
   /// **'Corner Radius'**
   String get cornerRadius;
 
+  /// No description provided for @textStroke.
+  ///
+  /// In en, this message translates to:
+  /// **'Text Stroke'**
+  String get textStroke;
+
   /// No description provided for @horizontalPadding.
   ///
   /// In en, this message translates to:

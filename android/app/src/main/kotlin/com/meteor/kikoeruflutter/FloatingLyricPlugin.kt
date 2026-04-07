@@ -198,6 +198,7 @@ class FloatingLyricPlugin private constructor(private val context: Context) : Me
             val cornerRadius = call.argument<Double>("cornerRadius")
             val paddingHorizontal = call.argument<Double>("paddingHorizontal")
             val paddingVertical = call.argument<Double>("paddingVertical")
+            val textStrokeWidth = call.argument<Double>("textStrokeWidth")
 
             floatingView?.updateStyle(
                 fontSize?.toFloat(),
@@ -205,7 +206,8 @@ class FloatingLyricPlugin private constructor(private val context: Context) : Me
                 backgroundColor,
                 cornerRadius?.toFloat(),
                 paddingHorizontal?.toFloat(),
-                paddingVertical?.toFloat()
+                paddingVertical?.toFloat(),
+                textStrokeWidth?.toFloat()
             )
             result.success(true)
         } catch (e: Exception) {

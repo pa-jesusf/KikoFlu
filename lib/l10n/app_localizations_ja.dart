@@ -2492,6 +2492,9 @@ class SJa extends S {
   String get cornerRadius => '角の半径';
 
   @override
+  String get textStroke => 'テキスト縁取り';
+
+  @override
   String get horizontalPadding => '水平パディング';
 
   @override

@@ -85,6 +85,7 @@ class FloatingLyricWindow: NSPanel {
     private var _cornerRadius: CGFloat = 8.0
     private var _paddingHorizontal: CGFloat = 16.0
     private var _paddingVertical: CGFloat = 8.0
+    private var _textStrokeWidth: CGFloat = 0.0
 
     init() {
         super.init(
@@ -147,12 +148,26 @@ class FloatingLyricWindow: NSPanel {
         if let paddingV = args["paddingVertical"] as? Double {
             _paddingVertical = CGFloat(paddingV)
         }
+        if let strokeWidth = args["textStrokeWidth"] as? Double {
+            _textStrokeWidth = CGFloat(strokeWidth)
+        }
         
         // Apply styles
         lyricView.font = NSFont.systemFont(ofSize: _fontSize, weight: .bold)
         lyricView.textColor = _textColor
         backgroundView.layer?.backgroundColor = _backgroundColor.cgColor
         backgroundView.layer?.cornerRadius = _cornerRadius
+        
+        // Apply text shadow for stroke effect
+        if _textStrokeWidth > 0 {
+            let shadow = NSShadow()
+            shadow.shadowColor = _textColor
+            shadow.shadowBlurRadius = _textStrokeWidth
+            shadow.shadowOffset = .zero
+            lyricView.shadow = shadow
+        } else {
+            lyricView.shadow = nil
+        }
         
         resizeToFit()
     }

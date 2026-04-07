@@ -171,6 +171,21 @@ class FloatingLyricManager: NSObject, AVPictureInPictureControllerDelegate {
             if let cornerRadius = args["cornerRadius"] as? Double {
                 view.layer.cornerRadius = CGFloat(cornerRadius)
             }
+            
+            if let strokeWidth = args["textStrokeWidth"] as? Double {
+                if strokeWidth > 0 {
+                    view.layer.shadowColor = (view.textColor ?? .white).cgColor
+                    view.layer.shadowRadius = CGFloat(strokeWidth)
+                    view.layer.shadowOpacity = 1.0
+                    view.layer.shadowOffset = .zero
+                    view.clipsToBounds = false
+                } else {
+                    view.layer.shadowColor = UIColor.clear.cgColor
+                    view.layer.shadowRadius = 0
+                    view.layer.shadowOpacity = 0
+                    view.clipsToBounds = true
+                }
+            }
         }
     }
     
