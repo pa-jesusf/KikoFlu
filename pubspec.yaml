@@ -66,6 +66,9 @@ dependencies:
   gbk_codec: ^0.4.0
   charset: ^2.0.1
   
+  # Share
+  share_plus: ^10.1.4
+
   # System Integration
   url_launcher: ^6.2.2
   open_filex: ^4.5.0

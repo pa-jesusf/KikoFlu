@@ -61,6 +61,8 @@ PODS:
   - SDWebImage (5.21.6):
     - SDWebImage/Core (= 5.21.6)
   - SDWebImage/Core (5.21.6)
+  - share_plus (0.0.1):
+    - Flutter
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -84,6 +86,7 @@ DEPENDENCIES:
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - saver_gallery (from `.symlinks/plugins/saver_gallery/ios`)
+  - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
@@ -121,6 +124,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
   saver_gallery:
     :path: ".symlinks/plugins/saver_gallery/ios"
+  share_plus:
+    :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sqflite_darwin:
@@ -145,6 +150,7 @@ SPEC CHECKSUMS:
   ReachabilitySwift: 32793e867593cfc1177f5d16491e3a197d2fccda
   saver_gallery: af2d0c762dafda254e0ad025ef0dabd6506cd490
   SDWebImage: 1bb6a1b84b6fe87b972a102bdc77dd589df33477
+  share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4

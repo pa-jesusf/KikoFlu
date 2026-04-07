@@ -28,7 +28,7 @@ import '../widgets/work_detail/tag_vote_dialog.dart';
 import '../widgets/work_detail/add_tag_dialog.dart';
 import '../widgets/work_detail/recommendation_section.dart';
 
-import '../widgets/cover_preview_dialog.dart';
+import '../widgets/image_gallery_screen.dart';
 
 class WorkDetailScreen extends ConsumerStatefulWidget {
   final Work work;
@@ -615,11 +615,19 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
     final effectiveHeroTag = widget.heroTag ?? 'work_cover_${widget.work.id}';
     final coverWidget = GestureDetector(
       onLongPress: () {
-        CoverPreviewDialog.show(
-          context,
-          imageUrl: work.getCoverImageUrl(host, token: token),
-          identifier: widget.work.id.toString(),
-          heroTag: effectiveHeroTag,
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ImageGalleryScreen(
+              images: [
+                {
+                  'url': work.getCoverImageUrl(host, token: token),
+                  'title': work.title,
+                  'hash': '',
+                },
+              ],
+              initialIndex: 0,
+            ),
+          ),
         );
       },
       child: Padding(

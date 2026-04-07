@@ -252,6 +252,7 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
     final currentImage = widget.images[_currentIndex];
     final title = currentImage['title'] ?? '';
     final pageLabel = '${_currentIndex + 1}/${widget.images.length}';
+    final isSingleImage = widget.images.length == 1;
 
     final imageArea = _buildImagePageView(isLandscape);
 
@@ -264,7 +265,7 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
           backgroundColor: Colors.black.withOpacity(0.4),
           elevation: 0,
           foregroundColor: Colors.white,
-          title: Text(pageLabel),
+          title: isSingleImage ? (title.isNotEmpty ? Text(title) : null) : Text(pageLabel),
           actions: [
             if (_isSaving)
               const Padding(
@@ -284,17 +285,18 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
                 onPressed: _saveImage,
                 tooltip: S.of(context).saveImage,
               ),
-            IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.of(context).maybePop(),
-            ),
+            if (isLandscape)
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).maybePop(),
+              ),
           ],
         ),
         body: SafeArea(
           child: Stack(
             children: [
               Positioned.fill(child: imageArea),
-              if (title.isNotEmpty)
+              if (title.isNotEmpty && !isSingleImage)
                 Positioned(
                   left: 16,
                   right: 16,
@@ -315,20 +317,22 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
         elevation: 0,
         foregroundColor: Colors.white,
         titleSpacing: 16,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(pageLabel, style: const TextStyle(fontSize: 16)),
-            if (title.isNotEmpty)
-              Text(
-                title,
-                style: const TextStyle(fontSize: 12),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+        title: isSingleImage
+            ? (title.isNotEmpty ? Text(title, style: const TextStyle(fontSize: 16)) : null)
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(pageLabel, style: const TextStyle(fontSize: 16)),
+                  if (title.isNotEmpty)
+                    Text(
+                      title,
+                      style: const TextStyle(fontSize: 12),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
               ),
-          ],
-        ),
         actions: [
           if (_isSaving)
             const Padding(
@@ -356,7 +360,7 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
             child: Stack(
               children: [
                 Positioned.fill(child: imageArea),
-                if (title.isNotEmpty)
+                if (title.isNotEmpty && !isSingleImage)
                   Positioned(
                     left: 16,
                     right: 16,
@@ -366,7 +370,7 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
               ],
             ),
           ),
-          _buildThumbnailStrip(),
+          if (!isSingleImage) _buildThumbnailStrip(),
         ],
       ),
     );

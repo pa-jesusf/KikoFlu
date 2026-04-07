@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../services/cache_service.dart';
 import '../services/translation_service.dart';
@@ -150,34 +152,48 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
     }
 
     try {
-      // 选择保存目录
-      final directoryPath = await FilePicker.platform.getDirectoryPath();
-      if (directoryPath == null) return;
-
       // 生成文件名
       String fileName = widget.title;
       if (!fileName.contains('.')) {
         fileName = '$fileName.txt';
       }
 
-      // 检查文件是否已存在，如果存在则添加序号
-      String finalPath = path.join(directoryPath, fileName);
-      int counter = 1;
-      while (await File(finalPath).exists()) {
-        final nameWithoutExt = path.basenameWithoutExtension(fileName);
-        final ext = path.extension(fileName);
-        finalPath = path.join(directoryPath, '${nameWithoutExt}_$counter$ext');
-        counter++;
-      }
+      if (Platform.isIOS) {
+        // iOS: 通过分享面板保存
+        final tempDir = await getTemporaryDirectory();
+        final tempFile = File('${tempDir.path}/$fileName');
+        final bytes = _encodeString(contentToSave);
+        await tempFile.writeAsBytes(bytes);
+        try {
+          await Share.shareXFiles([XFile(tempFile.path)]);
+        } finally {
+          if (await tempFile.exists()) {
+            await tempFile.delete();
+          }
+        }
+      } else {
+        // 其他平台: 选择目录后写入
+        final directoryPath = await FilePicker.platform.getDirectoryPath();
+        if (directoryPath == null) return;
 
-      // 写入文件
-      final file = File(finalPath);
-      // 使用原始编码保存，保持编码一致性
-      final bytes = _encodeString(contentToSave);
-      await file.writeAsBytes(bytes);
+        // 检查文件是否已存在，如果存在则添加序号
+        String finalPath = path.join(directoryPath, fileName);
+        int counter = 1;
+        while (await File(finalPath).exists()) {
+          final nameWithoutExt = path.basenameWithoutExtension(fileName);
+          final ext = path.extension(fileName);
+          finalPath = path.join(directoryPath, '${nameWithoutExt}_$counter$ext');
+          counter++;
+        }
 
-      if (mounted) {
-        SnackBarUtil.showSuccess(context, S.of(context).fileSavedToPath(finalPath));
+        // 写入文件
+        final file = File(finalPath);
+        final bytes = _encodeString(contentToSave);
+        await file.writeAsBytes(bytes);
+
+        if (mounted) {
+          SnackBarUtil.showSuccess(context, S.of(context).fileSavedToPath(finalPath));
+        }
       }
     } catch (e) {
       if (mounted) {

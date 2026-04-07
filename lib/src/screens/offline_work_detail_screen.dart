@@ -6,6 +6,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:archive/archive.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../models/work.dart';
@@ -22,7 +24,7 @@ import '../widgets/global_audio_player_wrapper.dart';
 import '../widgets/download_fab.dart';
 import '../utils/string_utils.dart';
 import '../widgets/privacy_blur_cover.dart';
-import '../widgets/cover_preview_dialog.dart';
+import '../widgets/image_gallery_screen.dart';
 
 /// 离线作品详情页 - 使用下载时保存的元数据展示作品信息
 /// 不依赖网络请求，完全离线可用
@@ -166,31 +168,43 @@ class _OfflineWorkDetailScreenState
       if (!mounted) return;
       Navigator.of(context).pop(); // 关闭进度对话框
 
-      // 让用户选择保存位置
-      final directoryPath = await FilePicker.platform.getDirectoryPath();
-      if (directoryPath == null) return; // 用户取消
-
-      if (!mounted) return; // 选择目录后再次检查
-
       // 生成文件名
       final fileName = '${formatRJCode(widget.work.id)}.zip';
-      final savePath = path.join(directoryPath, fileName);
 
-      // 写入文件
-      final file = File(savePath);
-      await file.writeAsBytes(zipBytes);
-
-      if (mounted) {
-        // 使用 addPostFrameCallback 确保在正确时机显示提示
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            SnackBarUtil.showSuccess(
-              context,
-              S.of(context).exportSuccess(savePath),
-              duration: const Duration(seconds: 3),
-            );
+      if (Platform.isIOS) {
+        // iOS: 通过分享面板导出
+        final tempDir = await getTemporaryDirectory();
+        final tempFile = File('${tempDir.path}/$fileName');
+        await tempFile.writeAsBytes(zipBytes);
+        try {
+          await Share.shareXFiles([XFile(tempFile.path)]);
+        } finally {
+          if (await tempFile.exists()) {
+            await tempFile.delete();
           }
-        });
+        }
+      } else {
+        // 其他平台: 选择目录后写入
+        final directoryPath = await FilePicker.platform.getDirectoryPath();
+        if (directoryPath == null) return;
+
+        if (!mounted) return;
+
+        final savePath = path.join(directoryPath, fileName);
+        final file = File(savePath);
+        await file.writeAsBytes(zipBytes);
+
+        if (mounted) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              SnackBarUtil.showSuccess(
+                context,
+                S.of(context).exportSuccess(savePath),
+                duration: const Duration(seconds: 3),
+              );
+            }
+          });
+        }
       }
     } catch (e) {
       // 在 catch 块中也需要安全处理
@@ -342,12 +356,22 @@ class _OfflineWorkDetailScreenState
     // 封面图片组件
     final coverWidget = GestureDetector(
       onLongPress: () {
-        CoverPreviewDialog.show(
-          context,
-          localPath: widget.localCoverPath,
-          imageUrl: '$host/api/cover/${work.id}',
-          identifier: widget.work.id.toString(),
-          heroTag: 'offline_work_cover_${widget.work.id}',
+        final imageUrl = widget.localCoverPath != null
+            ? 'file://${widget.localCoverPath}'
+            : '$host/api/cover/${work.id}';
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ImageGalleryScreen(
+              images: [
+                {
+                  'url': imageUrl,
+                  'title': work.title,
+                  'hash': '',
+                },
+              ],
+              initialIndex: 0,
+            ),
+          ),
         );
       },
       child: Padding(
