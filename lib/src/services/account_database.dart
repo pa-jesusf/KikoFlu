@@ -54,17 +54,20 @@ class AccountDatabase {
   Future<Account> createAccount(Account account) async {
     final db = await database;
 
-    // Deactivate all other accounts if this one is active
-    if (account.isActive) {
-      await db.update(
-        'accounts',
-        {'isActive': 0},
-        where: 'isActive = ?',
-        whereArgs: [1],
-      );
-    }
+    late final int id;
+    await db.transaction((txn) async {
+      // Deactivate all other accounts if this one is active
+      if (account.isActive) {
+        await txn.update(
+          'accounts',
+          {'isActive': 0},
+          where: 'isActive = ?',
+          whereArgs: [1],
+        );
+      }
 
-    final id = await db.insert('accounts', account.toMap());
+      id = await txn.insert('accounts', account.toMap());
+    });
     return account.copyWith(id: id);
   }
 
@@ -108,22 +111,26 @@ class AccountDatabase {
   Future<int> updateAccount(Account account) async {
     final db = await database;
 
-    // If setting this account as active, deactivate others
-    if (account.isActive) {
-      await db.update(
-        'accounts',
-        {'isActive': 0},
-        where: 'isActive = ? AND id != ?',
-        whereArgs: [1, account.id],
-      );
-    }
+    late final int result;
+    await db.transaction((txn) async {
+      // If setting this account as active, deactivate others
+      if (account.isActive) {
+        await txn.update(
+          'accounts',
+          {'isActive': 0},
+          where: 'isActive = ? AND id != ?',
+          whereArgs: [1, account.id],
+        );
+      }
 
-    return await db.update(
-      'accounts',
-      account.toMap(),
-      where: 'id = ?',
-      whereArgs: [account.id],
-    );
+      result = await txn.update(
+        'accounts',
+        account.toMap(),
+        where: 'id = ?',
+        whereArgs: [account.id],
+      );
+    });
+    return result;
   }
 
   Future<int> deleteAccount(int id) async {
@@ -138,19 +145,23 @@ class AccountDatabase {
   Future<int> setActiveAccount(int id) async {
     final db = await database;
 
-    // Deactivate all accounts
-    await db.update('accounts', {'isActive': 0});
+    late final int result;
+    await db.transaction((txn) async {
+      // Deactivate all accounts
+      await txn.update('accounts', {'isActive': 0});
 
-    // Activate the selected account and update lastUsedAt
-    return await db.update(
-      'accounts',
-      {
-        'isActive': 1,
-        'lastUsedAt': DateTime.now().toIso8601String(),
-      },
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+      // Activate the selected account and update lastUsedAt
+      result = await txn.update(
+        'accounts',
+        {
+          'isActive': 1,
+          'lastUsedAt': DateTime.now().toIso8601String(),
+        },
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    });
+    return result;
   }
 
   Future<void> close() async {

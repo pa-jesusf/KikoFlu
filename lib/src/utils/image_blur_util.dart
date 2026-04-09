@@ -50,39 +50,47 @@ class ImageBlurUtil {
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
       final ui.Image image = frameInfo.image;
 
-      // 应用极高强度模糊 (sigma = 100)
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final Canvas canvas = Canvas(recorder);
+      ui.Picture? picture;
+      ui.Image? blurredImage;
+      try {
+        // 应用极高强度模糊 (sigma = 100)
+        final ui.PictureRecorder recorder = ui.PictureRecorder();
+        final Canvas canvas = Canvas(recorder);
 
-      // 创建高斯模糊滤镜
-      final Paint paint = Paint()
-        ..imageFilter = ui.ImageFilter.blur(sigmaX: 100.0, sigmaY: 100.0);
+        // 创建高斯模糊滤镜
+        final Paint paint = Paint()
+          ..imageFilter = ui.ImageFilter.blur(sigmaX: 100.0, sigmaY: 100.0);
 
-      // 绘制模糊图片
-      canvas.drawImage(image, Offset.zero, paint);
+        // 绘制模糊图片
+        canvas.drawImage(image, Offset.zero, paint);
 
-      // 转换为图片
-      final ui.Picture picture = recorder.endRecording();
-      final ui.Image blurredImage = await picture.toImage(
-        image.width,
-        image.height,
-      );
+        // 转换为图片
+        picture = recorder.endRecording();
+        blurredImage = await picture.toImage(
+          image.width,
+          image.height,
+        );
 
-      // 转换为PNG字节数据
-      final ByteData? byteData = await blurredImage.toByteData(
-        format: ui.ImageByteFormat.png,
-      );
+        // 转换为PNG字节数据
+        final ByteData? byteData = await blurredImage.toByteData(
+          format: ui.ImageByteFormat.png,
+        );
 
-      if (byteData == null) {
-        return null;
+        if (byteData == null) {
+          return null;
+        }
+
+        final Uint8List pngBytes = byteData.buffer.asUint8List();
+
+        // 保存到临时文件
+        await blurredFile.writeAsBytes(pngBytes);
+
+        return 'file://${blurredFile.path}';
+      } finally {
+        image.dispose();
+        picture?.dispose();
+        blurredImage?.dispose();
       }
-
-      final Uint8List pngBytes = byteData.buffer.asUint8List();
-
-      // 保存到临时文件
-      await blurredFile.writeAsBytes(pngBytes);
-
-      return 'file://${blurredFile.path}';
     } catch (e) {
       debugPrint('模糊图片失败: $e');
       return null;
