@@ -537,7 +537,7 @@ class SRu extends S {
   String get all => 'Все';
 
   @override
-  String get marked => 'Отмечено';
+  String get marked => 'Хочу послушать';
 
   @override
   String get listening => 'Слушаю';

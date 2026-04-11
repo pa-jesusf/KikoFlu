@@ -524,7 +524,7 @@ class SJa extends S {
   String get all => 'すべて';
 
   @override
-  String get marked => 'マーク済み';
+  String get marked => '気になる';
 
   @override
   String get listening => '聴取中';

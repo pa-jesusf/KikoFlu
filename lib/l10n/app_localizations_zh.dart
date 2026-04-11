@@ -523,7 +523,7 @@ class SZh extends S {
   String get all => '全部';
 
   @override
-  String get marked => '已标记';
+  String get marked => '想听';
 
   @override
   String get listening => '在听';
@@ -3882,7 +3882,7 @@ class SZhHant extends SZh {
   String get all => '全部';
 
   @override
-  String get marked => '已標記';
+  String get marked => '想聽';
 
   @override
   String get listening => '在聽';
