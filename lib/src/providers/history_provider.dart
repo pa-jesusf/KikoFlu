@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'auth_provider.dart' show kikoeruApiServiceProvider;
 import '../models/work.dart';
 import '../models/history_record.dart';
 import '../models/audio_track.dart';
 import '../services/history_database.dart';
-import '../services/audio_player_service.dart';
+import '../services/audio_player_service.dart' as import_service;
+import '../services/playback_history_service.dart';
 
 class HistoryState {
   final List<HistoryRecord> records;
@@ -49,16 +49,16 @@ final historyProvider =
 });
 
 class HistoryNotifier extends StateNotifier<HistoryState> {
+  // ignore: unused_field - kept for potential future use with Ref
   final Ref _ref;
 
   HistoryNotifier(this._ref) : super(const HistoryState()) {
     load(refresh: true);
-    _initPlaybackListener();
+    _initHistoryUpdateListener();
   }
 
-  StreamSubscription? _positionSubscription;
-  StreamSubscription? _trackSubscription;
-  DateTime _lastUpdateTime = DateTime.now();
+  StreamSubscription? _historyUpdateSubscription;
+  DateTime _lastRefreshTime = DateTime.now();
 
   Future<void> load({bool refresh = false, bool force = false}) async {
     if (state.isLoading && !force) return;
@@ -112,25 +112,23 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
     await load();
   }
 
+  /// 外部直接写入历史（例如 history_work_card 恢复播放时）
   Future<void> addOrUpdate(Work work,
       {AudioTrack? track, int? positionMs}) async {
     final now = DateTime.now();
-    final audioService = AudioPlayerService.instance;
+    final audioService = PlaybackHistoryService.instance;
 
-    // Get playlist info if available and matching current work
     int playlistIndex = 0;
     int playlistTotal = 0;
 
-    if (audioService.currentTrack?.workId == work.id) {
-      playlistIndex = audioService.currentIndex;
-      playlistTotal = audioService.queue.length;
+    // 尝试从播放历史服务获取播放列表信息
+    if (audioService.currentWorkId == work.id) {
+      playlistIndex = audioService.currentTrack != null
+          ? AudioPlayerServiceHelper.currentIndex
+          : 0;
+      playlistTotal = AudioPlayerServiceHelper.queueLength;
     }
 
-    // Find existing record in current list (might not be in list if on other page)
-    // But we should check DB first? No, just update DB and reload current page.
-
-    // Actually, we need to get the existing record from DB to preserve other fields if not provided
-    // But for simplicity, we can try to find in state first.
     final existingIndex = state.records.indexWhere((r) => r.work.id == work.id);
     HistoryRecord record;
 
@@ -147,13 +145,6 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
             playlistTotal > 0 ? playlistTotal : existing.playlistTotal,
       );
     } else {
-      // If not in current list, we should try to fetch from DB or create new.
-      // Since we are playing it now, it will become the most recent one.
-      // We can just create a new record object, but we might lose previous progress if we don't fetch.
-      // Ideally we should fetch from DB.
-      // But `addOrUpdate` in DB handles replace.
-      // So we just need to make sure we have the correct data.
-      // If we don't have track/position, we assume 0/null.
       record = HistoryRecord(
         work: work,
         lastPlayedTime: now,
@@ -165,14 +156,12 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
     }
 
     await HistoryDatabase.instance.addOrUpdate(record);
-
-    // Reload current page to reflect changes; force reload if another load is running
     await load(force: true);
   }
 
   Future<void> remove(int workId) async {
     await HistoryDatabase.instance.delete(workId);
-    await load(force: true); // Reload current page (force)
+    await load(force: true);
   }
 
   Future<void> clear() async {
@@ -180,73 +169,45 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
     state = state.copyWith(records: [], totalCount: 0, currentPage: 1);
   }
 
-  void _initPlaybackListener() {
-    // Listen to track changes
-    _trackSubscription =
-        AudioPlayerService.instance.currentTrackStream.listen((track) {
-      if (track != null && track.workId != null) {
-        _updateHistoryFromPlayback(track);
-      }
-    });
-
-    // Listen to position changes
-    _positionSubscription =
-        AudioPlayerService.instance.positionStream.listen((position) {
+  /// 监听 PlaybackHistoryService 的写入通知，节流刷新列表
+  void _initHistoryUpdateListener() {
+    _historyUpdateSubscription =
+        PlaybackHistoryService.instance.historyUpdatedStream.listen((_) {
       final now = DateTime.now();
-      // Throttle updates to every 5 seconds
-      if (now.difference(_lastUpdateTime).inSeconds >= 5) {
-        _lastUpdateTime = now;
-        final track = AudioPlayerService.instance.currentTrack;
-        if (track != null && track.workId != null) {
-          _updateHistoryFromPlayback(track, position: position);
-        }
+      // 节流：10 秒内最多刷新一次列表
+      if (now.difference(_lastRefreshTime).inSeconds >= 10) {
+        _lastRefreshTime = now;
+        load(refresh: true, force: true);
       }
     });
-  }
-
-  Future<void> _updateHistoryFromPlayback(AudioTrack track,
-      {Duration? position}) async {
-    if (track.workId == null) return;
-
-    // We need the Work object.
-    // We check if the work is already in history.
-    final existingIndex =
-        state.records.indexWhere((r) => r.work.id == track.workId);
-
-    HistoryRecord? dbRecord;
-    if (existingIndex < 0) {
-      dbRecord =
-          await HistoryDatabase.instance.getHistoryByWorkId(track.workId!);
-    }
-
-    if (existingIndex >= 0) {
-      // Update existing record
-      final existing = state.records[existingIndex];
-      await addOrUpdate(existing.work,
-          track: track, positionMs: position?.inMilliseconds);
-    } else if (dbRecord != null) {
-      await addOrUpdate(dbRecord.work,
-          track: track, positionMs: position?.inMilliseconds);
-    } else {
-      // If not in history, try fetching the Work details from API and add it.
-      try {
-        final api = _ref.read(kikoeruApiServiceProvider);
-        final json = await api.getWork(track.workId!);
-        final work = Work.fromJson(json);
-        await addOrUpdate(work,
-            track: track, positionMs: position?.inMilliseconds);
-      } catch (e) {
-        // If fetching fails, log and do nothing. UI or other flows may add later.
-        print(
-            'Failed to fetch work for history update (id=${track.workId}): $e');
-      }
-    }
   }
 
   @override
   void dispose() {
-    _positionSubscription?.cancel();
-    _trackSubscription?.cancel();
+    _historyUpdateSubscription?.cancel();
     super.dispose();
   }
+}
+
+/// 帮助类，用于从 AudioPlayerService 获取播放列表信息
+/// 避免直接在 provider 层级依赖 AudioPlayerService 的内部状态
+class AudioPlayerServiceHelper {
+  static int get currentIndex {
+    try {
+      return _audioPlayerService.currentIndex;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  static int get queueLength {
+    try {
+      return _audioPlayerService.queue.length;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  static import_service.AudioPlayerService get _audioPlayerService =>
+      import_service.AudioPlayerService.instance;
 }

@@ -160,7 +160,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
                           );
                           ref
                               .read(audioPlayerControllerProvider.notifier)
-                              .seek(seekPosition);
+                              .seekAndPersist(seekPosition);
                         }
                         setState(() {
                           _isDragging = false;
@@ -180,7 +180,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
                             );
                             ref
                                 .read(audioPlayerControllerProvider.notifier)
-                                .seek(seekPosition);
+                                .seekAndPersist(seekPosition);
                           }
                         }
                       },
@@ -265,7 +265,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
                                     ref
                                         .read(audioPlayerControllerProvider
                                             .notifier)
-                                        .seek(seekPosition);
+                                        .seekAndPersist(seekPosition);
                                   }
                                   setState(() {
                                     _isDragging = false;

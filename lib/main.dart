@@ -26,6 +26,9 @@ import 'src/services/cache_service.dart';
 import 'src/services/download_service.dart';
 import 'src/services/floating_lyric_service.dart';
 import 'src/services/log_service.dart';
+import 'src/services/audio_player_service.dart';
+import 'src/services/playback_history_service.dart';
+import 'src/models/work.dart';
 import 'l10n/app_localizations.dart';
 import 'src/providers/audio_provider.dart';
 import 'src/providers/auth_provider.dart';
@@ -307,15 +310,18 @@ class KikoeruApp extends ConsumerStatefulWidget {
   ConsumerState<KikoeruApp> createState() => _KikoeruAppState();
 }
 
-class _KikoeruAppState extends ConsumerState<KikoeruApp> with WindowListener {
+class _KikoeruAppState extends ConsumerState<KikoeruApp>
+    with WindowListener, WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       windowManager.addListener(this);
     }
     // Initialize audio and video services
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initPlaybackHistoryService();
       ref.read(audioPlayerControllerProvider.notifier).initialize();
 
       // Silent update check on startup
@@ -323,8 +329,23 @@ class _KikoeruAppState extends ConsumerState<KikoeruApp> with WindowListener {
     });
   }
 
+  void _initPlaybackHistoryService() {
+    final historyService = PlaybackHistoryService.instance;
+
+    // 注入 Work 获取回调
+    historyService.onFetchWork = (workId) async {
+      final api = ref.read(kikoeruApiServiceProvider);
+      final json = await api.getWork(workId);
+      return Work.fromJson(json);
+    };
+
+    // 绑定播放器
+    historyService.attachPlayer(AudioPlayerService.instance);
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       windowManager.removeListener(this);
     }
@@ -332,9 +353,24 @@ class _KikoeruAppState extends ConsumerState<KikoeruApp> with WindowListener {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // 应用进入后台时立即 flush 播放历史
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      PlaybackHistoryService.instance
+          .flushNow(reason: FlushReason.appBackground);
+    }
+  }
+
+  @override
   void onWindowClose() async {
+    // 桌面端关闭窗口时 flush 播放历史
+    await PlaybackHistoryService.instance.flushNow(reason: FlushReason.dispose);
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      // 关闭主窗口时，同时关闭悬浮字幕窗�?
+      // 关闭主窗口时，同时关闭悬浮字幕窗口
       await FloatingLyricService.instance.hide();
     }
     super.onWindowClose();

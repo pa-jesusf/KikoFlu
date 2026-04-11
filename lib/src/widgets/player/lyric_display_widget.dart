@@ -214,7 +214,7 @@ class _FullLyricDisplayState extends ConsumerState<FullLyricDisplay> {
     final displayLyrics = lyricState.displayLyrics;
     if (index >= 0 && index < displayLyrics.length) {
       final targetTime = displayLyrics[index].startTime;
-      ref.read(audioPlayerControllerProvider.notifier).seek(targetTime);
+      ref.read(audioPlayerControllerProvider.notifier).seekAndPersist(targetTime);
 
       setState(() {
         _autoScroll = false;

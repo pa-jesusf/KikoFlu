@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../models/audio_track.dart';
 import '../models/work.dart';
 import '../services/audio_player_service.dart';
+import '../services/playback_history_service.dart';
 import 'settings_provider.dart';
 import 'history_provider.dart';
 import 'auth_provider.dart' show kikoeruApiServiceProvider;
@@ -215,14 +216,24 @@ class AudioPlayerController extends StateNotifier<AudioPlayerState> {
 
   Future<void> pause() async {
     await _service.pause();
+    // 暂停时立即落盘历史
+    PlaybackHistoryService.instance.onPaused();
   }
 
   Future<void> stop() async {
     await _service.stop();
+    // 停止时立即落盘历史
+    PlaybackHistoryService.instance.onStopped();
   }
 
   Future<void> seek(Duration position) async {
     await _service.seek(position);
+  }
+
+  /// seek 并立即持久化历史（用于用户显式拖动进度条）
+  Future<void> seekAndPersist(Duration position) async {
+    await _service.seek(position);
+    await PlaybackHistoryService.instance.onSeekCommitted(position);
   }
 
   Future<void> seekForward(Duration duration) async {

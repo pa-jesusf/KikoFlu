@@ -168,7 +168,7 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
       _seekingPosition = newPosition;
     });
 
-    ref.read(audioPlayerControllerProvider.notifier).seek(newPosition);
+    ref.read(audioPlayerControllerProvider.notifier).seekAndPersist(newPosition);
 
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
