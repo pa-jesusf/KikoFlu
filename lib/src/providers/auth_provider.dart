@@ -379,9 +379,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// （GET /api/auth/me 返回 guestMode: true）。token 置空，
   /// 后续请求不携带 Authorization 头，服务器以游客身份响应。
   Future<bool> guestConnect(
-    String host, [
-    String? serverCookie,
-  ], {
+    String host,
+    String? serverCookie, {
     bool silent = false,
   }) async {
     if (!silent) {
