@@ -72,6 +72,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isLogin = true; // true for login, false for register
   bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _useGuestConnect = false;
   String? _proxyErrorText;
   late final List<String> _hostOptions;
   String _hostValue = '';
@@ -101,6 +102,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _submit() async {
+    // 游客直连模式：无需账号密码，不调用登录接口
+    if (_useGuestConnect) {
+      await _submitGuestConnect();
+      return;
+    }
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -178,6 +185,56 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  // 游客直连：不调用登录接口，以游客身份直接建立会话
+  Future<void> _submitGuestConnect() async {
+    // 验证服务器地址
+    if (_hostValue.trim().isEmpty) {
+      SnackBarUtil.showError(context, S.of(context).pleaseEnterServerAddress);
+      return;
+    }
+
+    if (!await _saveProxyAddress() || !mounted) return;
+
+    setState(() => _isLoading = true);
+
+    final host = _hostValue.trim();
+    final serverCookie = _serverCookieController.text.trim();
+
+    try {
+      final success = await ref
+          .read(authProvider.notifier)
+          .guestConnect(host, serverCookie);
+
+      if (success && mounted) {
+        if (widget.isAddingAccount) {
+          // Adding account mode - just go back
+          Navigator.pop(context, true);
+          SnackBarUtil.showSuccess(context, S.of(context).guestAccountAdded);
+        } else {
+          // Normal login - go to main screen
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const MainScreen()),
+            (route) => false,
+          );
+        }
+      } else if (mounted) {
+        final error = ref.read(authProvider).error;
+        SnackBarUtil.showError(
+          context,
+          error ?? S.of(context).guestLoginFailed,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackBarUtil.showError(context, S.of(context).guestLoginFailed);
+      }
+    }
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
+  }
+
   // 游客登录
   Future<void> _loginAsGuest() async {
     // 验证服务器地址
@@ -247,6 +304,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void _toggleMode() {
     setState(() {
       _isLogin = !_isLogin;
+      _useGuestConnect = false;
     });
     ref.read(authProvider.notifier).clearError();
   }
@@ -895,13 +953,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 width: 20,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-            : Text(_isLogin ? S.of(context).login : S.of(context).register),
+            : Text(_useGuestConnect
+                ? S.of(context).guestMode
+                : (_isLogin ? S.of(context).login : S.of(context).register)),
       ),
 
       const SizedBox(height: 12),
 
-      // Guest login button (only show in login mode)
-      if (_isLogin)
+      // Guest login button (only show in login mode when direct connect is off)
+      if (_isLogin && !_useGuestConnect)
         OutlinedButton.icon(
           onPressed: _isLoading ? null : _loginAsGuest,
           icon: const Icon(Icons.person_outline),
@@ -924,6 +984,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           style: TextStyle(color: Theme.of(context).colorScheme.primary),
         ),
       ),
+
+      // 无需登录直连开关（仅登录模式显示，置于最底部）
+      if (_isLogin) ...[
+        const SizedBox(height: 8),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(S.of(context).guestConnectMode),
+          subtitle: Text(S.of(context).guestConnectModeMessage),
+          value: _useGuestConnect,
+          onChanged: _isLoading
+              ? null
+              : (value) => setState(() => _useGuestConnect = value),
+        ),
+      ],
     ];
   }
 }

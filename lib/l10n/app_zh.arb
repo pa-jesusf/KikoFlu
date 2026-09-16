@@ -92,6 +92,9 @@
   "guestLoginFailed": "游客登录失败",
   "guestMode": "游客模式",
 
+  "guestConnectMode": "游客直连（无需账号）",
+  "guestConnectModeMessage": "无需登录，直接以游客身份访问。适用于不支持登录或开放游客访问的服务器。",
+
   "cancel": "取消",
   "confirm": "确定",
   "close": "关闭",

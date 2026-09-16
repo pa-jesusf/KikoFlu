@@ -245,6 +245,13 @@ class SZh extends S {
   String get guestMode => '游客模式';
 
   @override
+  String get guestConnectMode => '游客直连（无需账号）';
+
+  @override
+  String get guestConnectModeMessage =>
+      '无需登录，直接以游客身份访问。适用于不支持登录或开放游客访问的服务器。';
+
+  @override
   String get cancel => '取消';
 
   @override
@@ -3882,6 +3889,13 @@ class SZhHant extends SZh {
 
   @override
   String get guestMode => '訪客模式';
+
+  @override
+  String get guestConnectMode => '訪客直連（無需帳號）';
+
+  @override
+  String get guestConnectModeMessage =>
+      '無需登入，直接以訪客身分存取。適用於不支援登入或開放訪客存取的伺服器。';
 
   @override
   String get cancel => '取消';

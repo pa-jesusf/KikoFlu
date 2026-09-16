@@ -121,13 +121,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
         _apiService.init('', activeAccount.host);
 
-        final success = await login(
-          activeAccount.username,
-          activeAccount.password,
-          activeAccount.host,
-          activeAccount.serverCookie,
-          silent: true, // Don't show loading state
-        );
+        // 游客直连账号走 guestConnect，无需登录直接建立会话
+        final success = activeAccount.isGuestConnect
+            ? await guestConnect(
+                activeAccount.host,
+                activeAccount.serverCookie,
+                silent: true,
+              )
+            : await login(
+                activeAccount.username,
+                activeAccount.password,
+                activeAccount.host,
+                activeAccount.serverCookie,
+                silent: true, // Don't show loading state
+              );
 
         if (success) {
           _log.captureOutput('[Auth] Re-login successful');
@@ -360,6 +367,141 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = state.copyWith(
           isLoading: false,
           error: 'Login failed: ${e.toString()}',
+        );
+      }
+      return false;
+    }
+  }
+
+  /// 游客直连：不调用登录接口（POST /api/auth/me），直接以游客身份建立会话。
+  ///
+  /// 适用于不支持登录或开放游客访问的服务器
+  /// （GET /api/auth/me 返回 guestMode: true）。token 置空，
+  /// 后续请求不携带 Authorization 头，服务器以游客身份响应。
+  Future<bool> guestConnect(
+    String host, [
+    String? serverCookie,
+    bool silent = false,
+  ]) async {
+    if (!silent) {
+      state = state.copyWith(isLoading: true, error: null);
+    }
+
+    if (serverCookie != null && serverCookie.isNotEmpty) {
+      await StorageService.setString('server_cookie', serverCookie);
+    } else {
+      await StorageService.remove('server_cookie');
+    }
+
+    try {
+      _log.captureOutput('[Auth] Guest direct connect attempt - host: $host');
+
+      // 删除主机地址末尾的斜杠，以免请求资源时出现地址错误
+      if (host.endsWith('/')) {
+        host = host.substring(0, host.length - 1);
+      }
+
+      // Normalize host URL to include protocol
+      String normalizedHost;
+      if (host.startsWith('http://') || host.startsWith('https://')) {
+        normalizedHost = host;
+      } else {
+        if (host.contains('localhost') ||
+            host.startsWith('127.0.0.1') ||
+            host.startsWith('192.168.')) {
+          normalizedHost = 'http://$host';
+        } else {
+          normalizedHost = 'https://$host';
+        }
+      }
+
+      // 空 token 初始化：后续请求不携带 Authorization 头
+      _apiService.init('', normalizedHost);
+
+      // GET /api/auth/me（无 token），检测游客模式并获取游客信息
+      final userInfo = await _apiService.getUserInfo();
+
+      if (userInfo['guestMode'] != true) {
+        _log.captureOutput('[Auth] Guest mode not enabled on server');
+        if (!silent) {
+          state = state.copyWith(
+            isLoading: false,
+            error: 'Guest mode is not enabled on this server',
+          );
+        }
+        return false;
+      }
+
+      final guestUser = User.fromJson(userInfo).copyWith(
+        host: normalizedHost,
+        token: '',
+        loggedIn: false,
+        serverCookie: serverCookie,
+        lastUpdateTime: DateTime.now(),
+      );
+
+      await StorageService.setString('auth_token', '');
+      await StorageService.setString('server_host', normalizedHost);
+      await StorageService.setMap('current_user', guestUser.toJson());
+
+      // 保存/更新带游客直连标记的账号
+      try {
+        final existingAccounts = await AccountDatabase.instance.getAllAccounts();
+        final username = guestUser.name.isNotEmpty ? guestUser.name : 'guest';
+        Account? existingAccount;
+        for (final acc in existingAccounts) {
+          if (acc.username == username && acc.host == normalizedHost) {
+            existingAccount = acc;
+            break;
+          }
+        }
+
+        if (existingAccount != null) {
+          await AccountDatabase.instance.updateAccount(
+            existingAccount.copyWith(
+              password: '',
+              isActive: true,
+              isGuestConnect: true,
+              serverCookie: serverCookie,
+              lastUsedAt: DateTime.now(),
+            ),
+          );
+        } else {
+          await AccountDatabase.instance.createAccount(
+            Account(
+              username: username,
+              password: '',
+              host: normalizedHost,
+              isActive: true,
+              isGuestConnect: true,
+              serverCookie: serverCookie,
+              createdAt: DateTime.now(),
+              lastUsedAt: DateTime.now(),
+            ),
+          );
+        }
+        _log.captureOutput('[Auth] Guest account saved to database');
+      } catch (e) {
+        _log.captureOutput('[Auth] Failed to save guest account: $e');
+      }
+
+      state = state.copyWith(
+        currentUser: guestUser,
+        token: '',
+        host: normalizedHost,
+        isLoading: false,
+        isLoggedIn: true,
+      );
+
+      _log.captureOutput('[Auth] Guest direct connect completed');
+      return true;
+    } catch (e) {
+      _log.captureOutput('[Auth] Guest direct connect error: $e');
+
+      if (!silent) {
+        state = state.copyWith(
+          isLoading: false,
+          error: 'Guest connect failed: ${e.toString()}',
         );
       }
       return false;

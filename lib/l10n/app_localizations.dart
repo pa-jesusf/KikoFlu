@@ -564,6 +564,18 @@ abstract class S {
   /// **'Guest Mode'**
   String get guestMode;
 
+  /// No description provided for @guestConnectMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest direct connect (no account)'**
+  String get guestConnectMode;
+
+  /// No description provided for @guestConnectModeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Access directly as a guest without logging in. For servers that do not support login or allow guest access.'**
+  String get guestConnectModeMessage;
+
   /// No description provided for @cancel.
   ///
   /// In en, this message translates to:

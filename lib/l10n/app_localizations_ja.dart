@@ -246,6 +246,13 @@ class SJa extends S {
   String get guestMode => 'ゲストモード';
 
   @override
+  String get guestConnectMode => 'ゲスト直結（アカウント不要）';
+
+  @override
+  String get guestConnectModeMessage =>
+      'ログインせず、ゲストとして直接アクセスします。ログイン非対応やゲストアクセスを許可しているサーバー向けです。';
+
+  @override
   String get cancel => 'キャンセル';
 
   @override
