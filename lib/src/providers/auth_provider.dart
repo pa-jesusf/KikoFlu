@@ -381,8 +381,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> guestConnect(
     String host, [
     String? serverCookie,
+  ], {
     bool silent = false,
-  ]) async {
+  }) async {
     if (!silent) {
       state = state.copyWith(isLoading: true, error: null);
     }
