@@ -55,12 +55,16 @@ class _AccountManagementScreenState
       // Switch account in database
       await AccountDatabase.instance.setActiveAccount(account.id!);
 
-      // Login with the account
-      final success = await ref.read(authProvider.notifier).login(
-          account.username,
-          account.password,
-          account.host,
-          account.serverCookie);
+      // Login with the account (guest connect accounts skip the login API)
+      final success = account.isGuestConnect
+          ? await ref
+              .read(authProvider.notifier)
+              .guestConnect(account.host, account.serverCookie)
+          : await ref.read(authProvider.notifier).login(
+              account.username,
+              account.password,
+              account.host,
+              account.serverCookie);
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

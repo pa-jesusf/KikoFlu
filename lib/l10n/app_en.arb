@@ -102,6 +102,9 @@
   "guestLoginFailed": "Guest login failed",
   "guestMode": "Guest Mode",
 
+  "guestConnectMode": "Guest direct connect (no account)",
+  "guestConnectModeMessage": "Access directly as a guest without logging in. For servers that do not support login or allow guest access.",
+
   "cancel": "Cancel",
   "confirm": "Confirm",
   "close": "Close",

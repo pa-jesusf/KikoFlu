@@ -248,6 +248,13 @@ class SRu extends S {
   String get guestMode => 'Гостевой режим';
 
   @override
+  String get guestConnectMode => 'Гостевое подключение (без аккаунта)';
+
+  @override
+  String get guestConnectModeMessage =>
+      'Доступ напрямую как гость без входа. Для серверов, которые не поддерживают вход или разрешают гостевой доступ.';
+
+  @override
   String get cancel => 'Отмена';
 
   @override

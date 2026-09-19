@@ -92,6 +92,9 @@
   "guestLoginFailed": "ゲストログイン失敗",
   "guestMode": "ゲストモード",
 
+  "guestConnectMode": "ゲスト直結（アカウント不要）",
+  "guestConnectModeMessage": "ログインせず、ゲストとして直接アクセスします。ログイン非対応やゲストアクセスを許可しているサーバー向けです。",
+
   "cancel": "キャンセル",
   "confirm": "確定",
   "close": "閉じる",

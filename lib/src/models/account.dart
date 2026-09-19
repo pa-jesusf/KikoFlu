@@ -6,6 +6,7 @@ class Account extends Equatable {
   final String password;
   final String host;
   final bool isActive;
+  final bool isGuestConnect;
   final String? serverCookie;
   final DateTime? createdAt;
   final DateTime? lastUsedAt;
@@ -16,6 +17,7 @@ class Account extends Equatable {
     required this.password,
     required this.host,
     this.isActive = false,
+    this.isGuestConnect = false,
     this.serverCookie,
     this.createdAt,
     this.lastUsedAt,
@@ -28,6 +30,7 @@ class Account extends Equatable {
       password: map['password'] as String,
       host: map['host'] as String,
       isActive: (map['isActive'] as int) == 1,
+      isGuestConnect: (map['isGuestConnect'] as int? ?? 0) == 1,
       serverCookie: map['serverCookie'] as String?,
       createdAt: map['createdAt'] != null
           ? DateTime.parse(map['createdAt'] as String)
@@ -45,6 +48,7 @@ class Account extends Equatable {
       'password': password,
       'host': host,
       'isActive': isActive ? 1 : 0,
+      'isGuestConnect': isGuestConnect ? 1 : 0,
       'serverCookie': serverCookie,
       'createdAt': createdAt?.toIso8601String(),
       'lastUsedAt': lastUsedAt?.toIso8601String(),
@@ -57,6 +61,7 @@ class Account extends Equatable {
     String? password,
     String? host,
     bool? isActive,
+    bool? isGuestConnect,
     String? serverCookie,
     DateTime? createdAt,
     DateTime? lastUsedAt,
@@ -67,6 +72,7 @@ class Account extends Equatable {
       password: password ?? this.password,
       host: host ?? this.host,
       isActive: isActive ?? this.isActive,
+      isGuestConnect: isGuestConnect ?? this.isGuestConnect,
       serverCookie: serverCookie ?? this.serverCookie,
       createdAt: createdAt ?? this.createdAt,
       lastUsedAt: lastUsedAt ?? this.lastUsedAt,
@@ -80,6 +86,7 @@ class Account extends Equatable {
         password,
         host,
         isActive,
+        isGuestConnect,
         serverCookie,
         createdAt,
         lastUsedAt,
@@ -87,5 +94,5 @@ class Account extends Equatable {
 
   @override
   String toString() =>
-      'Account(id: $id, username: $username, host: $host, isActive: $isActive, serverCookie: $serverCookie)';
+      'Account(id: $id, username: $username, host: $host, isActive: $isActive, isGuestConnect: $isGuestConnect, serverCookie: $serverCookie)';
 }

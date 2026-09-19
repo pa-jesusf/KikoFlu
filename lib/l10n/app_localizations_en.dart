@@ -247,6 +247,13 @@ class SEn extends S {
   String get guestMode => 'Guest Mode';
 
   @override
+  String get guestConnectMode => 'Guest direct connect (no account)';
+
+  @override
+  String get guestConnectModeMessage =>
+      'Access directly as a guest without logging in. For servers that do not support login or allow guest access.';
+
+  @override
   String get cancel => 'Cancel';
 
   @override

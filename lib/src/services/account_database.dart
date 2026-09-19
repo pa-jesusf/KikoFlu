@@ -32,7 +32,7 @@ class AccountDatabase {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -46,6 +46,7 @@ class AccountDatabase {
         password TEXT NOT NULL,
         host TEXT NOT NULL,
         isActive INTEGER NOT NULL DEFAULT 0,
+        isGuestConnect INTEGER NOT NULL DEFAULT 0,
         serverCookie TEXT,
         createdAt TEXT,
         lastUsedAt TEXT
@@ -56,6 +57,11 @@ class AccountDatabase {
   Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       await db.execute('ALTER TABLE accounts ADD COLUMN serverCookie TEXT');
+    }
+    if (oldVersion < 3) {
+      await db.execute(
+        'ALTER TABLE accounts ADD COLUMN isGuestConnect INTEGER NOT NULL DEFAULT 0',
+      );
     }
   }
 

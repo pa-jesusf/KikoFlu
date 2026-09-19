@@ -92,6 +92,9 @@
   "guestLoginFailed": "訪客登入失敗",
   "guestMode": "訪客模式",
 
+  "guestConnectMode": "訪客直連（無需帳號）",
+  "guestConnectModeMessage": "無需登入，直接以訪客身分存取。適用於不支援登入或開放訪客存取的伺服器。",
+
   "cancel": "取消",
   "confirm": "確定",
   "close": "關閉",
