@@ -27,6 +27,7 @@ import '../utils/system_ui_style.dart';
 export '../providers/my_reviews_provider.dart' show MyReviewLayoutType;
 
 import '../../l10n/app_localizations.dart';
+import '../utils/responsive_grid_helper.dart';
 
 class MyScreen extends ConsumerStatefulWidget {
   const MyScreen({super.key});
@@ -533,7 +534,7 @@ class _MyScreenState extends ConsumerState<MyScreen>
       fillEmptyViewport: false,
       padding: state.layoutType == MyReviewLayoutType.list
           ? EdgeInsets.fromLTRB(8, topPadding + 8, 8, 8)
-          : MediaQuery.orientationOf(context) == Orientation.landscape
+          : ResponsiveGridHelper.isTabletLayout(context)
               ? EdgeInsets.fromLTRB(24, topPadding + 8, 24, 24)
               : EdgeInsets.fromLTRB(8, topPadding + 8, 8, 8),
     );

@@ -80,8 +80,9 @@ class WorksGridView extends ConsumerWidget {
       final availableHeight = constraints.hasBoundedHeight
           ? constraints.maxHeight.clamp(0.0, mediaSize.height).toDouble()
           : mediaSize.height;
-      final isLandscape = availableWidth > availableHeight;
-      final spacing = isLandscape ? 24.0 : 8.0;
+      final spacing = availableWidth > availableHeight
+          ? 24.0
+          : ResponsiveGridHelper.gridSpacing(context);
       final defaultPadding = spacing;
       final collectionPadding = padding ?? EdgeInsets.all(defaultPadding);
       final resolvedPadding =

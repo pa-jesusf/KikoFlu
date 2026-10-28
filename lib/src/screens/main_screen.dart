@@ -14,6 +14,7 @@ import 'search_screen.dart';
 import 'my_screen.dart';
 import 'settings_screen.dart';
 import '../providers/settings_provider.dart';
+import '../utils/responsive_grid_helper.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -98,14 +99,13 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+    final isTabletLayout = ResponsiveGridHelper.isTabletLayout(context);
     final showUpdateBadge = ref.watch(showUpdateRedDotProvider);
     final useLiquidGlass = ref.watch(liquidGlassNavigationProvider);
     final destinations = _buildDestinations(context, showUpdateBadge);
 
-    if (isLandscape) {
-      // 横屏布局：使用 NavigationRail
+    if (isTabletLayout) {
+      // 横屏或平板式布局：使用 NavigationRail
       final landscapeScaffold = Scaffold(
         body: Stack(
           children: [
