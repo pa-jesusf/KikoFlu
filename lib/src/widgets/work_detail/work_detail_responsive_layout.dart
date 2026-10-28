@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../liquid_glass_layout.dart';
+import '../../utils/responsive_grid_helper.dart';
 
 typedef WorkDetailCoverBuilder = Widget Function(
   BuildContext context,
@@ -22,7 +23,7 @@ class WorkDetailResponsiveLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
+        ResponsiveGridHelper.isTabletLayout(context);
     final cover = coverBuilder(context, isLandscape);
 
     if (isLandscape) {

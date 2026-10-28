@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:real_liquid_glass/real_liquid_glass.dart';
 
 import '../providers/settings_provider.dart';
+import '../utils/responsive_grid_helper.dart';
 
 class FloatingFeedModeAction {
   const FloatingFeedModeAction({
@@ -382,7 +383,7 @@ class FloatingToolbarLayout {
   const FloatingToolbarLayout._();
 
   static double horizontalPadding(BuildContext context) {
-    return MediaQuery.of(context).orientation == Orientation.landscape
+    return ResponsiveGridHelper.isTabletLayout(context)
         ? 24.0
         : 8.0;
   }

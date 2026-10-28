@@ -17,6 +17,7 @@ import 'va_chip.dart';
 import 'age_rating_chip.dart';
 import 'work_bookmark_manager.dart';
 import 'privacy_blur_cover.dart';
+import '../utils/responsive_grid_helper.dart';
 
 class EnhancedWorkCard extends ConsumerStatefulWidget {
   final Work work;
@@ -140,7 +141,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
         };
 
     final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
+        ResponsiveGridHelper.isTabletLayout(context);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -199,7 +200,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
     Widget? trailingAction,
   }) {
     final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
+        ResponsiveGridHelper.isTabletLayout(context);
     final titleFontSize =
         displaySettings.scaleFontSize(isLandscape ? 13.5 : 11.0);
     final chipFontSize =
@@ -342,7 +343,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
     Widget? trailingAction,
   }) {
     final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
+        ResponsiveGridHelper.isTabletLayout(context);
     final titleFontSize =
         displaySettings.scaleFontSize(isLandscape ? 14.5 : 12.0);
     final bodyFontSize =
@@ -536,7 +537,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
     Widget? trailingAction,
   }) {
     final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
+        ResponsiveGridHelper.isTabletLayout(context);
     final rjFontSize = displaySettings.scaleFontSize(isLandscape ? 12.0 : 11.0);
     final titleFontSize =
         displaySettings.scaleFontSize(isLandscape ? 17.0 : 15.0);
@@ -671,7 +672,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
     WorkCardDisplaySettings displaySettings,
   ) {
     final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
+        ResponsiveGridHelper.isTabletLayout(context);
     final bodyFontSize =
         displaySettings.scaleFontSize(isLandscape ? 14.0 : 13.0);
     final metaFontSize =
@@ -866,7 +867,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
 
   Widget _buildRjTag() {
     final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
+        ResponsiveGridHelper.isTabletLayout(context);
     final displaySettings = ref.watch(workCardDisplayProvider);
     final fontSize = displaySettings.scaleFontSize(isLandscape ? 13.0 : 11.0);
 
@@ -889,7 +890,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
 
   Widget _buildDateTag() {
     final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
+        ResponsiveGridHelper.isTabletLayout(context);
     final displaySettings = ref.watch(workCardDisplayProvider);
     final fontSize = displaySettings.scaleFontSize(isLandscape ? 13.0 : 10.0);
 
@@ -912,7 +913,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
 
   Widget _buildSubtitleTag(BuildContext context, {bool isLocal = false}) {
     final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
+        ResponsiveGridHelper.isTabletLayout(context);
     final displaySettings = ref.watch(workCardDisplayProvider);
     final iconSize = displaySettings.scaleFontSize(isLandscape ? 16.0 : 14.0);
 
@@ -934,7 +935,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
 
   Widget _buildTagsRow(BuildContext context) {
     final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
+        ResponsiveGridHelper.isTabletLayout(context);
     final displaySettings = ref.watch(workCardDisplayProvider);
     final fontSize = displaySettings.scaleFontSize(isLandscape ? 13.0 : 10.0);
 
@@ -958,7 +959,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
 
   Widget _buildVoiceActorsRow(BuildContext context) {
     final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
+        ResponsiveGridHelper.isTabletLayout(context);
     final displaySettings = ref.watch(workCardDisplayProvider);
     final fontSize = displaySettings.scaleFontSize(isLandscape ? 13.0 : 10.0);
 

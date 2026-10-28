@@ -28,6 +28,7 @@ import '../widgets/liquid_glass_layout.dart';
 import '../widgets/radio_option_group.dart';
 import '../widgets/settings_option_dialog.dart';
 import '../widgets/confirmation_dialog.dart';
+import '../utils/responsive_grid_helper.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -113,7 +114,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
 
     final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+        ResponsiveGridHelper.isTabletLayout(context);
     final dockExtent = LiquidGlassDockScope.extentOf(context);
     final cards = [
       _buildAccountCard(context),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../services/subtitle_library_service.dart';
+import '../utils/responsive_grid_helper.dart';
 
 class SubtitleLibraryTopBar extends StatelessWidget {
   const SubtitleLibraryTopBar({
@@ -58,7 +59,7 @@ class SubtitleLibraryTopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+        ResponsiveGridHelper.isTabletLayout(context);
     final horizontalPadding = isLandscape ? 24.0 : 8.0;
 
     return Container(

@@ -19,6 +19,7 @@ import '../widgets/floating_feed_toolbar.dart';
 import '../utils/system_ui_style.dart';
 import '../widgets/search_condition_chip.dart';
 import '../widgets/async_state_view.dart';
+import '../utils/responsive_grid_helper.dart';
 
 class SearchResultScreen extends StatelessWidget {
   final String keyword;
@@ -459,10 +460,10 @@ class _SearchResultContentState extends ConsumerState<_SearchResultContent> {
           child: Padding(
             padding: EdgeInsets.only(
               top: MediaQuery.paddingOf(context).top + 64,
-              left: MediaQuery.orientationOf(context) == Orientation.landscape
+              left: ResponsiveGridHelper.isTabletLayout(context)
                   ? 24
                   : 8,
-              right: MediaQuery.orientationOf(context) == Orientation.landscape
+              right: ResponsiveGridHelper.isTabletLayout(context)
                   ? 24
                   : 8,
               bottom: 8,

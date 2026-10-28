@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../models/work.dart';
 import '../services/storage_service.dart';
+import 'responsive_grid_helper.dart';
 
 const _maxPendingCoverPrefetches = 12;
 final Queue<_CoverPrefetchTask> _coverPrefetchQueue = Queue();
@@ -36,10 +37,8 @@ int resolveWorkCoverCacheWidth(
   required int crossAxisCount,
   bool isListCard = true,
 }) {
-  final isLandscape =
-      MediaQuery.orientationOf(context) == Orientation.landscape;
-  final spacing = isLandscape ? 24.0 : 8.0;
-  final padding = isLandscape ? 24.0 : 8.0;
+  final spacing = ResponsiveGridHelper.gridSpacing(context);
+  final padding = spacing;
 
   return calculateWorkCoverCacheWidth(
     viewportWidth: MediaQuery.sizeOf(context).width,
