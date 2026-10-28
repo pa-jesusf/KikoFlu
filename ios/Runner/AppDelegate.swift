@@ -7,7 +7,7 @@ import AudioToolbox
 import CoreHaptics
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   private var floatingLyricManager: FloatingLyricManager?
   private var audioHapticsBridge: AudioHapticsBridge?
 
@@ -15,13 +15,24 @@ import CoreHaptics
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
-    floatingLyricManager = FloatingLyricManager(controller: controller)
-    audioHapticsBridge = AudioHapticsBridge(controller: controller)
+    // Under the UIScene lifecycle the Flutter view controller does not exist
+    // yet; channels are set up in didInitializeImplicitFlutterEngine.
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+
+    let registry = engineBridge.pluginRegistry
+    if let registrar = registry.registrar(forPlugin: "FloatingLyricManager") {
+      floatingLyricManager = FloatingLyricManager(registrar: registrar)
+    }
+    let messenger = engineBridge.applicationRegistrar.messenger()
+    audioHapticsBridge = AudioHapticsBridge(messenger: messenger)
 
     let screenAwakeChannel = FlutterMethodChannel(
       name: "com.meteor.kikoeruflutter/screen_awake",
-      binaryMessenger: controller.binaryMessenger
+      binaryMessenger: messenger
     )
     screenAwakeChannel.setMethodCallHandler { call, result in
       switch call.method {
@@ -37,7 +48,7 @@ import CoreHaptics
 
     let systemProxyChannel = FlutterMethodChannel(
       name: "com.meteor.kikoeruflutter/system_proxy",
-      binaryMessenger: controller.binaryMessenger
+      binaryMessenger: messenger
     )
     systemProxyChannel.setMethodCallHandler { [weak self] call, result in
       guard let self else {
@@ -51,9 +62,6 @@ import CoreHaptics
         result(FlutterMethodNotImplemented)
       }
     }
-    
-    GeneratedPluginRegistrant.register(with: self)
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
   private func systemProxy() -> String? {
@@ -108,10 +116,10 @@ class AudioHapticsBridge {
     private var loggedReadableAlias = false
     private var loggedAssetReaderFallback = false
 
-    init(controller: FlutterViewController) {
+    init(messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
             name: "com.meteor.kikoeruflutter/audio_haptics",
-            binaryMessenger: controller.binaryMessenger
+            binaryMessenger: messenger
         )
 
         channel.setMethodCallHandler { [weak self] call, result in
@@ -1028,6 +1036,7 @@ class FloatingLyricManager: NSObject, AVPictureInPictureControllerDelegate {
     private var sampleBufferDisplayLayer: AVSampleBufferDisplayLayer?
     private var sampleBufferPlaybackDelegate: AnyObject?
     private weak var hostView: UIView?
+    private let registrar: FlutterPluginRegistrar
     private var channel: FlutterMethodChannel
 
     private var fpsMonitor = FPSMonitor()
@@ -1089,10 +1098,11 @@ class FloatingLyricManager: NSObject, AVPictureInPictureControllerDelegate {
     // Base64 of a 1-second black MP4 video
     private let dummyVideoBase64 = "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"
 
-    init(controller: FlutterViewController) {
+    init(registrar: FlutterPluginRegistrar) {
+        self.registrar = registrar
         channel = FlutterMethodChannel(
             name: "com.kikoeru.flutter/floating_lyric",
-            binaryMessenger: controller.binaryMessenger
+            binaryMessenger: registrar.messenger()
         )
         super.init()
 
@@ -1100,10 +1110,35 @@ class FloatingLyricManager: NSObject, AVPictureInPictureControllerDelegate {
             self?.handleMethodCall(call, result: result)
         }
 
-        hostView = controller.view
-        updateRenderMetrics(for: controller.view)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(sceneDidActivate(notification:)),
+            name: UIScene.didActivateNotification,
+            object: nil
+        )
+    }
+
+    @objc private func sceneDidActivate(notification: Notification) {
+        attachHostViewIfNeeded()
+    }
+
+    // Under the UIScene lifecycle the engine is created before the Flutter
+    // view is loaded, so Picture in Picture is set up once the view exists:
+    // when the scene first activates, or on the first call from Dart.
+    private func attachHostViewIfNeeded() {
+        guard hostView == nil,
+              let view = registrar.viewController?.viewIfLoaded else {
+            return
+        }
+        NotificationCenter.default.removeObserver(
+            self,
+            name: UIScene.didActivateNotification,
+            object: nil
+        )
+        hostView = view
+        updateRenderMetrics(for: view)
         rebuildRenderedFrame()
-        setupPictureInPicture(in: controller.view)
+        setupPictureInPicture(in: view)
     }
 
     deinit {
@@ -1444,6 +1479,7 @@ class FloatingLyricManager: NSObject, AVPictureInPictureControllerDelegate {
     }
 
     private func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        attachHostViewIfNeeded()
         switch call.method {
         case "show":
             let args = call.arguments as? [String: Any]
