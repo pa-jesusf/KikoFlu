@@ -15,6 +15,7 @@ import 'my_screen.dart';
 import 'settings_screen.dart';
 import '../providers/settings_provider.dart';
 import '../services/native_tab_bar_service.dart';
+import '../widgets/offline_banner_inset.dart';
 import '../utils/responsive_grid_helper.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
@@ -260,8 +261,8 @@ class _MainScreenState extends ConsumerState<MainScreen> with RouteAware {
                               ],
                             );
 
-                      return Padding(
-                        padding: EdgeInsets.only(top: isOfflineMode ? 30 : 0),
+                      return OfflineBannerInset(
+                        offline: isOfflineMode,
                         child: SafeArea(
                           top: false,
                           bottom: !useLiquidGlass,
@@ -331,8 +332,8 @@ class _MainScreenState extends ConsumerState<MainScreen> with RouteAware {
                   !authState.isLoggedIn &&
                   authState.error != null;
 
-              return Padding(
-                padding: EdgeInsets.only(top: isOfflineMode ? 30 : 0),
+              return OfflineBannerInset(
+                offline: isOfflineMode,
                 child: SafeArea(
                   top: false,
                   bottom: false,
@@ -477,8 +478,8 @@ class _MainScreenState extends ConsumerState<MainScreen> with RouteAware {
                     !authState.isLoggedIn &&
                     authState.error != null;
 
-                return Padding(
-                  padding: EdgeInsets.only(top: isOfflineMode ? 30 : 0),
+                return OfflineBannerInset(
+                  offline: isOfflineMode,
                   child: SafeArea(
                     top: false,
                     bottom: false,
