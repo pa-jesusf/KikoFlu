@@ -460,12 +460,9 @@ class _SearchResultContentState extends ConsumerState<_SearchResultContent> {
           child: Padding(
             padding: EdgeInsets.only(
               top: MediaQuery.paddingOf(context).top + 64,
-              left: ResponsiveGridHelper.isTabletLayout(context)
-                  ? 24
-                  : 8,
-              right: ResponsiveGridHelper.isTabletLayout(context)
-                  ? 24
-                  : 8,
+              // 和下面网格的默认边距一致（竖拿的平板是 16）
+              left: ResponsiveGridHelper.gridSpacing(context),
+              right: ResponsiveGridHelper.gridSpacing(context),
               bottom: 8,
             ),
             child: SingleChildScrollView(
