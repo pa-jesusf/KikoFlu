@@ -27,6 +27,7 @@ import '../utils/system_ui_style.dart';
 export '../providers/my_reviews_provider.dart' show MyReviewLayoutType;
 
 import '../../l10n/app_localizations.dart';
+import '../utils/responsive_grid_helper.dart';
 
 class MyScreen extends ConsumerStatefulWidget {
   const MyScreen({super.key});
@@ -40,6 +41,10 @@ class _MyScreenState extends ConsumerState<MyScreen>
   final ScrollController _scrollController = ScrollController();
   late TabController _tabController;
   final ValueNotifier<bool> _tabSwitcherVisible = ValueNotifier(true);
+  // 标签切换条放在顶部状态栏里时不占内容区，滚动时不用收起
+  bool _tabSwitcherInStatusBar = false;
+
+  static const double _tabSwitcherHeight = 40;
   int _lastTabIndex = 0;
 
   @override
@@ -171,6 +176,7 @@ class _MyScreenState extends ConsumerState<MyScreen>
 
   bool _handleScrollNotification(ScrollNotification notification) {
     if (notification.metrics.axis != Axis.vertical) return false;
+    if (_tabSwitcherInStatusBar) return false;
 
     if (notification.metrics.pixels <= notification.metrics.minScrollExtent) {
       _tabSwitcherVisible.value = true;
@@ -278,9 +284,25 @@ class _MyScreenState extends ConsumerState<MyScreen>
     final tabsSettings = ref.watch(myTabsDisplayProvider);
     final topPadding = MediaQuery.paddingOf(context).top;
     final horizontalPadding = FloatingToolbarLayout.horizontalPadding(context);
-    final tabSwitcherTop = topPadding + 8;
-    final contentTop = tabSwitcherTop + kTextTabBarHeight + 8;
-    final collapsedToolbarTop = tabSwitcherTop;
+    // iPhone Duo 展开竖拿时，标签切换条放进顶部状态栏左侧，下面的内容整体上移
+    // 切换条外面还有 FloatingToolbarSurface 的 4pt 内边距
+    final statusBarSlot = FloatingToolbarLayout.topStatusBarSlot(
+      context,
+      height: _tabSwitcherHeight + 8,
+    );
+    _tabSwitcherInStatusBar = statusBarSlot != null;
+    if (_tabSwitcherInStatusBar && !_tabSwitcherVisible.value) {
+      // 从横屏转回竖屏时，之前滚动收起的切换条要重新显示
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _tabSwitcherVisible.value = true;
+      });
+    }
+    final tabSwitcherTop = statusBarSlot?.top ?? topPadding + 8;
+    final contentTop = statusBarSlot != null
+        ? topPadding + 8
+        : tabSwitcherTop + kTextTabBarHeight + 8;
+    final collapsedToolbarTop =
+        statusBarSlot != null ? contentTop : tabSwitcherTop;
     final tabs = _buildTabList(
       tabsSettings,
       contentTop: contentTop,
@@ -340,8 +362,8 @@ class _MyScreenState extends ConsumerState<MyScreen>
               ),
               Positioned(
                 top: tabSwitcherTop,
-                left: horizontalPadding,
-                right: horizontalPadding,
+                left: statusBarSlot?.left ?? horizontalPadding,
+                right: statusBarSlot?.right ?? horizontalPadding,
                 child: ValueListenableBuilder<bool>(
                   valueListenable: _tabSwitcherVisible,
                   builder: (context, visible, child) => IgnorePointer(
@@ -360,7 +382,7 @@ class _MyScreenState extends ConsumerState<MyScreen>
                   ),
                   child: FloatingToolbarSurface(
                     child: SizedBox(
-                      height: 40,
+                      height: _tabSwitcherHeight,
                       child: TabBar(
                         controller: _tabController,
                         isScrollable: true,
@@ -533,7 +555,7 @@ class _MyScreenState extends ConsumerState<MyScreen>
       fillEmptyViewport: false,
       padding: state.layoutType == MyReviewLayoutType.list
           ? EdgeInsets.fromLTRB(8, topPadding + 8, 8, 8)
-          : MediaQuery.orientationOf(context) == Orientation.landscape
+          : ResponsiveGridHelper.isTabletLayout(context)
               ? EdgeInsets.fromLTRB(24, topPadding + 8, 24, 24)
               : EdgeInsets.fromLTRB(8, topPadding + 8, 8, 8),
     );

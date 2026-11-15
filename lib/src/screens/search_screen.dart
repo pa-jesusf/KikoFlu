@@ -312,6 +312,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         MediaQuery.of(context).orientation == Orientation.landscape;
     final dockExtent = LiquidGlassDockScope.extentOf(context);
     final contentBottomPadding = 16 + dockExtent;
+    // iPhone Duo 展开竖拿时，搜索类型和筛选按钮放进顶部状态栏，代替页面标题
+    // 放进状态栏那一行时和首页、我的页的胶囊一样高（48），和时间、Wi-Fi 对齐
+    final searchTypesInStatusBar = FloatingToolbarLayout.topStatusBarSlot(
+          context,
+          height: FloatingToolbarLayout.toolbarHeight,
+        ) !=
+        null;
+    // 有竖状态栏时右上角紧挨着它，筛选按钮改放到搜索类型那一行的右侧
+    final filterBesideSearchTypes = searchTypesInStatusBar ||
+        FloatingToolbarLayout.hasVerticalBar(context);
     return GestureDetector(
       // 点击任何地方（包括 AppBar）都取消焦点，关闭下拉框
       onTap: () {
@@ -319,39 +329,40 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       },
       child: Scaffold(
         floatingActionButton: const DownloadFab(),
-        appBar: ScrollableAppBar(
-          title: Text(
-            S.of(context).search,
-            style: UiTextStyles.pageTitle,
-          ),
-          clipBehavior: Clip.none,
-          actions: [
-            // 筛选按钮移到右上角
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: FloatingToolbarSurface(
-                child: FloatingToolbarIconButton(
-                  icon: _showAdvancedFilters
-                      ? Icons.filter_alt
-                      : Icons.filter_alt_outlined,
-                  tooltip: S.of(context).filter,
-                  isSelected: _showAdvancedFilters,
-                  onPressed: () {
-                    setState(() {
-                      _showAdvancedFilters = !_showAdvancedFilters;
-                      // 关闭高级筛选时重置参数为默认值
-                      if (!_showAdvancedFilters) {
-                        _minRate = 0;
-                        _ageRating = AgeRating.all;
-                        _salesRange = SalesRange.all;
-                      }
-                    });
-                  },
+        appBar: searchTypesInStatusBar
+            ? ScrollableAppBar(
+                centerTitle: false,
+                titleSpacing: 16,
+                toolbarHeight: FloatingToolbarLayout.toolbarHeight,
+                clipBehavior: Clip.none,
+                title: Row(
+                  children: [
+                    Flexible(
+                      child: _buildSearchTypeSelector(
+                        theme,
+                        height: FloatingToolbarLayout.toolbarHeight,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterButton(),
+                  ],
                 ),
+              )
+            : ScrollableAppBar(
+                title: Text(
+                  S.of(context).search,
+                  style: UiTextStyles.pageTitle,
+                ),
+                clipBehavior: Clip.none,
+                actions: [
+                  // 筛选按钮移到右上角
+                  if (!filterBesideSearchTypes)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: _buildFilterButton(),
+                    ),
+                ],
               ),
-            ),
-          ],
-        ),
         resizeToAvoidBottomInset: true, // 自动调整以避免键盘遮挡
         body: LiquidGlassDockMediaQuery(
           child: isLandscape
@@ -375,7 +386,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                             color: theme.colorScheme.surface,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: _buildMainContentChildren(true),
+                              children: _buildMainContentChildren(
+                                true,
+                                showSearchTypes: !searchTypesInStatusBar,
+                                filterBesideSearchTypes:
+                                    filterBesideSearchTypes,
+                              ),
                             ),
                           ),
                         ),
@@ -394,7 +410,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                     color: theme.colorScheme.surface,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: _buildMainContentChildren(false),
+                      children: _buildMainContentChildren(
+                        false,
+                        showSearchTypes: !searchTypesInStatusBar,
+                        filterBesideSearchTypes: filterBesideSearchTypes,
+                      ),
                     ),
                   ),
                 ),
@@ -403,9 +423,54 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     ); // GestureDetector 的闭合
   }
 
+  Widget _buildSearchTypeSelector(ThemeData theme, {double height = 56}) {
+    return FloatingToolbarSurface(
+      padding: const EdgeInsets.all(4),
+      child: SizedBox(
+        height: height - 8,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: SearchType.values
+                .map((type) => _buildSearchTypeButton(type, theme))
+                .toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterButton() {
+    return FloatingToolbarSurface(
+      child: FloatingToolbarIconButton(
+        icon: _showAdvancedFilters
+            ? Icons.filter_alt
+            : Icons.filter_alt_outlined,
+        tooltip: S.of(context).filter,
+        isSelected: _showAdvancedFilters,
+        onPressed: () {
+          setState(() {
+            _showAdvancedFilters = !_showAdvancedFilters;
+            // 关闭高级筛选时重置参数为默认值
+            if (!_showAdvancedFilters) {
+              _minRate = 0;
+              _ageRating = AgeRating.all;
+              _salesRange = SalesRange.all;
+            }
+          });
+        },
+      ),
+    );
+  }
+
   Widget _buildAdvancedFiltersSidebar(ThemeData theme) {
-    return Flexible(
-      flex: 4,
+    // 约三分之一屏宽，但不少于 260：合上横拿的 iPhone Duo 等窄横屏按比例分时
+    // 只有约 130pt 内容宽，标题、滑块和下拉框都放不下
+    final sidebarWidth =
+        (MediaQuery.sizeOf(context).width / 3).clamp(260.0, 400.0);
+    return SizedBox(
+      width: sidebarWidth,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
         child: Card(
@@ -418,13 +483,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                 children: [
                   Row(
                     children: [
-                      Text(
-                        S.of(context).advancedFilter,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Text(
+                          S.of(context).advancedFilter,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.close),
                         tooltip: S.of(context).close,
@@ -440,7 +506,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                     ],
                   ),
                   const SizedBox(height: 12),
-                  ..._buildAdvancedFilterSections(),
+                  ..._buildAdvancedFilterSections(stackDropdowns: true),
                 ],
               ),
             ),
@@ -450,7 +516,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     );
   }
 
-  List<Widget> _buildMainContentChildren(bool isLandscape) {
+  List<Widget> _buildMainContentChildren(
+    bool isLandscape, {
+    bool showSearchTypes = true,
+    bool filterBesideSearchTypes = false,
+  }) {
     final theme = Theme.of(context);
 
     return [
@@ -498,21 +568,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         ),
         const SizedBox(height: 12),
       ],
-      FloatingToolbarSurface(
-        padding: const EdgeInsets.all(4),
-        child: SizedBox(
-          height: 48,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: SearchType.values
-                  .map((type) => _buildSearchTypeButton(type, theme))
-                  .toList(),
+      if (showSearchTypes && filterBesideSearchTypes)
+        Row(
+          children: [
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: _buildSearchTypeSelector(theme),
+              ),
             ),
-          ),
-        ),
-      ),
+            const SizedBox(width: 8),
+            _buildFilterButton(),
+          ],
+        )
+      else if (showSearchTypes)
+        _buildSearchTypeSelector(theme),
       if (_currentSearchType == SearchType.tag ||
           _currentSearchType == SearchType.va ||
           _currentSearchType == SearchType.circle)
@@ -980,7 +1050,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     );
   }
 
-  List<Widget> _buildAdvancedFilterSections() {
+  List<Widget> _buildAdvancedFilterSections({bool stackDropdowns = false}) {
     final theme = Theme.of(context);
     final filterValueStyle = theme.textTheme.labelLarge?.copyWith(
       color: theme.colorScheme.onSurface,
@@ -988,6 +1058,60 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     );
     final authState = ref.watch(authProvider);
     final isOfficialServer = ServerUtils.isOfficialServer(authState.host);
+
+    final ageRatingDropdown = FloatingToolbarSurface(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: LiquidGlassDropdownButtonFormField<AgeRating>(
+        initialValue: _ageRating,
+        decoration: _filterInputDecoration(
+          theme,
+          labelText: S.of(context).ageRatingLabel,
+          prefixIcon: const Icon(Icons.shield),
+        ),
+        items: AgeRating.values
+            .where(
+              (rating) => isOfficialServer || rating != AgeRating.r15,
+            )
+            .map((rating) {
+              return DropdownMenuItem(
+                value: rating,
+                child: Text(
+                  rating.localizedLabel(context),
+                  style: filterValueStyle,
+                ),
+              );
+            })
+            .toList(),
+        style: filterValueStyle,
+        onChanged: (value) =>
+            setState(() => _ageRating = value ?? AgeRating.all),
+      ),
+    );
+    final salesDropdown = FloatingToolbarSurface(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: LiquidGlassDropdownButtonFormField<SalesRange>(
+        initialValue: _salesRange,
+        decoration: _filterInputDecoration(
+          theme,
+          labelText: S.of(context).salesLabel,
+          prefixIcon: const Icon(Icons.trending_up),
+        ),
+        items: SalesRange.values.map((range) {
+          return DropdownMenuItem(
+            value: range,
+            child: Text(
+              range == SalesRange.all
+                  ? S.of(context).salesRangeAll
+                  : range.label,
+              style: filterValueStyle,
+            ),
+          );
+        }).toList(),
+        style: filterValueStyle,
+        onChanged: (value) =>
+            setState(() => _salesRange = value ?? SalesRange.all),
+      ),
+    );
 
     return [
       if (isOfficialServer) ...[
@@ -1018,70 +1142,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         ),
         const SizedBox(height: 12),
       ],
-      Row(
-        children: [
-          Expanded(
-            child: FloatingToolbarSurface(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: LiquidGlassDropdownButtonFormField<AgeRating>(
-                initialValue: _ageRating,
-                decoration: _filterInputDecoration(
-                  theme,
-                  labelText: S.of(context).ageRatingLabel,
-                  prefixIcon: const Icon(Icons.shield),
-                ),
-                items: AgeRating.values
-                    .where(
-                      (rating) => isOfficialServer || rating != AgeRating.r15,
-                    )
-                    .map((rating) {
-                      return DropdownMenuItem(
-                        value: rating,
-                        child: Text(
-                          rating.localizedLabel(context),
-                          style: filterValueStyle,
-                        ),
-                      );
-                    })
-                    .toList(),
-                style: filterValueStyle,
-                onChanged: (value) =>
-                    setState(() => _ageRating = value ?? AgeRating.all),
-              ),
-            ),
-          ),
-          if (isOfficialServer) ...[
-            const SizedBox(width: 12),
-            Expanded(
-              child: FloatingToolbarSurface(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: LiquidGlassDropdownButtonFormField<SalesRange>(
-                  initialValue: _salesRange,
-                  decoration: _filterInputDecoration(
-                    theme,
-                    labelText: S.of(context).salesLabel,
-                    prefixIcon: const Icon(Icons.trending_up),
-                  ),
-                  items: SalesRange.values.map((range) {
-                    return DropdownMenuItem(
-                      value: range,
-                      child: Text(
-                        range == SalesRange.all
-                            ? S.of(context).salesRangeAll
-                            : range.label,
-                        style: filterValueStyle,
-                      ),
-                    );
-                  }).toList(),
-                  style: filterValueStyle,
-                  onChanged: (value) =>
-                      setState(() => _salesRange = value ?? SalesRange.all),
-                ),
-              ),
-            ),
-          ],
+      // 侧栏只有屏幕约三分之一宽，两个下拉框并排会把选中值挤成竖排，改为上下排列
+      if (stackDropdowns) ...[
+        ageRatingDropdown,
+        if (isOfficialServer) ...[
+          const SizedBox(height: 12),
+          salesDropdown,
         ],
-      ),
+      ] else
+        Row(
+          children: [
+            Expanded(child: ageRatingDropdown),
+            if (isOfficialServer) ...[
+              const SizedBox(width: 12),
+              Expanded(child: salesDropdown),
+            ],
+          ],
+        ),
       const SizedBox(height: 12),
     ];
   }

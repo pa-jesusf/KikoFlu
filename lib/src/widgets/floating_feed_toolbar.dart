@@ -1,9 +1,13 @@
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:real_liquid_glass/real_liquid_glass.dart';
 
 import '../providers/settings_provider.dart';
+import '../services/duo_layout.dart';
+import '../utils/responsive_grid_helper.dart';
 
 class FloatingFeedModeAction {
   const FloatingFeedModeAction({
@@ -42,10 +46,15 @@ class FloatingFeedToolbar extends StatelessWidget {
     required this.modeActions,
     required this.toolActions,
     this.collapseModesWhenNeeded = true,
+    this.alignToStart = false,
   }) : assert(modeActions.length > 0);
 
   final List<FloatingFeedModeAction> modeActions;
   final List<FloatingFeedToolAction> toolActions;
+
+  /// Keeps the tool capsule next to the mode capsule instead of pushing it to
+  /// the far edge, e.g. when the trailing corner holds the status bar items.
+  final bool alignToStart;
 
   /// Replaces the mode row with a dropdown when it cannot fit beside tools.
   ///
@@ -57,7 +66,7 @@ class FloatingFeedToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final toolbar = SizedBox(
-      height: 48,
+      height: FloatingToolbarLayout.toolbarHeight,
       child: LayoutBuilder(
         builder: (context, constraints) {
           const surfacePadding = 8.0;
@@ -118,7 +127,9 @@ class FloatingFeedToolbar extends StatelessWidget {
           );
 
           return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: alignToStart
+                ? MainAxisAlignment.start
+                : MainAxisAlignment.spaceBetween,
             children: [
               Flexible(fit: FlexFit.loose, child: modeSurface),
               if (toolActions.isNotEmpty) ...[
@@ -381,8 +392,36 @@ class _ModeDropdown extends ConsumerWidget {
 class FloatingToolbarLayout {
   const FloatingToolbarLayout._();
 
+  /// Height of [FloatingFeedToolbar].
+  static const double toolbarHeight = 48;
+
+  /// Where a top bar of [height] goes when the system lets it sit inside the
+  /// top safe area, as on iPhone Duo held upright while unfolded: UIKit's top
+  /// bar region places it in the status bar row, clear of the time and
+  /// Wi-Fi. Returns null elsewhere (a vertical bar, other devices), and where
+  /// the top inset has already been consumed, so the bar stays below it.
+  static ({double top, double left, double right})? topStatusBarSlot(
+    BuildContext context, {
+    double height = toolbarHeight,
+  }) {
+    final layout = DuoLayout.of(context);
+    final region = layout?.topBar;
+    if (region == null || layout!.hasVerticalBar) return null;
+    // UIKit centres shorter bars on the status bar row and never places a
+    // taller one above the region's top (44pt: 26, 48pt: 24, 56pt: 24).
+    final centre = region.top + DuoLayoutData.barExtent / 2;
+    final top = math.max(region.top, centre - height / 2);
+    if (top + height > MediaQuery.paddingOf(context).top) return null;
+    return (top: top, left: region.left, right: region.right);
+  }
+
+  /// Whether iPhone Duo puts bars in a vertical bar beside the content, as it
+  /// does when folded or held sideways.
+  static bool hasVerticalBar(BuildContext context) =>
+      DuoLayout.of(context)?.hasVerticalBar ?? false;
+
   static double horizontalPadding(BuildContext context) {
-    return MediaQuery.of(context).orientation == Orientation.landscape
+    return ResponsiveGridHelper.isTabletLayout(context)
         ? 24.0
         : 8.0;
   }

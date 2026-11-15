@@ -19,6 +19,7 @@ import '../widgets/floating_feed_toolbar.dart';
 import '../utils/system_ui_style.dart';
 import '../widgets/search_condition_chip.dart';
 import '../widgets/async_state_view.dart';
+import '../utils/responsive_grid_helper.dart';
 
 class SearchResultScreen extends StatelessWidget {
   final String keyword;
@@ -156,6 +157,8 @@ class _SearchResultContentState extends ConsumerState<_SearchResultContent> {
     final horizontalPadding = FloatingToolbarLayout.horizontalPadding(context);
 
     final topPadding = MediaQuery.paddingOf(context).top;
+    // iPhone Duo 展开竖拿时，返回按钮和工具栏放进顶部状态栏，列表随之上移
+    final statusBarSlot = FloatingToolbarLayout.topStatusBarSlot(context);
     final systemOverlayStyle =
         transparentSystemBarsForBrightness(Theme.of(context).brightness);
 
@@ -171,12 +174,16 @@ class _SearchResultContentState extends ConsumerState<_SearchResultContent> {
                 top: 0,
                 left: 0,
                 right: 0,
-                child: ProgressiveTopScrim(height: topPadding + 72),
+                child: ProgressiveTopScrim(
+                  height: statusBarSlot != null
+                      ? topPadding + 16
+                      : topPadding + 72,
+                ),
               ),
               Positioned(
-                top: topPadding + 8,
-                left: horizontalPadding,
-                right: horizontalPadding,
+                top: statusBarSlot?.top ?? topPadding + 8,
+                left: statusBarSlot?.left ?? horizontalPadding,
+                right: statusBarSlot?.right ?? horizontalPadding,
                 child: FloatingToolbarGlassRow(
                   children: [
                     FloatingToolbarSurface(
@@ -458,13 +465,13 @@ class _SearchResultContentState extends ConsumerState<_SearchResultContent> {
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.only(
-              top: MediaQuery.paddingOf(context).top + 64,
-              left: MediaQuery.orientationOf(context) == Orientation.landscape
-                  ? 24
-                  : 8,
-              right: MediaQuery.orientationOf(context) == Orientation.landscape
-                  ? 24
-                  : 8,
+              top: MediaQuery.paddingOf(context).top +
+                  (FloatingToolbarLayout.topStatusBarSlot(context) != null
+                      ? 8
+                      : 64),
+              // 和下面网格的默认边距一致（竖拿的平板是 16）
+              left: ResponsiveGridHelper.gridSpacing(context),
+              right: ResponsiveGridHelper.gridSpacing(context),
               bottom: 8,
             ),
             child: SingleChildScrollView(

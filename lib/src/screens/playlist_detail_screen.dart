@@ -374,9 +374,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     final isOwner = state.metadata?.userName == auth.userName;
     final layoutType = ref.watch(playlistDisplayProvider);
     final isMasonry = layoutType == PlaylistLayoutType.masonry;
-    final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
-    final spacing = isLandscape ? 24.0 : 8.0;
+    final spacing = ResponsiveGridHelper.gridSpacing(context);
     final crossAxisCount = isMasonry
         ? ref.watch(workCardDisplayProvider).applyCardSize(
               ResponsiveGridHelper.getBigGridCrossAxisCount(context),

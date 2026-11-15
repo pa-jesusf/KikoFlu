@@ -137,11 +137,16 @@ class LiquidGlassDockOverlay extends StatelessWidget {
     required this.child,
     required this.dock,
     required this.onExtentChanged,
+    this.bottomInset,
   });
 
   final Widget child;
   final Widget dock;
   final ValueChanged<double> onExtentChanged;
+
+  /// Space below the dock; defaults to [LiquidGlassLayout.dockBottomInset].
+  /// The native iOS tab bar passes its own height so the dock floats above it.
+  final double? bottomInset;
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +162,8 @@ class LiquidGlassDockOverlay extends StatelessWidget {
             onChanged: onExtentChanged,
             child: Padding(
               padding: EdgeInsets.only(
-                bottom: LiquidGlassLayout.dockBottomInset(context),
+                bottom:
+                    bottomInset ?? LiquidGlassLayout.dockBottomInset(context),
               ),
               child: dock,
             ),

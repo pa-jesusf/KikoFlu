@@ -191,8 +191,11 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
 
     final horizontalPadding = FloatingToolbarLayout.horizontalPadding(context);
     final topPadding = MediaQuery.paddingOf(context).top;
-    final toolbarTop = topPadding + 8;
-    final contentTopPadding = toolbarTop + 56;
+    // iPhone Duo 展开竖拿时，工具栏放进顶部状态栏左侧的空白里，列表随之上移
+    final statusBarSlot = FloatingToolbarLayout.topStatusBarSlot(context);
+    final toolbarTop = statusBarSlot?.top ?? topPadding + 8;
+    final contentTopPadding =
+        statusBarSlot != null ? topPadding + 8 : toolbarTop + 56;
     final systemOverlayStyle =
         transparentSystemBarsForBrightness(Theme.of(context).brightness);
 
@@ -244,14 +247,17 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
               top: 0,
               left: 0,
               right: 0,
-              child: ProgressiveTopScrim(height: topPadding + 72),
+              child: ProgressiveTopScrim(
+                height: statusBarSlot != null ? topPadding + 16 : topPadding + 72,
+              ),
             ),
             Positioned(
               top: toolbarTop,
-              left: horizontalPadding,
-              right: horizontalPadding,
+              left: statusBarSlot?.left ?? horizontalPadding,
+              right: statusBarSlot?.right ?? horizontalPadding,
               child: FloatingFeedToolbar(
                 collapseModesWhenNeeded: false,
+                alignToStart: statusBarSlot != null,
                 modeActions: _buildModeActions(context, worksState),
                 toolActions: _buildToolActions(
                   context,

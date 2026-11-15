@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'top_status_bar_app_bar.dart';
+
 /// 可滚动 AppBar - 默认不显示分隔线，滚动时显示
 class ScrollableAppBar extends StatefulWidget implements PreferredSizeWidget {
   const ScrollableAppBar({
@@ -93,7 +95,7 @@ class _ScrollableAppBarState extends State<ScrollableAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
+    final appBar = AppBar(
       title: widget.title,
       leading: widget.leading,
       actions: widget.actions,
@@ -133,6 +135,14 @@ class _ScrollableAppBarState extends State<ScrollableAppBar> {
               ),
             ),
           ),
+    );
+
+    // iPhone Duo：标题栏放进顶部状态栏那一行，或把按钮放进侧边竖栏
+    return TopStatusBarAppBar.adapt(
+      context,
+      appBar,
+      height:
+          widget.toolbarHeight + (widget.bottom?.preferredSize.height ?? 1),
     );
   }
 }

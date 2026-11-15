@@ -8,6 +8,7 @@ import '../utils/ui_tokens.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/responsive_dialog.dart';
 import '../widgets/settings_option_dialog.dart';
+import '../widgets/top_status_bar_app_bar.dart';
 
 class BlockedItemsScreen extends ConsumerWidget {
   const BlockedItemsScreen({super.key});
@@ -17,17 +18,19 @@ class BlockedItemsScreen extends ConsumerWidget {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            S.of(context).blockedItems,
-            style: UiTextStyles.pageTitle,
-          ),
-          bottom: TabBar(
-            tabs: [
-              Tab(text: S.of(context).searchTypeTag),
-              Tab(text: S.of(context).searchTypeVa),
-              Tab(text: S.of(context).searchTypeCircle),
-            ],
+        appBar: TopStatusBarAppBar(
+          appBar: AppBar(
+            title: Text(
+              S.of(context).blockedItems,
+              style: UiTextStyles.pageTitle,
+            ),
+            bottom: TabBar(
+              tabs: [
+                Tab(text: S.of(context).searchTypeTag),
+                Tab(text: S.of(context).searchTypeVa),
+                Tab(text: S.of(context).searchTypeCircle),
+              ],
+            ),
           ),
         ),
         body: const TabBarView(

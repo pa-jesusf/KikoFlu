@@ -27,6 +27,22 @@ class ResponsiveGridHelper {
     return columns.clamp(minimumColumns, preferredColumns).toInt();
   }
 
+  /// 是否使用平板式布局（侧边导航、多列网格、分栏页面）：横屏，或窗口最短边
+  /// ≥ 600（平板、展开后竖着拿的 iPhone Duo）。合上的 iPhone Duo 和直板
+  /// iPhone 的最短边都小于 600。
+  static bool isTabletLayout(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    return size.width > size.height || size.shortestSide >= 600;
+  }
+
+  /// 网格的间距和边距：横屏 24；竖着拿的平板 16，让展开的 iPhone Duo 在侧边
+  /// 导航旁也能排下三列；竖屏手机 8。
+  static double gridSpacing(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    if (size.width > size.height) return 24;
+    return isTabletLayout(context) ? 16 : 8;
+  }
+
   static (double width, double height) _availableSize(
     BuildContext context, {
     double? availableWidth,
@@ -41,8 +57,8 @@ class ResponsiveGridHelper {
   /// 根据屏幕尺寸计算大网格的列数
   ///
   /// 逻辑：
-  /// - 竖屏：优先2列，卡片过窄时降为1列
-  /// - 横屏：
+  /// - 竖屏手机：优先2列，卡片过窄时降为1列
+  /// - 横屏或平板式布局（见 [isTabletLayout]）：
   ///   - 屏幕宽度 < 1200px 或宽高比 < 1.3：优先3列
   ///   - 屏幕宽度 >= 1200px 且宽高比 >= 1.3：优先4列
   /// - 所有模式都按实际可用宽度保留最小卡片宽度。
@@ -60,7 +76,7 @@ class ResponsiveGridHelper {
     );
     final isLandscape = width > height;
     final aspectRatio = height > 0 ? width / height : double.infinity;
-    final preferredColumns = !isLandscape
+    final preferredColumns = !isLandscape && !isTabletLayout(context)
         ? 2
         : (width >= 1200 && aspectRatio >= 1.3 ? 4 : 3);
 
@@ -77,8 +93,8 @@ class ResponsiveGridHelper {
   /// 根据屏幕尺寸计算小网格的列数
   ///
   /// 逻辑：
-  /// - 竖屏：优先3列
-  /// - 横屏：优先5列
+  /// - 竖屏手机：优先3列
+  /// - 横屏或平板式布局：优先5列
   /// - 极窄窗口至少保留2列，避免网格退化为列表。
   static int getSmallGridCrossAxisCount(
     BuildContext context, {
@@ -92,7 +108,8 @@ class ResponsiveGridHelper {
       availableWidth: availableWidth,
       availableHeight: availableHeight,
     );
-    final preferredColumns = width > height ? 5 : 3;
+    final preferredColumns =
+        width > height || isTabletLayout(context) ? 5 : 3;
 
     return _fitColumnsToWidth(
       width: width,
