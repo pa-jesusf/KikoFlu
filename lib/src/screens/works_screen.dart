@@ -26,7 +26,15 @@ class WorksScreen extends ConsumerStatefulWidget {
 
 class _WorksScreenState extends ConsumerState<WorksScreen>
     with AutomaticKeepAliveClientMixin {
-  final ScrollController _scrollController = ScrollController();
+  // 每个模式一个滚动控制器：切换模式时 AnimatedSwitcher 会让新旧两个列表同时
+  // 存在约 250ms，共用一个控制器会同时挂上两个列表，读取 offset/position 时
+  // 抛出异常，导致滚动位置恢复失败、快速连点时模式切换不了。偏移由
+  // _scrollPositions 手动保存和恢复，所以不再写入 PageStorage（三个模式的
+  // 列表在 PageStorage 里是同一个位置，会互相覆盖）。
+  final Map<DisplayMode, ScrollController> _scrollControllers = {
+    for (final mode in DisplayMode.values)
+      mode: ScrollController(keepScrollOffset: false),
+  };
 
   int _slideDirection = 0;
   final Map<DisplayMode, double> _scrollPositions = {
@@ -50,7 +58,9 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    for (final controller in _scrollControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -120,8 +130,9 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
     final currentMode = ref.read(worksProvider).displayMode;
     if (currentMode == mode) return;
 
-    if (_scrollController.hasClients) {
-      _scrollPositions[currentMode] = _scrollController.offset;
+    final currentController = _scrollControllers[currentMode]!;
+    if (currentController.hasClients) {
+      _scrollPositions[currentMode] = currentController.offset;
     }
 
     ref.read(worksProvider.notifier).setDisplayMode(mode);
@@ -131,11 +142,12 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
     final targetOffset = _scrollPositions[mode] ?? 0;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (!_scrollController.hasClients) return;
-      final maxExtent = _scrollController.position.maxScrollExtent;
+      final controller = _scrollControllers[mode]!;
+      if (!controller.hasClients) return;
+      final maxExtent = controller.position.maxScrollExtent;
       final safeMax = maxExtent.isFinite ? maxExtent : targetOffset;
       final clamped = targetOffset.clamp(0.0, safeMax).toDouble();
-      _scrollController.jumpTo(clamped);
+      controller.jumpTo(clamped);
     });
   }
 
@@ -334,7 +346,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
     return WorksGridView(
       works: worksState.works,
       layoutType: worksState.layoutType,
-      scrollController: _scrollController,
+      scrollController: _scrollControllers[worksState.displayMode],
       padding: padding,
       physics: ScrollOptimization.physics,
       isLoading: worksState.isLoading,
