@@ -20,6 +20,11 @@ import CoreHaptics
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
+  /// The native tab bar moved the Flutter view into another tab's container.
+  func flutterViewDidMove() {
+    floatingLyricManager?.hostViewDidMove()
+  }
+
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
 
@@ -1120,6 +1125,13 @@ class FloatingLyricManager: NSObject, AVPictureInPictureControllerDelegate {
 
     @objc private func sceneDidActivate(notification: Notification) {
         attachHostViewIfNeeded()
+    }
+
+    /// The sample buffer layer sits beside the Flutter view in its parent's
+    /// layer, so it has to follow the view into the new tab container.
+    func hostViewDidMove() {
+        guard let hostView, sampleBufferDisplayLayer != nil else { return }
+        attachSampleBufferDisplayLayer(below: hostView)
     }
 
     // Under the UIScene lifecycle the engine is created before the Flutter
