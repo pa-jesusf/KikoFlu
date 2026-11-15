@@ -313,9 +313,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     final dockExtent = LiquidGlassDockScope.extentOf(context);
     final contentBottomPadding = 16 + dockExtent;
     // iPhone Duo 展开竖拿时，搜索类型和筛选按钮放进顶部状态栏，代替页面标题
+    // 放进状态栏那一行时和首页、我的页的胶囊一样高（48），和时间、Wi-Fi 对齐
     final searchTypesInStatusBar = FloatingToolbarLayout.topStatusBarSlot(
           context,
-          height: _searchTypeSelectorHeight,
+          height: FloatingToolbarLayout.toolbarHeight,
         ) !=
         null;
     // 有竖状态栏时右上角紧挨着它，筛选按钮改放到搜索类型那一行的右侧
@@ -332,10 +333,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
             ? ScrollableAppBar(
                 centerTitle: false,
                 titleSpacing: 16,
+                toolbarHeight: FloatingToolbarLayout.toolbarHeight,
                 clipBehavior: Clip.none,
                 title: Row(
                   children: [
-                    Flexible(child: _buildSearchTypeSelector(theme)),
+                    Flexible(
+                      child: _buildSearchTypeSelector(
+                        theme,
+                        height: FloatingToolbarLayout.toolbarHeight,
+                      ),
+                    ),
                     const SizedBox(width: 8),
                     _buildFilterButton(),
                   ],
@@ -416,13 +423,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     ); // GestureDetector 的闭合
   }
 
-  static const double _searchTypeSelectorHeight = 56;
-
-  Widget _buildSearchTypeSelector(ThemeData theme) {
+  Widget _buildSearchTypeSelector(ThemeData theme, {double height = 56}) {
     return FloatingToolbarSurface(
       padding: const EdgeInsets.all(4),
       child: SizedBox(
-        height: _searchTypeSelectorHeight - 8,
+        height: height - 8,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
