@@ -404,8 +404,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   }
 
   Widget _buildAdvancedFiltersSidebar(ThemeData theme) {
-    return Flexible(
-      flex: 4,
+    // 约三分之一屏宽，但不少于 260：合上横拿的 iPhone Duo 等窄横屏按比例分时
+    // 只有约 130pt 内容宽，标题、滑块和下拉框都放不下
+    final sidebarWidth =
+        (MediaQuery.sizeOf(context).width / 3).clamp(260.0, 400.0);
+    return SizedBox(
+      width: sidebarWidth,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
         child: Card(
@@ -418,13 +422,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                 children: [
                   Row(
                     children: [
-                      Text(
-                        S.of(context).advancedFilter,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Text(
+                          S.of(context).advancedFilter,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.close),
                         tooltip: S.of(context).close,
@@ -440,7 +445,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                     ],
                   ),
                   const SizedBox(height: 12),
-                  ..._buildAdvancedFilterSections(),
+                  ..._buildAdvancedFilterSections(stackDropdowns: true),
                 ],
               ),
             ),
@@ -980,7 +985,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     );
   }
 
-  List<Widget> _buildAdvancedFilterSections() {
+  List<Widget> _buildAdvancedFilterSections({bool stackDropdowns = false}) {
     final theme = Theme.of(context);
     final filterValueStyle = theme.textTheme.labelLarge?.copyWith(
       color: theme.colorScheme.onSurface,
@@ -988,6 +993,60 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     );
     final authState = ref.watch(authProvider);
     final isOfficialServer = ServerUtils.isOfficialServer(authState.host);
+
+    final ageRatingDropdown = FloatingToolbarSurface(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: LiquidGlassDropdownButtonFormField<AgeRating>(
+        initialValue: _ageRating,
+        decoration: _filterInputDecoration(
+          theme,
+          labelText: S.of(context).ageRatingLabel,
+          prefixIcon: const Icon(Icons.shield),
+        ),
+        items: AgeRating.values
+            .where(
+              (rating) => isOfficialServer || rating != AgeRating.r15,
+            )
+            .map((rating) {
+              return DropdownMenuItem(
+                value: rating,
+                child: Text(
+                  rating.localizedLabel(context),
+                  style: filterValueStyle,
+                ),
+              );
+            })
+            .toList(),
+        style: filterValueStyle,
+        onChanged: (value) =>
+            setState(() => _ageRating = value ?? AgeRating.all),
+      ),
+    );
+    final salesDropdown = FloatingToolbarSurface(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: LiquidGlassDropdownButtonFormField<SalesRange>(
+        initialValue: _salesRange,
+        decoration: _filterInputDecoration(
+          theme,
+          labelText: S.of(context).salesLabel,
+          prefixIcon: const Icon(Icons.trending_up),
+        ),
+        items: SalesRange.values.map((range) {
+          return DropdownMenuItem(
+            value: range,
+            child: Text(
+              range == SalesRange.all
+                  ? S.of(context).salesRangeAll
+                  : range.label,
+              style: filterValueStyle,
+            ),
+          );
+        }).toList(),
+        style: filterValueStyle,
+        onChanged: (value) =>
+            setState(() => _salesRange = value ?? SalesRange.all),
+      ),
+    );
 
     return [
       if (isOfficialServer) ...[
@@ -1018,70 +1077,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         ),
         const SizedBox(height: 12),
       ],
-      Row(
-        children: [
-          Expanded(
-            child: FloatingToolbarSurface(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: LiquidGlassDropdownButtonFormField<AgeRating>(
-                initialValue: _ageRating,
-                decoration: _filterInputDecoration(
-                  theme,
-                  labelText: S.of(context).ageRatingLabel,
-                  prefixIcon: const Icon(Icons.shield),
-                ),
-                items: AgeRating.values
-                    .where(
-                      (rating) => isOfficialServer || rating != AgeRating.r15,
-                    )
-                    .map((rating) {
-                      return DropdownMenuItem(
-                        value: rating,
-                        child: Text(
-                          rating.localizedLabel(context),
-                          style: filterValueStyle,
-                        ),
-                      );
-                    })
-                    .toList(),
-                style: filterValueStyle,
-                onChanged: (value) =>
-                    setState(() => _ageRating = value ?? AgeRating.all),
-              ),
-            ),
-          ),
-          if (isOfficialServer) ...[
-            const SizedBox(width: 12),
-            Expanded(
-              child: FloatingToolbarSurface(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: LiquidGlassDropdownButtonFormField<SalesRange>(
-                  initialValue: _salesRange,
-                  decoration: _filterInputDecoration(
-                    theme,
-                    labelText: S.of(context).salesLabel,
-                    prefixIcon: const Icon(Icons.trending_up),
-                  ),
-                  items: SalesRange.values.map((range) {
-                    return DropdownMenuItem(
-                      value: range,
-                      child: Text(
-                        range == SalesRange.all
-                            ? S.of(context).salesRangeAll
-                            : range.label,
-                        style: filterValueStyle,
-                      ),
-                    );
-                  }).toList(),
-                  style: filterValueStyle,
-                  onChanged: (value) =>
-                      setState(() => _salesRange = value ?? SalesRange.all),
-                ),
-              ),
-            ),
-          ],
+      // 侧栏只有屏幕约三分之一宽，两个下拉框并排会把选中值挤成竖排，改为上下排列
+      if (stackDropdowns) ...[
+        ageRatingDropdown,
+        if (isOfficialServer) ...[
+          const SizedBox(height: 12),
+          salesDropdown,
         ],
-      ),
+      ] else
+        Row(
+          children: [
+            Expanded(child: ageRatingDropdown),
+            if (isOfficialServer) ...[
+              const SizedBox(width: 12),
+              Expanded(child: salesDropdown),
+            ],
+          ],
+        ),
       const SizedBox(height: 12),
     ];
   }

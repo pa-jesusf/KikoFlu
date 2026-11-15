@@ -30,6 +30,8 @@ import 'src/services/audio_haptics_service.dart';
 import 'src/services/floating_lyric_service.dart';
 import 'src/services/log_service.dart';
 import 'src/services/audio_player_service.dart';
+import 'src/services/duo_layout.dart';
+import 'src/services/native_tab_bar_service.dart';
 import 'src/services/playback_history_service.dart';
 import 'src/services/platform_appearance_service.dart';
 import 'src/models/work.dart';
@@ -351,8 +353,13 @@ void main(List<String> args) async {
   // first-run navigation style. Older Apple OSes stay on the classic default.
   await LiquidGlass.capabilities();
 
+  // iPhone (iOS 26+) hosts the app in a native Liquid Glass tab bar.
+  await NativeTabBarService.initialize();
+  // iPhone Duo: where the system puts bars and what it reserves.
+  await DuoLayout.initialize();
+
   runZonedGuarded(
-    () => runApp(const ProviderScope(child: KikoeruApp())),
+    () => runApp(ProviderScope(child: DuoLayout(child: const KikoeruApp()))),
     (error, stack) {
       LogService.instance.error('$error\n$stack', tag: 'Zone');
     },
@@ -546,6 +553,7 @@ class _KikoeruAppState extends ConsumerState<KikoeruApp>
             effectiveLocale,
           ),
           themeMode: mode,
+          navigatorObservers: [NativeTabBarService.routeObserver],
           home: ScreenAwakeObserver(child: _buildHomeScreen()),
         );
       },
