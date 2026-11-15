@@ -137,11 +137,10 @@ class _ScrollableAppBarState extends State<ScrollableAppBar> {
           ),
     );
 
-    // iPhone Duo 展开竖拿时，标题栏放进顶部状态栏，右侧让出时间和 Wi-Fi
-    return TopStatusBarAppBar.wrap(
+    // iPhone Duo：标题栏放进顶部状态栏那一行，或把按钮放进侧边竖栏
+    return TopStatusBarAppBar.adapt(
       context,
       appBar,
-      toolbarHeight: widget.toolbarHeight,
       height:
           widget.toolbarHeight + (widget.bottom?.preferredSize.height ?? 1),
     );
