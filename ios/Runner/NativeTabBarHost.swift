@@ -31,6 +31,7 @@ final class NativeTabBarHost: NSObject, UITabBarControllerDelegate {
   let tabBarController: UITabBarController = FlutterTabBarController()
   private let flutterController: FlutterViewController
   private let channel: FlutterMethodChannel
+  private let layoutReporter: DuoLayoutReporter
   private let containers: [FlutterTabContainer]
 
   @available(iOS 26.0, *)
@@ -40,6 +41,7 @@ final class NativeTabBarHost: NSObject, UITabBarControllerDelegate {
       name: NativeTabBarHost.channelName,
       binaryMessenger: flutterController.binaryMessenger
     )
+    layoutReporter = DuoLayoutReporter(messenger: flutterController.binaryMessenger)
     // Titles are replaced by localized ones from Dart once it starts.
     let items: [(String, String, String)] = [
       ("Home", "house", "house.fill"),
@@ -63,6 +65,11 @@ final class NativeTabBarHost: NSObject, UITabBarControllerDelegate {
 
     tabBarController.viewControllers = containers
     tabBarController.delegate = self
+    // Report the layout after every pass of the tab bar controller and the
+    // containers: rotating, folding and unfolding all end in one.
+    let reportLayout: () -> Void = { [weak self] in self?.reportLayout() }
+    (tabBarController as? FlutterTabBarController)?.onLayout = reportLayout
+    containers.forEach { $0.onLayout = reportLayout }
     // Hidden until the Flutter main screen asks for it (not on login).
     tabBarController.setTabBarHidden(true, animated: false)
     embedFlutter(in: containers[0])
@@ -90,6 +97,10 @@ final class NativeTabBarHost: NSObject, UITabBarControllerDelegate {
       let hidden = call.arguments as? Bool ?? false
       if #available(iOS 18.0, *), tabBarController.isTabBarHidden != hidden {
         tabBarController.setTabBarHidden(hidden, animated: true)
+        // The animation may end without another layout pass.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+          self?.reportLayout()
+        }
       }
       result(nil)
     case "setTitles":
@@ -122,6 +133,13 @@ final class NativeTabBarHost: NSObject, UITabBarControllerDelegate {
     channel.invokeMethod("select", arguments: index)
   }
 
+  private func reportLayout() {
+    guard flutterController.isViewLoaded else { return }
+    var tabBar: UITabBar? = tabBarController.tabBar
+    if #available(iOS 18.0, *), tabBarController.isTabBarHidden { tabBar = nil }
+    layoutReporter.report(view: flutterController.view, tabBar: tabBar)
+  }
+
   private func embedFlutter(in container: FlutterTabContainer) {
     guard flutterController.parent !== container else { return }
     flutterController.willMove(toParent: nil)
@@ -140,6 +158,13 @@ final class NativeTabBarHost: NSObject, UITabBarControllerDelegate {
 /// Passes the home indicator and edge gesture questions to the selected tab,
 /// whose container passes them on to Flutter.
 private final class FlutterTabBarController: UITabBarController {
+  var onLayout: (() -> Void)?
+
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    onLayout?()
+  }
+
   override var childForHomeIndicatorAutoHidden: UIViewController? { selectedViewController }
 
   override var childForScreenEdgesDeferringSystemGestures: UIViewController? {
@@ -158,6 +183,7 @@ private final class FlutterAppearanceState {
 /// forwarding them would report the app as inactive or paused on every tap.
 private final class FlutterTabContainer: UIViewController {
   private let appearance: FlutterAppearanceState
+  var onLayout: (() -> Void)?
 
   init(appearance: FlutterAppearanceState) {
     self.appearance = appearance
@@ -170,6 +196,11 @@ private final class FlutterTabContainer: UIViewController {
   }
 
   override var shouldAutomaticallyForwardAppearanceMethods: Bool { false }
+
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    onLayout?()
+  }
 
   // UIKit asks the tab bar controller and then this container, never the
   // Flutter view controller inside it, so pass these questions on; otherwise

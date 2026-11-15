@@ -14,6 +14,7 @@ import 'search_screen.dart';
 import 'my_screen.dart';
 import 'settings_screen.dart';
 import '../providers/settings_provider.dart';
+import '../services/duo_layout.dart';
 import '../services/native_tab_bar_service.dart';
 import '../widgets/offline_banner_inset.dart';
 import '../utils/responsive_grid_helper.dart';
@@ -447,11 +448,15 @@ class _MainScreenState extends ConsumerState<MainScreen> with RouteAware {
   /// 迷你播放器。系统把标签栏占用的区域作为安全区告诉 Flutter：普通 iPhone
   /// 是底部，iPhone Duo 是侧边的竖状态栏。
   Widget _buildNativeTabBarLayout(BuildContext context) {
-    final viewPadding = MediaQuery.viewPaddingOf(context);
-    // 底部安全区明显超过 Home 指示条（约 34pt）时，说明标签栏在底部，
-    // 迷你播放器要浮在标签栏上方
-    final dockBottomInset = viewPadding.bottom > 40
-        ? viewPadding.bottom + 8
+    // 标签栏在底部时（普通 iPhone、iPhone Duo 展开竖拿），迷你播放器浮在它上方；
+    // 标签栏在侧边竖栏里时，迷你播放器铺在内容区底部
+    final windowHeight = MediaQuery.sizeOf(context).height;
+    final tabBar = DuoLayout.of(context)?.tabBar;
+    final tabBarAtBottom = tabBar != null &&
+        tabBar.width > tabBar.height &&
+        tabBar.bottom >= windowHeight - 1;
+    final dockBottomInset = tabBarAtBottom
+        ? windowHeight - tabBar.top + 8
         : LiquidGlassLayout.dockBottomInset(context);
 
     final miniPlayer = Consumer(
