@@ -63,7 +63,67 @@ class LogService {
     _initialized = true;
   }
 
-  void _addEntry(LogEntry entry) {
+  static const String _redacted = '<redacted>';
+
+  // 日志可以在应用内复制、导出（常被附到 issue 里），所以写入前先去掉密码、
+  // token、Cookie 等凭据。Dio 的 LogInterceptor 会逐行打印请求头和请求体，
+  // 下载日志里的 URL 也带着 ?token=。
+  static final List<(RegExp, String Function(Match))> _redactions = [
+    // 请求头：Authorization: Bearer xxx、Cookie: a=b; c=d
+    (
+      RegExp(
+        r'\b(authorization|proxy-authorization|cookie|set-cookie)(\s*[:=]\s*)[^\n]+',
+        caseSensitive: false,
+      ),
+      (m) => '${m[1]}${m[2]}$_redacted',
+    ),
+    // JSON：{"password":"xxx"}
+    (
+      RegExp(
+        r'"(password|passwd|token|access_token|refresh_token|api_?key|secret)"(\s*:\s*)"(?:[^"\\]|\\.)*"',
+        caseSensitive: false,
+      ),
+      (m) => '"${m[1]}"${m[2]}"$_redacted"',
+    ),
+    // Map.toString()：{name: foo, password: xxx}
+    (
+      RegExp(
+        r'\b(password|passwd|token|access_token|refresh_token|api_?key|secret)(\s*:\s*)(?!exists \(|empty\b)[^,}\s][^,}\n]*',
+        caseSensitive: false,
+      ),
+      (m) => '${m[1]}${m[2]}$_redacted',
+    ),
+    // URL 查询参数：?token=xxx&...
+    (
+      RegExp(
+        r'([?&](?:token|access_token|api_?key)=)[^&#\s"\x27]+',
+        caseSensitive: false,
+      ),
+      (m) => '${m[1]}$_redacted',
+    ),
+    // 其他地方出现的 Bearer token
+    (
+      RegExp(r'\b(Bearer\s+)[A-Za-z0-9\-_.~+/]+=*', caseSensitive: false),
+      (m) => '${m[1]}$_redacted',
+    ),
+  ];
+
+  /// 去掉 [message] 中的密码、token、Cookie 等凭据。
+  static String redactSensitive(String message) {
+    var result = message;
+    for (final (pattern, replace) in _redactions) {
+      result = result.replaceAllMapped(pattern, replace);
+    }
+    return result;
+  }
+
+  void _addEntry(LogEntry rawEntry) {
+    final entry = LogEntry(
+      timestamp: rawEntry.timestamp,
+      level: rawEntry.level,
+      message: redactSensitive(rawEntry.message),
+      tag: rawEntry.tag,
+    );
     // 截断过长的消息
     final truncated = entry.message.length > _maxMessageLength
         ? LogEntry(
