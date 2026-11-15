@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../services/log_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../utils/snackbar_util.dart';
+import '../widgets/top_status_bar_app_bar.dart';
 
 class LogScreen extends StatefulWidget {
   const LogScreen({super.key});
@@ -141,104 +142,106 @@ class _LogScreenState extends State<LogScreen> {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: _isSearching
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: l10n.logSearchHint,
-                  border: InputBorder.none,
-                ),
-                onChanged: (value) {
-                  _searchQuery = value;
-                  _updateFilteredLogs();
-                },
-              )
-            : Text(l10n.logTitle),
-        actions: [
-          IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
-            onPressed: () {
-              setState(() {
-                if (_isSearching) {
-                  _isSearching = false;
-                  _searchQuery = '';
-                  _searchController.clear();
-                  _updateFilteredLogs();
-                } else {
-                  _isSearching = true;
-                }
-              });
-            },
-          ),
-          PopupMenuButton<LogLevel?>(
-            icon: Icon(
-              Icons.filter_list,
-              color: _filterLevel != null
-                  ? Theme.of(context).colorScheme.primary
-                  : null,
+      appBar: TopStatusBarAppBar(
+        appBar: AppBar(
+          title: _isSearching
+              ? TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: l10n.logSearchHint,
+                    border: InputBorder.none,
+                  ),
+                  onChanged: (value) {
+                    _searchQuery = value;
+                    _updateFilteredLogs();
+                  },
+                )
+              : Text(l10n.logTitle),
+          actions: [
+            IconButton(
+              icon: Icon(_isSearching ? Icons.close : Icons.search),
+              onPressed: () {
+                setState(() {
+                  if (_isSearching) {
+                    _isSearching = false;
+                    _searchQuery = '';
+                    _searchController.clear();
+                    _updateFilteredLogs();
+                  } else {
+                    _isSearching = true;
+                  }
+                });
+              },
             ),
-            onSelected: (level) {
-              _filterLevel = level;
-              _updateFilteredLogs();
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: null,
-                child: Text(l10n.logFilterAll),
+            PopupMenuButton<LogLevel?>(
+              icon: Icon(
+                Icons.filter_list,
+                color: _filterLevel != null
+                    ? Theme.of(context).colorScheme.primary
+                    : null,
               ),
-              const PopupMenuItem(
-                value: LogLevel.debug,
-                child: Text('Debug'),
-              ),
-              const PopupMenuItem(
-                value: LogLevel.info,
-                child: Text('Info'),
-              ),
-              const PopupMenuItem(
-                value: LogLevel.warning,
-                child: Text('Warning'),
-              ),
-              const PopupMenuItem(
-                value: LogLevel.error,
-                child: Text('Error'),
-              ),
-            ],
-          ),
-          PopupMenuButton<String>(
-            onSelected: (action) => _handleLogAction(action, l10n),
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'copy',
-                child: ListTile(
-                  leading: const Icon(Icons.copy),
-                  title: Text(l10n.logCopy),
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
+              onSelected: (level) {
+                _filterLevel = level;
+                _updateFilteredLogs();
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: null,
+                  child: Text(l10n.logFilterAll),
                 ),
-              ),
-              PopupMenuItem(
-                value: 'export',
-                child: ListTile(
-                  leading: const Icon(Icons.save_alt),
-                  title: Text(l10n.logExport),
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
+                const PopupMenuItem(
+                  value: LogLevel.debug,
+                  child: Text('Debug'),
                 ),
-              ),
-              PopupMenuItem(
-                value: 'clear',
-                child: ListTile(
-                  leading: const Icon(Icons.delete_outline),
-                  title: Text(l10n.logClear),
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
+                const PopupMenuItem(
+                  value: LogLevel.info,
+                  child: Text('Info'),
                 ),
-              ),
-            ],
-          ),
-        ],
+                const PopupMenuItem(
+                  value: LogLevel.warning,
+                  child: Text('Warning'),
+                ),
+                const PopupMenuItem(
+                  value: LogLevel.error,
+                  child: Text('Error'),
+                ),
+              ],
+            ),
+            PopupMenuButton<String>(
+              onSelected: (action) => _handleLogAction(action, l10n),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'copy',
+                  child: ListTile(
+                    leading: const Icon(Icons.copy),
+                    title: Text(l10n.logCopy),
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'export',
+                  child: ListTile(
+                    leading: const Icon(Icons.save_alt),
+                    title: Text(l10n.logExport),
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'clear',
+                  child: ListTile(
+                    leading: const Icon(Icons.delete_outline),
+                    title: Text(l10n.logClear),
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: [

@@ -312,6 +312,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         MediaQuery.of(context).orientation == Orientation.landscape;
     final dockExtent = LiquidGlassDockScope.extentOf(context);
     final contentBottomPadding = 16 + dockExtent;
+    // iPhone Duo 展开竖拿时，搜索类型和筛选按钮放进顶部状态栏，代替页面标题
+    final searchTypesInStatusBar = FloatingToolbarLayout.topStatusBarSlot(
+          context,
+          height: _searchTypeSelectorHeight,
+        ) !=
+        null;
+    // 有竖状态栏时右上角紧挨着它，筛选按钮改放到搜索类型那一行的右侧
+    final filterBesideSearchTypes = searchTypesInStatusBar ||
+        FloatingToolbarLayout.hasVerticalBar(context);
     return GestureDetector(
       // 点击任何地方（包括 AppBar）都取消焦点，关闭下拉框
       onTap: () {
@@ -319,39 +328,34 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       },
       child: Scaffold(
         floatingActionButton: const DownloadFab(),
-        appBar: ScrollableAppBar(
-          title: Text(
-            S.of(context).search,
-            style: UiTextStyles.pageTitle,
-          ),
-          clipBehavior: Clip.none,
-          actions: [
-            // 筛选按钮移到右上角
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: FloatingToolbarSurface(
-                child: FloatingToolbarIconButton(
-                  icon: _showAdvancedFilters
-                      ? Icons.filter_alt
-                      : Icons.filter_alt_outlined,
-                  tooltip: S.of(context).filter,
-                  isSelected: _showAdvancedFilters,
-                  onPressed: () {
-                    setState(() {
-                      _showAdvancedFilters = !_showAdvancedFilters;
-                      // 关闭高级筛选时重置参数为默认值
-                      if (!_showAdvancedFilters) {
-                        _minRate = 0;
-                        _ageRating = AgeRating.all;
-                        _salesRange = SalesRange.all;
-                      }
-                    });
-                  },
+        appBar: searchTypesInStatusBar
+            ? ScrollableAppBar(
+                centerTitle: false,
+                titleSpacing: 16,
+                clipBehavior: Clip.none,
+                title: Row(
+                  children: [
+                    Flexible(child: _buildSearchTypeSelector(theme)),
+                    const SizedBox(width: 8),
+                    _buildFilterButton(),
+                  ],
                 ),
+              )
+            : ScrollableAppBar(
+                title: Text(
+                  S.of(context).search,
+                  style: UiTextStyles.pageTitle,
+                ),
+                clipBehavior: Clip.none,
+                actions: [
+                  // 筛选按钮移到右上角
+                  if (!filterBesideSearchTypes)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: _buildFilterButton(),
+                    ),
+                ],
               ),
-            ),
-          ],
-        ),
         resizeToAvoidBottomInset: true, // 自动调整以避免键盘遮挡
         body: LiquidGlassDockMediaQuery(
           child: isLandscape
@@ -375,7 +379,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                             color: theme.colorScheme.surface,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: _buildMainContentChildren(true),
+                              children: _buildMainContentChildren(
+                                true,
+                                showSearchTypes: !searchTypesInStatusBar,
+                                filterBesideSearchTypes:
+                                    filterBesideSearchTypes,
+                              ),
                             ),
                           ),
                         ),
@@ -394,13 +403,60 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                     color: theme.colorScheme.surface,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: _buildMainContentChildren(false),
+                      children: _buildMainContentChildren(
+                        false,
+                        showSearchTypes: !searchTypesInStatusBar,
+                        filterBesideSearchTypes: filterBesideSearchTypes,
+                      ),
                     ),
                   ),
                 ),
         ),
       ), // Scaffold 的闭合
     ); // GestureDetector 的闭合
+  }
+
+  static const double _searchTypeSelectorHeight = 56;
+
+  Widget _buildSearchTypeSelector(ThemeData theme) {
+    return FloatingToolbarSurface(
+      padding: const EdgeInsets.all(4),
+      child: SizedBox(
+        height: _searchTypeSelectorHeight - 8,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: SearchType.values
+                .map((type) => _buildSearchTypeButton(type, theme))
+                .toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterButton() {
+    return FloatingToolbarSurface(
+      child: FloatingToolbarIconButton(
+        icon: _showAdvancedFilters
+            ? Icons.filter_alt
+            : Icons.filter_alt_outlined,
+        tooltip: S.of(context).filter,
+        isSelected: _showAdvancedFilters,
+        onPressed: () {
+          setState(() {
+            _showAdvancedFilters = !_showAdvancedFilters;
+            // 关闭高级筛选时重置参数为默认值
+            if (!_showAdvancedFilters) {
+              _minRate = 0;
+              _ageRating = AgeRating.all;
+              _salesRange = SalesRange.all;
+            }
+          });
+        },
+      ),
+    );
   }
 
   Widget _buildAdvancedFiltersSidebar(ThemeData theme) {
@@ -455,7 +511,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     );
   }
 
-  List<Widget> _buildMainContentChildren(bool isLandscape) {
+  List<Widget> _buildMainContentChildren(
+    bool isLandscape, {
+    bool showSearchTypes = true,
+    bool filterBesideSearchTypes = false,
+  }) {
     final theme = Theme.of(context);
 
     return [
@@ -503,21 +563,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         ),
         const SizedBox(height: 12),
       ],
-      FloatingToolbarSurface(
-        padding: const EdgeInsets.all(4),
-        child: SizedBox(
-          height: 48,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: SearchType.values
-                  .map((type) => _buildSearchTypeButton(type, theme))
-                  .toList(),
+      if (showSearchTypes && filterBesideSearchTypes)
+        Row(
+          children: [
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: _buildSearchTypeSelector(theme),
+              ),
             ),
-          ),
-        ),
-      ),
+            const SizedBox(width: 8),
+            _buildFilterButton(),
+          ],
+        )
+      else if (showSearchTypes)
+        _buildSearchTypeSelector(theme),
       if (_currentSearchType == SearchType.tag ||
           _currentSearchType == SearchType.va ||
           _currentSearchType == SearchType.circle)

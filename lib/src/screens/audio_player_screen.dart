@@ -20,6 +20,7 @@ import '../widgets/work_bookmark_manager.dart';
 import '../widgets/confirmation_dialog.dart';
 import 'work_detail_screen.dart';
 import '../../l10n/app_localizations.dart';
+import '../widgets/top_status_bar_app_bar.dart';
 
 /// 音频播放器主屏幕
 class AudioPlayerScreen extends ConsumerStatefulWidget {
@@ -275,49 +276,51 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
     SystemUiOverlayStyle systemOverlayStyle,
     AsyncValue currentTrack,
   ) {
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      systemOverlayStyle: systemOverlayStyle,
-      leading: Padding(
-        padding: const EdgeInsets.only(left: 8.0),
-        child: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      actions: [
-        Consumer(
-          builder: (context, ref, child) {
-            final lyricState = ref.watch(lyricControllerProvider);
-            if (lyricState.lyrics.isEmpty || lyricState.isLoading) {
-              return const SizedBox.shrink();
-            }
-
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.fullscreen),
-                  onPressed: _enterLyricFullscreen,
-                  tooltip: S.of(context).fullscreenLyrics,
-                ),
-                _buildLyricTranslateAppBarButton(context),
-              ],
-            );
-          },
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 8.0),
+    return TopStatusBarAppBar(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        systemOverlayStyle: systemOverlayStyle,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
           child: IconButton(
-            icon: const Icon(Icons.queue_music),
-            onPressed: () => PlaylistDialog.show(context),
-            tooltip: S.of(context).playlistTitle,
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-      ],
-      automaticallyImplyLeading: false,
+        actions: [
+          Consumer(
+            builder: (context, ref, child) {
+              final lyricState = ref.watch(lyricControllerProvider);
+              if (lyricState.lyrics.isEmpty || lyricState.isLoading) {
+                return const SizedBox.shrink();
+              }
+
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.fullscreen),
+                    onPressed: _enterLyricFullscreen,
+                    tooltip: S.of(context).fullscreenLyrics,
+                  ),
+                  _buildLyricTranslateAppBarButton(context),
+                ],
+              );
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: IconButton(
+              icon: const Icon(Icons.queue_music),
+              onPressed: () => PlaylistDialog.show(context),
+              tooltip: S.of(context).playlistTitle,
+            ),
+          ),
+        ],
+        automaticallyImplyLeading: false,
+      ),
     );
   }
 

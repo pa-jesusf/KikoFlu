@@ -6,6 +6,7 @@ import '../../l10n/app_localizations.dart';
 import '../utils/snackbar_util.dart';
 import '../utils/ui_tokens.dart';
 import '../widgets/settings_section.dart';
+import '../widgets/top_status_bar_app_bar.dart';
 
 /// 权限管理页面（仅安卓平台）
 class PermissionsScreen extends StatefulWidget {
@@ -131,9 +132,11 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     // 非安卓平台显示提示信息
     if (!Platform.isAndroid) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(S.of(context).permissionManagement,
-              style: UiTextStyles.pageTitle),
+        appBar: TopStatusBarAppBar(
+          appBar: AppBar(
+            title: Text(S.of(context).permissionManagement,
+                style: UiTextStyles.pageTitle),
+          ),
         ),
         body: Center(
           child: Column(
@@ -163,16 +166,18 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(S.of(context).permissionManagement,
-            style: UiTextStyles.pageTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _checkPermissions,
-            tooltip: S.of(context).refreshPermissionStatus,
-          ),
-        ],
+      appBar: TopStatusBarAppBar(
+        appBar: AppBar(
+          title: Text(S.of(context).permissionManagement,
+              style: UiTextStyles.pageTitle),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: _checkPermissions,
+              tooltip: S.of(context).refreshPermissionStatus,
+            ),
+          ],
+        ),
       ),
       body: _isCheckingPermissions
           ? const Center(child: CircularProgressIndicator())

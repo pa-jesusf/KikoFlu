@@ -14,6 +14,7 @@ import '../services/storage_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'cached_image_widget.dart';
 import 'confirmation_dialog.dart';
+import 'top_status_bar_app_bar.dart';
 
 /// 图片画廊屏幕，支持查看、缩放、保存图片
 class ImageGalleryScreen extends StatefulWidget {
@@ -271,39 +272,41 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
       return Scaffold(
         backgroundColor: Colors.black,
         extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          scrolledUnderElevation: 0,
-          backgroundColor: Colors.black.withValues(alpha: 0.4),
-          elevation: 0,
-          foregroundColor: Colors.white,
-          title: isSingleImage
-              ? (title.isNotEmpty ? Text(title) : null)
-              : Text(pageLabel),
-          actions: [
-            if (_isSaving)
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        appBar: TopStatusBarAppBar(
+          appBar: AppBar(
+            scrolledUnderElevation: 0,
+            backgroundColor: Colors.black.withValues(alpha: 0.4),
+            elevation: 0,
+            foregroundColor: Colors.white,
+            title: isSingleImage
+                ? (title.isNotEmpty ? Text(title) : null)
+                : Text(pageLabel),
+            actions: [
+              if (_isSaving)
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
                   ),
+                )
+              else
+                IconButton(
+                  icon: const Icon(Icons.download),
+                  onPressed: _saveImage,
+                  tooltip: S.of(context).saveImage,
                 ),
-              )
-            else
-              IconButton(
-                icon: const Icon(Icons.download),
-                onPressed: _saveImage,
-                tooltip: S.of(context).saveImage,
-              ),
-            if (isLandscape)
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(context).maybePop(),
-              ),
-          ],
+              if (isLandscape)
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
+            ],
+          ),
         ),
         body: SafeArea(
           child: Stack(
@@ -324,50 +327,52 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        backgroundColor: Colors.black,
-        elevation: 0,
-        foregroundColor: Colors.white,
-        titleSpacing: 16,
-        title: isSingleImage
-            ? (title.isNotEmpty
-                ? Text(title, style: const TextStyle(fontSize: 16))
-                : null)
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(pageLabel, style: const TextStyle(fontSize: 16)),
-                  if (title.isNotEmpty)
-                    Text(
-                      title,
-                      style: const TextStyle(fontSize: 12),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                ],
-              ),
-        actions: [
-          if (_isSaving)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+      appBar: TopStatusBarAppBar(
+        appBar: AppBar(
+          scrolledUnderElevation: 0,
+          backgroundColor: Colors.black,
+          elevation: 0,
+          foregroundColor: Colors.white,
+          titleSpacing: 16,
+          title: isSingleImage
+              ? (title.isNotEmpty
+                  ? Text(title, style: const TextStyle(fontSize: 16))
+                  : null)
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(pageLabel, style: const TextStyle(fontSize: 16)),
+                    if (title.isNotEmpty)
+                      Text(
+                        title,
+                        style: const TextStyle(fontSize: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  ],
                 ),
+          actions: [
+            if (_isSaving)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+              )
+            else
+              IconButton(
+                icon: const Icon(Icons.download),
+                onPressed: _saveImage,
+                tooltip: S.of(context).saveImage,
               ),
-            )
-          else
-            IconButton(
-              icon: const Icon(Icons.download),
-              onPressed: _saveImage,
-              tooltip: S.of(context).saveImage,
-            ),
-        ],
+          ],
+        ),
       ),
       body: Column(
         children: [

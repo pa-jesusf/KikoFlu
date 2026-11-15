@@ -8,6 +8,7 @@ import '../utils/string_utils.dart';
 import '../utils/ui_tokens.dart';
 import '../widgets/virtualized_sliver_collection.dart';
 import '../widgets/confirmation_dialog.dart';
+import '../widgets/top_status_bar_app_bar.dart';
 
 class DownloadsScreen extends ConsumerStatefulWidget {
   const DownloadsScreen({super.key});
@@ -99,75 +100,77 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        title: _isSelectionMode
-            ? Text(S.of(context).selectedCount(_selectedTaskIds.length))
-            : Text(
-                S.of(context).downloadTasks,
-                style: UiTextStyles.pageTitle,
-              ),
-        leading: _isSelectionMode
-            ? IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: _toggleSelectionMode,
-              )
-            : null,
-        actions: _isSelectionMode
-            ? [
-                IconButton(
-                  icon: const Icon(Icons.select_all),
-                  onPressed: () {
-                    final tasks = DownloadService.instance.tasks;
-                    final currentTasks = tasks.where(
-                      (t) =>
-                          t.status == DownloadStatus.downloading ||
-                          t.status == DownloadStatus.paused ||
-                          t.status == DownloadStatus.pending ||
-                          t.status == DownloadStatus.failed,
-                    );
-                    _selectAll(currentTasks.toList());
-                  },
-                  tooltip: S.of(context).selectAll,
+      appBar: TopStatusBarAppBar(
+        appBar: AppBar(
+          scrolledUnderElevation: 0,
+          title: _isSelectionMode
+              ? Text(S.of(context).selectedCount(_selectedTaskIds.length))
+              : Text(
+                  S.of(context).downloadTasks,
+                  style: UiTextStyles.pageTitle,
                 ),
-                IconButton(
-                  icon: const Icon(Icons.deselect),
-                  onPressed: _deselectAll,
-                  tooltip: S.of(context).deselectAll,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.pause),
-                  onPressed: _selectedTaskIds.isEmpty
-                      ? null
-                      : () {
-                          _pauseSelected();
-                        },
-                  tooltip: S.of(context).pause,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.play_arrow),
-                  onPressed: _selectedTaskIds.isEmpty
-                      ? null
-                      : () {
-                          _resumeSelected();
-                        },
-                  tooltip: S.of(context).resume,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: _selectedTaskIds.isEmpty
-                      ? null
-                      : () => _confirmBatchDelete(),
-                  tooltip: S.of(context).delete,
-                ),
-              ]
-            : [
-                IconButton(
-                  icon: const Icon(Icons.checklist),
+          leading: _isSelectionMode
+              ? IconButton(
+                  icon: const Icon(Icons.close),
                   onPressed: _toggleSelectionMode,
-                  tooltip: S.of(context).select,
-                ),
-              ],
+                )
+              : null,
+          actions: _isSelectionMode
+              ? [
+                  IconButton(
+                    icon: const Icon(Icons.select_all),
+                    onPressed: () {
+                      final tasks = DownloadService.instance.tasks;
+                      final currentTasks = tasks.where(
+                        (t) =>
+                            t.status == DownloadStatus.downloading ||
+                            t.status == DownloadStatus.paused ||
+                            t.status == DownloadStatus.pending ||
+                            t.status == DownloadStatus.failed,
+                      );
+                      _selectAll(currentTasks.toList());
+                    },
+                    tooltip: S.of(context).selectAll,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.deselect),
+                    onPressed: _deselectAll,
+                    tooltip: S.of(context).deselectAll,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.pause),
+                    onPressed: _selectedTaskIds.isEmpty
+                        ? null
+                        : () {
+                            _pauseSelected();
+                          },
+                    tooltip: S.of(context).pause,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.play_arrow),
+                    onPressed: _selectedTaskIds.isEmpty
+                        ? null
+                        : () {
+                            _resumeSelected();
+                          },
+                    tooltip: S.of(context).resume,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: _selectedTaskIds.isEmpty
+                        ? null
+                        : () => _confirmBatchDelete(),
+                    tooltip: S.of(context).delete,
+                  ),
+                ]
+              : [
+                  IconButton(
+                    icon: const Icon(Icons.checklist),
+                    onPressed: _toggleSelectionMode,
+                    tooltip: S.of(context).select,
+                  ),
+                ],
+        ),
       ),
       body: StreamBuilder<List<DownloadTask>>(
         stream: DownloadService.instance.tasksStream,
