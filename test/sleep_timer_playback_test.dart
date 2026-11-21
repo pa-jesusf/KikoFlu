@@ -37,6 +37,12 @@ class _Player extends Fake implements AudioPlayer {
   Stream<Duration> get positionStream => const Stream.empty();
   @override
   Stream<Duration?> get durationStream => const Stream.empty();
+  // On macOS the service polls position and duration every 500 ms to detect
+  // completion; without these the poll throws once fake time advances.
+  @override
+  Duration get position => Duration.zero;
+  @override
+  Duration? get duration => null;
 
   void complete() {
     processingState = ProcessingState.completed;
