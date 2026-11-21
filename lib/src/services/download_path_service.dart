@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -144,8 +145,10 @@ class DownloadPathService {
     // 获取当前下载目录
     final oldDir = await getDownloadDirectory();
 
-    // 如果新旧路径相同，不需要迁移
-    if (oldDir.path == newPath) {
+    // 如果新旧路径相同，不需要迁移。比较解析过符号链接的真实路径，否则同一个
+    // 目录的不同写法（如 /var 与 /private/var）会被当成两个目录，复制到自身后
+    // 再把原文件删掉。
+    if (await _isSameDirectory(oldDir, newDir)) {
       return MigrationResult(
         success: true,
         message: '目录未改变，无需迁移',
@@ -168,7 +171,7 @@ class DownloadPathService {
     final currentDir = await getDownloadDirectory();
     final defaultDir = await _getDefaultDownloadDirectory();
 
-    if (currentDir.path == defaultDir.path) {
+    if (await _isSameDirectory(currentDir, defaultDir)) {
       await clearCustomPath();
       return MigrationResult(
         success: true,
@@ -184,6 +187,26 @@ class DownloadPathService {
 
     return result;
   }
+
+  static Future<bool> _isSameDirectory(Directory a, Directory b) async {
+    if (p.equals(a.path, b.path)) return true;
+    try {
+      if (!await a.exists() || !await b.exists()) return false;
+      return p.equals(
+        await a.resolveSymbolicLinks(),
+        await b.resolveSymbolicLinks(),
+      );
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @visibleForTesting
+  static Future<MigrationResult> migrateFilesForTesting(
+    Directory oldDir,
+    Directory newDir,
+  ) =>
+      _migrateFiles(oldDir, newDir);
 
   /// 迁移文件从旧目录到新目录
   /// 只迁移符合下载结构的文件（数字或 RJ 命名的 workId 文件夹）
@@ -206,6 +229,10 @@ class DownloadPathService {
       int skippedCount = 0;
       int errorCount = 0;
       final List<String> skippedItems = [];
+      // 复制完成的作品文件夹，全部复制成功后才删除原文件夹
+      final List<Directory> copiedSources = [];
+      // 本次新建的目标文件夹，复制出错时清理掉
+      final List<Directory> createdTargets = [];
 
       // 只遍历旧目录的第一层（不递归）
       await for (final entity in oldDir.list(followLinks: false)) {
@@ -220,6 +247,9 @@ class DownloadPathService {
           if (workId != null || folderName == 'subtitle_library') {
             try {
               final newWorkDir = Directory(p.join(newDir.path, folderName));
+              if (!await newWorkDir.exists()) {
+                createdTargets.add(newWorkDir);
+              }
               await newWorkDir.create(recursive: true);
 
               // 递归复制该作品文件夹的所有内容
@@ -255,14 +285,7 @@ class DownloadPathService {
                     tag: 'DownloadPath');
               }
 
-              // 迁移成功后删除原文件夹
-              try {
-                await entity.delete(recursive: true);
-              } catch (e) {
-                _log.error('删除原文件夹失败: $folderName, 错误: $e',
-                    tag: 'DownloadPath');
-                errorCount++;
-              }
+              copiedSources.add(entity);
             } catch (e) {
               _log.error('迁移文件夹失败: $folderName, 错误: $e', tag: 'DownloadPath');
               errorCount++;
@@ -279,6 +302,36 @@ class DownloadPathService {
           skippedCount++;
           skippedItems.add(fileName);
           _log.debug('跳过根目录文件: $fileName', tag: 'DownloadPath');
+        }
+      }
+
+      if (errorCount > 0) {
+        // 有文件没复制过去（如目标盘空间不足）。保留全部原文件、不切换目录，
+        // 并清理本次新建的不完整副本，避免下载内容丢失。
+        for (final dir in createdTargets) {
+          try {
+            await dir.delete(recursive: true);
+          } catch (e) {
+            _log.error('清理未完成的副本失败: ${dir.path}, 错误: $e',
+                tag: 'DownloadPath');
+          }
+        }
+        return MigrationResult(
+          success: false,
+          message: '迁移失败: $errorCount 个文件复制出错，原文件已保留，下载目录未更改',
+          fileCount: fileCount,
+          errorCount: errorCount,
+        );
+      }
+
+      // 全部复制成功后再删除原文件夹
+      for (final source in copiedSources) {
+        try {
+          await source.delete(recursive: true);
+        } catch (e) {
+          _log.error('删除原文件夹失败: ${source.path}, 错误: $e',
+              tag: 'DownloadPath');
+          errorCount++;
         }
       }
 
