@@ -406,8 +406,12 @@ class WorksNotifier extends StateNotifier<WorksState> {
   }
 
   Future<void> refresh({bool resetPage = false}) async {
+    // Popular and Recommended scroll through pages that are appended to one
+    // list, so reloading only the current page would merge it into the stale
+    // list. Start them over from page 1; the paged All mode keeps its page.
+    final restartFeed = state.displayMode != DisplayMode.all;
     await loadWorks(
-      targetPage: resetPage ? 1 : state.currentPage,
+      targetPage: resetPage || restartFeed ? 1 : state.currentPage,
       supersede: true,
     );
   }
@@ -521,7 +525,8 @@ class WorksNotifier extends StateNotifier<WorksState> {
 
     int newPage;
     if (oldFilterMode == SubtitleFilterMode.all && newFilterMode.isActive) {
-      newPage = ((currentPage + 1) / 2).ceil();
+      // 每页条数翻倍：旧的第 p 页从第 (p-1)*N 条开始，落在新的第 ceil(p/2) 页
+      newPage = (currentPage + 1) ~/ 2;
     } else if (oldFilterMode.isActive &&
         newFilterMode == SubtitleFilterMode.all) {
       newPage = (currentPage * 2) - 1;
