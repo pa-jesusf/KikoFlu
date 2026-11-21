@@ -207,6 +207,29 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  /// Snapshot of the session in use before trying another server, so a failed
+  /// login or registration does not leave the running session pointed at the
+  /// new host without a token (or without its server cookie).
+  ({String? token, String? host, String? cookie}) _captureSession() => (
+        token: _apiService.currentToken,
+        host: _apiService.currentHost,
+        cookie: StorageService.getString('server_cookie'),
+      );
+
+  Future<void> _restoreSession(
+      ({String? token, String? host, String? cookie}) session) async {
+    final cookie = session.cookie;
+    if (cookie != null && cookie.isNotEmpty) {
+      await StorageService.setString('server_cookie', cookie);
+    } else {
+      await StorageService.remove('server_cookie');
+    }
+    final host = session.host;
+    if (host != null && host.isNotEmpty) {
+      _apiService.init(session.token ?? '', host);
+    }
+  }
+
   Future<bool> login(
     String username,
     String password,
@@ -218,6 +241,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(isLoading: true, error: null);
     }
 
+    final previousSession = _captureSession();
     if (serverCookie != null && serverCookie.isNotEmpty) {
       await StorageService.setString('server_cookie', serverCookie);
     } else {
@@ -355,6 +379,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return true;
     } catch (e) {
       _log.captureOutput('[Auth] Login error: $e');
+      await _restoreSession(previousSession);
 
       if (!silent) {
         state = state.copyWith(
@@ -370,6 +395,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       [String? serverCookie]) async {
     state = state.copyWith(isLoading: true, error: null);
 
+    final previousSession = _captureSession();
     if (serverCookie != null && serverCookie.isNotEmpty) {
       await StorageService.setString('server_cookie', serverCookie);
     } else {
@@ -467,6 +493,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       return true;
     } catch (e) {
+      await _restoreSession(previousSession);
       String errorMessage = 'Registration failed: ${e.toString()}';
 
       if (e is KikoeruApiException && e.originalError is DioException) {

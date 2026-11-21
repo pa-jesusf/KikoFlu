@@ -104,6 +104,10 @@ class KikoeruApiService {
     );
   }
 
+  /// The token and host currently in use, so a failed login can put them back.
+  String? get currentToken => _token;
+  String? get currentHost => _host;
+
   void init(String token, String host) {
     _token = token;
     // Handle host configuration properly
