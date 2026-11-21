@@ -406,8 +406,12 @@ class WorksNotifier extends StateNotifier<WorksState> {
   }
 
   Future<void> refresh({bool resetPage = false}) async {
+    // Popular and Recommended scroll through pages that are appended to one
+    // list, so reloading only the current page would merge it into the stale
+    // list. Start them over from page 1; the paged All mode keeps its page.
+    final restartFeed = state.displayMode != DisplayMode.all;
     await loadWorks(
-      targetPage: resetPage ? 1 : state.currentPage,
+      targetPage: resetPage || restartFeed ? 1 : state.currentPage,
       supersede: true,
     );
   }
