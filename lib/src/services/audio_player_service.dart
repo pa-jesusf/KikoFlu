@@ -853,6 +853,11 @@ class AudioPlayerService {
   Future<void> skipToNext() async {
     if (_queue.isNotEmpty && _currentIndex < _queue.length - 1) {
       await _switchToIndexAndPlay(_currentIndex + 1);
+    } else if (_queue.isNotEmpty && _appLoopMode != LoopMode.off) {
+      // 列表循环和单曲循环时，界面上的「下一首」一直可点：最后一首手动切到
+      // 下一首时回到第一首（列表循环下与自动播完一致；单曲循环自动播完时
+      // 仍重播当前曲目，只有手动切歌才会换曲）
+      await _switchToIndexAndPlay(0);
     } else {
       // No next track available
       throw Exception('没有下一首可播放');
@@ -862,6 +867,9 @@ class AudioPlayerService {
   Future<void> skipToPrevious() async {
     if (_queue.isNotEmpty && _currentIndex > 0) {
       await _switchToIndexAndPlay(_currentIndex - 1);
+    } else if (_queue.isNotEmpty && _appLoopMode != LoopMode.off) {
+      // 循环模式下第一首的「上一首」跳到最后一首
+      await _switchToIndexAndPlay(_queue.length - 1);
     } else {
       // No previous track available
       throw Exception('没有上一首可播放');
