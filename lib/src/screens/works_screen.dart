@@ -26,12 +26,29 @@ class WorksScreen extends ConsumerStatefulWidget {
 
 class _WorksScreenState extends ConsumerState<WorksScreen>
     with AutomaticKeepAliveClientMixin {
-  final ScrollController _scrollController = ScrollController();
+  // 每个模式一个滚动控制器：切换模式时 AnimatedSwitcher 会让新旧两个列表同时
+  // 存在约 250ms，共用一个控制器会同时挂上两个列表，读取 offset/position 时
+  // 抛出异常，导致滚动位置恢复失败、快速连点时模式切换不了。
+  final Map<DisplayMode, ScrollController> _scrollControllers = {
+    for (final mode in DisplayMode.values) mode: ScrollController(),
+  };
+
+  // 动画结束前切回某个模式时，该模式的旧列表还在退场，仍挂着它的控制器。
+  // 这时给新列表换一个控制器（见 _changeDisplayMode），换下来的控制器放在
+  // 这里，等旧列表卸载后再释放。
+  final List<ScrollController> _retiredScrollControllers = [];
+
+  // 每个模式在 PageStorage 里各用一个位置（见 _buildLayoutView）：共用一个
+  // 位置时各模式会互相覆盖偏移；而 PageStorage 必须保留，因为 MainScreen
+  // 横竖屏切换时会重建 WorksScreen，State 中的偏移随之丢失，只能靠
+  // PageStorage 恢复。
+  static PageStorageKey<String> _pageStorageKeyFor(DisplayMode mode) =>
+      PageStorageKey<String>('works_${mode.name}');
 
   int _slideDirection = 0;
-  final Map<DisplayMode, double> _scrollPositions = {
-    for (final mode in DisplayMode.values) mode: 0.0,
-  };
+  // 本 State 内切换模式时手动记录的偏移。没有记录的模式（例如 WorksScreen
+  // 重建之后）不做跳转，交给 PageStorage 恢复。
+  final Map<DisplayMode, double> _scrollPositions = {};
 
   @override
   bool get wantKeepAlive => true; // 保持状态不被销毁
@@ -50,7 +67,12 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    for (final controller in _scrollControllers.values) {
+      controller.dispose();
+    }
+    for (final controller in _retiredScrollControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -120,22 +142,40 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
     final currentMode = ref.read(worksProvider).displayMode;
     if (currentMode == mode) return;
 
-    if (_scrollController.hasClients) {
-      _scrollPositions[currentMode] = _scrollController.offset;
+    final currentController = _scrollControllers[currentMode]!;
+    if (currentController.hasClients) {
+      _scrollPositions[currentMode] = currentController.offset;
+    }
+
+    // 释放旧列表已经卸载的控制器。
+    _retiredScrollControllers.removeWhere((controller) {
+      if (controller.hasClients) return false;
+      controller.dispose();
+      return true;
+    });
+    final targetController = _scrollControllers[mode]!;
+    if (targetController.hasClients) {
+      // 快速切回时该模式的旧列表还没退场，给新列表换一个控制器，保证每个
+      // 控制器只挂一个列表。偏移仍由 PageStorage（按模式区分的 key）和
+      // _scrollPositions 恢复，与控制器无关。
+      _retiredScrollControllers.add(targetController);
+      _scrollControllers[mode] = ScrollController();
     }
 
     ref.read(worksProvider.notifier).setDisplayMode(mode);
   }
 
   void _restoreScrollPosition(DisplayMode mode) {
-    final targetOffset = _scrollPositions[mode] ?? 0;
+    final targetOffset = _scrollPositions[mode];
+    if (targetOffset == null) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (!_scrollController.hasClients) return;
-      final maxExtent = _scrollController.position.maxScrollExtent;
+      final controller = _scrollControllers[mode]!;
+      if (!controller.hasClients) return;
+      final maxExtent = controller.position.maxScrollExtent;
       final safeMax = maxExtent.isFinite ? maxExtent : targetOffset;
       final clamped = targetOffset.clamp(0.0, safeMax).toDouble();
-      _scrollController.jumpTo(clamped);
+      controller.jumpTo(clamped);
     });
   }
 
@@ -334,7 +374,8 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
     return WorksGridView(
       works: worksState.works,
       layoutType: worksState.layoutType,
-      scrollController: _scrollController,
+      scrollController: _scrollControllers[worksState.displayMode],
+      pageStorageKey: _pageStorageKeyFor(worksState.displayMode),
       padding: padding,
       physics: ScrollOptimization.physics,
       isLoading: worksState.isLoading,
