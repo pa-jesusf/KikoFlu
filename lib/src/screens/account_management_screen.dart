@@ -52,15 +52,17 @@ class _AccountManagementScreenState
     if (confirm != true) return;
 
     try {
-      // Switch account in database
-      await AccountDatabase.instance.setActiveAccount(account.id!);
-
-      // Login with the account
+      // Login with the account first and mark it active only once that
+      // works, so a failed switch leaves the current account active.
       final success = await ref.read(authProvider.notifier).login(
           account.username,
           account.password,
           account.host,
           account.serverCookie);
+
+      if (success) {
+        await AccountDatabase.instance.setActiveAccount(account.id!);
+      }
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
