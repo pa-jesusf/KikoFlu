@@ -15,6 +15,8 @@ import '../services/subtitle_library_service.dart';
 import '../services/subtitle_database.dart';
 import '../services/log_service.dart';
 import '../utils/encoding_utils.dart';
+import '../utils/server_utils.dart';
+import '../services/kikoeru_api_service.dart' hide kikoeruApiServiceProvider;
 import '../services/translation_service.dart';
 import '../services/storage_service.dart';
 import 'auth_provider.dart';
@@ -36,6 +38,7 @@ class LyricState {
   final int translatedCount;
   final int translationTotal;
   final String? translatedSubtitlePath;
+  final bool isAILyric; // 字幕来自服务器的 AI 生成歌词
 
   LyricState({
     this.lyrics = const [],
@@ -49,6 +52,7 @@ class LyricState {
     this.translatedCount = 0,
     this.translationTotal = 0,
     this.translatedSubtitlePath,
+    this.isAILyric = false,
   });
 
   LyricState copyWith({
@@ -63,6 +67,7 @@ class LyricState {
     int? translatedCount,
     int? translationTotal,
     String? translatedSubtitlePath,
+    bool? isAILyric,
   }) {
     return LyricState(
       lyrics: lyrics ?? this.lyrics,
@@ -77,6 +82,7 @@ class LyricState {
       translationTotal: translationTotal ?? this.translationTotal,
       translatedSubtitlePath:
           translatedSubtitlePath ?? this.translatedSubtitlePath,
+      isAILyric: isAILyric ?? this.isAILyric,
     );
   }
 
@@ -150,6 +156,11 @@ class LyricController extends StateNotifier<LyricState> {
   final Ref ref;
   int _loadRequestId = 0;
   int _translationRequestId = 0;
+
+  // 服务器歌词缓存（key = host/workId/seq）。用于：网络回退较慢时，
+  // 播放器的重复加载请求不会把已完成的结果丢弃。
+  final Map<String, ({List<LyricLine> lines, bool isAI, String url})>
+      _serverLyricCache = {};
 
   LyricController(this.ref) : super(LyricState());
 
@@ -239,6 +250,15 @@ class LyricController extends StateNotifier<LyricState> {
           }
         }
 
+        // 本地文件树与字幕库都没有命中：回退到服务器歌词查询
+        // （服务器的 query-lrc / check-lrc 会把 AI 生成歌词一并纳入候选，
+        //  这是 kikoeru 2.x 中 AI 歌词不显示的关键补齐）
+        _log.captureOutput(
+            '[Lyric] 本地未找到字幕，回退服务器歌词查询(含AI歌词): track="${track.title}"');
+        final serverLoaded = await _loadLyricFromServer(track, requestId);
+        if (!_isCurrentLoadRequest(requestId)) return;
+        if (serverLoaded) return;
+
         _log.captureOutput('[Lyric] 未找到匹配字幕: track="${track.title}"');
         _setStateForLoadRequest(
           requestId,
@@ -265,6 +285,10 @@ class LyricController extends StateNotifier<LyricState> {
       final workId = track.workId;
 
       if (hash == null || host.isEmpty || workId == null) {
+        // 命中了本地文件但无法流式取回：再尝试服务器歌词（含 AI 歌词）
+        final serverLoaded = await _loadLyricFromServer(track, requestId);
+        if (!_isCurrentLoadRequest(requestId)) return;
+        if (serverLoaded) return;
         _setStateForLoadRequest(
           requestId,
           LyricState(lyrics: [], isLoading: false),
@@ -355,6 +379,185 @@ class LyricController extends StateNotifier<LyricState> {
         ),
       );
     }
+  }
+
+  // 通过服务器 query-lrc / fetch-lrc 获取歌词（包含 kikoeru 2.x 的 AI 生成歌词）
+  Future<bool> _loadLyricFromServer(AudioTrack track, int requestId) async {
+    final workId = track.workId;
+    if (workId == null) return false;
+    final seq = _trackSeqFromHash(track);
+    if (seq == null) return false;
+
+    // 复用主 API 客户端（其 _dio 的 baseUrl/鉴权/日志已被音频、作品列表验证过）
+    final api = ref.read(kikoeruApiServiceProvider);
+
+    final authState = ref.read(authProvider);
+    final storedHost = StorageService.getString('server_host') ?? '';
+    final host = (authState.host != null && authState.host!.isNotEmpty)
+        ? authState.host!
+        : storedHost;
+    if (host.isEmpty || ServerUtils.isOfficialServer(host)) return false;
+
+    final cacheKey = '$host/$workId/$seq';
+    _log.captureOutput(
+        '[Lyric] 服务器歌词尝试(复用API客户端): host=$host workId=$workId seq=$seq');
+
+    final cached = _serverLyricCache[cacheKey];
+    if (cached != null) {
+      _applyServerLyric(requestId, cached);
+      return true;
+    }
+
+    final result =
+        await _serverLyricViaQuery(api, workId, seq) ?? await _serverLyricViaCheck(api, workId, seq);
+    if (result == null) {
+      _log.captureOutput('[Lyric] 服务器歌词查询无结果 workId=$workId seq=$seq');
+      return false;
+    }
+
+    // 无论本次请求是否已被更新的同曲目加载取代，都缓存结果，令后续加载瞬时命中。
+    _serverLyricCache[cacheKey] = result;
+    _log.captureOutput(
+        '[Lyric] 服务器字幕加载成功: ${result.isAI ? "AI歌词" : "本地歌词"} work=$workId seq=$seq lines=${result.lines.length}');
+    _applyServerLyric(requestId, result);
+    return true;
+  }
+
+  void _applyServerLyric(
+    int requestId,
+    ({List<LyricLine> lines, bool isAI, String url}) r,
+  ) {
+    _setStateForLoadRequest(
+      requestId,
+      LyricState(
+        lyrics: r.lines,
+        isLoading: false,
+        lyricUrl: r.url,
+        isAILyric: r.isAI,
+      ),
+    );
+  }
+
+  Future<({List<LyricLine> lines, bool isAI, String url})?> _serverLyricViaQuery(
+      KikoeruApiService api, int workId, int seq) async {
+    final qData = await api.queryLrc(workId, seq);
+    if (qData == null) {
+      _log.captureOutput('[Lyric] query-lrc 请求失败/无数据');
+      return null;
+    }
+    if (qData['result'] != true || qData['lyricList'] is! List) {
+      _log.captureOutput('[Lyric] query-lrc 无有效字段 result=${qData['result']}');
+      return null;
+    }
+    final list = qData['lyricList'] as List;
+
+    double matchLevelOf(Map<String, dynamic> c) {
+      final ml = c['matchLevel'];
+      if (ml is num) return ml.toDouble();
+      return double.tryParse(ml?.toString() ?? '') ?? 999.0;
+    }
+
+    final candidates = list
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .where((c) => matchLevelOf(c) >= 0)
+        .toList();
+    _log.captureOutput(
+        '[Lyric] query-lrc 候选: 总=${list.length} matchLevel>=0=${candidates.length}');
+    if (candidates.isEmpty) return null;
+    candidates.sort((a, b) => matchLevelOf(a).compareTo(matchLevelOf(b)));
+
+    final best = candidates.first;
+    final hash = best['hash']?.toString();
+    final isAI = best['isAI'] == true;
+    if (hash == null || hash.isEmpty) return null;
+
+    final fetchHash = isAI ? hash : hash.split('/').last;
+    if (int.tryParse(fetchHash) == null) {
+      _log.captureOutput('[Lyric] 候选 hash 非法: $hash isAI=$isAI');
+      return null;
+    }
+    _log.captureOutput('[Lyric] 选中 fetch-lrc hash=$fetchHash isAI=$isAI');
+
+    final fData = await api.fetchLrc(workId, fetchHash, isAI);
+    if (fData == null || fData['lrc'] is! List) {
+      _log.captureOutput('[Lyric] fetch-lrc 无 lrc 数据');
+      return null;
+    }
+    final raw = (fData['lrc'] as List);
+    final lines = _serverLrcToLines(raw);
+    if (lines.isEmpty) {
+      _log.captureOutput('[Lyric] fetch-lrc 解析为空 raw=${raw.length}');
+      return null;
+    }
+    return (
+      lines: lines,
+      isAI: isAI,
+      url: '/api/media/fetch-lrc/$workId/$fetchHash/${isAI ? 1 : 0}',
+    );
+  }
+
+  Future<({List<LyricLine> lines, bool isAI, String url})?> _serverLyricViaCheck(
+      KikoeruApiService api, int workId, int seq) async {
+    final data = await api.checkLrc(workId, seq);
+    if (data == null) {
+      _log.captureOutput('[Lyric] check-lrc 请求失败/无数据');
+      return null;
+    }
+    if (data['lrc'] is! List) {
+      _log.captureOutput('[Lyric] check-lrc 无 lrc (result=${data['result']})');
+      return null;
+    }
+    final raw = (data['lrc'] as List);
+    final lines = _serverLrcToLines(raw);
+    if (lines.isEmpty) {
+      _log.captureOutput('[Lyric] check-lrc 解析为空 raw=${raw.length}');
+      return null;
+    }
+    final hash = data['hash']?.toString() ?? '';
+    final isAI = hash.isNotEmpty && !hash.contains('/');
+    return (
+      lines: lines,
+      isAI: isAI,
+      url: '/api/media/check-lrc/$workId/$seq',
+    );
+  }
+
+  // AudioTrack.hash 为服务器的 "{workId}/{seq}"，取 seq 用于 query-lrc 的 :index
+  int? _trackSeqFromHash(AudioTrack track) {
+    final hash = track.hash;
+    if (hash == null || hash.isEmpty) return null;
+    final seqPart = hash.contains('/') ? hash.split('/').last : hash;
+    return int.tryParse(seqPart);
+  }
+
+  // 把服务器 fetch-lrc 返回的 [{time(ms), text, extLrc}, ...] 转为 LyricLine
+  List<LyricLine> _serverLrcToLines(List<dynamic> raw) {
+    final times = <int>[];
+    final texts = <String>[];
+    for (final entry in raw) {
+      if (entry is! Map) continue;
+      final t = entry['time'];
+      final ms = t is int ? t : int.tryParse(t?.toString() ?? '');
+      times.add(ms ?? 0);
+      texts.add((entry['text'] ?? '').toString());
+    }
+
+    final lines = <LyricLine>[];
+    for (int i = 0; i < texts.length; i++) {
+      final text = texts[i];
+      if (text.trim().isEmpty) continue;
+      final startMs = times[i];
+      final endMs = (i + 1 < times.length) ? times[i + 1] : startMs + 5000;
+      lines.add(
+        LyricLine(
+          startTime: Duration(milliseconds: startMs),
+          endTime: Duration(milliseconds: endMs),
+          text: text,
+        ),
+      );
+    }
+    return lines;
   }
 
   // 从字幕库查找匹配的字幕文件（使用数据库查询）
@@ -764,6 +967,7 @@ class LyricController extends StateNotifier<LyricState> {
       error: state.error,
       lyricUrl: state.lyricUrl,
       timelineOffset: state.timelineOffset,
+      isAILyric: state.isAILyric,
     );
   }
 
