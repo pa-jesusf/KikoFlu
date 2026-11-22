@@ -30,15 +30,29 @@ class LyricDisplay extends ConsumerWidget {
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
           child: Center(
-            child: Text(
-              currentLyric ?? '♪',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                    height: lyricSettings.smallLineHeight,
-                    fontSize: lyricSettings.smallFontSize,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (lyricState.isAILyric) ...[
+                  _LyricSourceBadge(
+                    label: 'AI',
+                    color: Theme.of(context).colorScheme.tertiary,
                   ),
-              textAlign: TextAlign.center,
+                  const SizedBox(width: 6),
+                ],
+                Flexible(
+                  child: Text(
+                    currentLyric ?? '♪',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                          height: lyricSettings.smallLineHeight,
+                          fontSize: lyricSettings.smallFontSize,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -258,7 +272,7 @@ class _FullLyricDisplayState extends ConsumerState<FullLyricDisplay> {
           });
         }
 
-        return GestureDetector(
+        final lyricsView = GestureDetector(
           onLongPress: widget.onLongPress,
           child: ListView.builder(
             controller: _scrollController,
@@ -313,9 +327,57 @@ class _FullLyricDisplayState extends ConsumerState<FullLyricDisplay> {
             },
           ),
         );
+
+        if (!lyricState.isAILyric) return lyricsView;
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            lyricsView,
+            Positioned(
+              top: 12,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: _LyricSourceBadge(
+                  label: 'AI',
+                  color: Theme.of(context).colorScheme.tertiary,
+                ),
+              ),
+            ),
+          ],
+        );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (_, __) => Center(child: Text(S.of(context).loadFailed)),
+    );
+  }
+}
+
+/// 歌词来源标记（例如服务器 AI 生成歌词）
+class _LyricSourceBadge extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _LyricSourceBadge({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          height: 1.0,
+        ),
+      ),
     );
   }
 }
