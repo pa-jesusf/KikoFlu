@@ -1258,6 +1258,44 @@ class KikoeruApiService {
     }
   }
 
+  // 歌词 API（Kikoeru 2.x：query-lrc / fetch-lrc / check-lrc，包含 AI 生成歌词）
+  /// 返回 {result, lyricList:[{title,hash,ext,isAI,matchLevel,...}]} 或 null。
+  Future<Map<String, dynamic>?> queryLrc(int workId, int trackIndex) async {
+    try {
+      final r = await _dio.get('/api/media/query-lrc/$workId/$trackIndex');
+      final d = r.data;
+      return (d is Map) ? Map<String, dynamic>.from(d) : null;
+    } catch (e) {
+      _logOutput('query-lrc 失败: $e');
+      return null;
+    }
+  }
+
+  /// 返回 {result, hash, lyricExtension, lrc:[{time(ms),text,...}]} 或 null。
+  Future<Map<String, dynamic>?> fetchLrc(int workId, String hash, bool isAI) async {
+    try {
+      final r =
+          await _dio.get('/api/media/fetch-lrc/$workId/$hash/${isAI ? 1 : 0}');
+      final d = r.data;
+      return (d is Map) ? Map<String, dynamic>.from(d) : null;
+    } catch (e) {
+      _logOutput('fetch-lrc 失败: $e');
+      return null;
+    }
+  }
+
+  /// 一次性择优（本地+AI），返回 {result, hash, lyricExtension, lrc:[...]} 或 null。
+  Future<Map<String, dynamic>?> checkLrc(int workId, int trackIndex) async {
+    try {
+      final r = await _dio.get('/api/media/check-lrc/$workId/$trackIndex');
+      final d = r.data;
+      return (d is Map) ? Map<String, dynamic>.from(d) : null;
+    } catch (e) {
+      _logOutput('check-lrc 失败: $e');
+      return null;
+    }
+  }
+
   // Reviews API
   Future<Map<String, dynamic>> getWorkReviews(int workId,
       {int page = 1, int pageSize = 20}) async {
